@@ -389,10 +389,16 @@ app.post('/verify-telebirr', async (req: Request, res: Response): Promise<void> 
     return;
   }
 
+  const cleanRef = typeof reference === 'string' ? reference.trim() : '';
+
   // Client bounce: parse client-fetched raw HTML
   if (html && typeof html === 'string' && html.trim().length > 0) {
     const parsed = scrapeTelebirrReceipt(html);
     if (parsed && isValidReceipt(parsed)) {
+      const refKey = cleanRef || parsed.receiptNo;
+      if (refKey) {
+        receiptCache.set('telebirr', refKey, parsed);
+      }
       res.json({ success: true, data: parsed, source: 'client_bounce' });
       return;
     }
@@ -400,7 +406,7 @@ app.post('/verify-telebirr', async (req: Request, res: Response): Promise<void> 
     return;
   }
 
-  if (reference.toUpperCase().startsWith('TEST') || reference.toUpperCase().startsWith('MOCK')) {
+  if (cleanRef && (cleanRef.toUpperCase().startsWith('TEST') || cleanRef.toUpperCase().startsWith('MOCK'))) {
     res.json({
       success: true,
       data: {
@@ -410,19 +416,28 @@ app.post('/verify-telebirr', async (req: Request, res: Response): Promise<void> 
         settledAmount: '500.00 Birr',
         totalPaidAmount: '500.00 Birr',
         transactionStatus: 'COMPLETED',
-        receiptNo: reference,
+        receiptNo: cleanRef,
         paymentDate: new Date().toISOString(),
       },
     });
     return;
   }
 
+  // Fast path: In-memory cache hit (< 1ms)
+  const cached = receiptCache.get<any>('telebirr', cleanRef);
+  if (cached) {
+    logger.info(`⚡ Telebirr cache HIT for: ${cleanRef}`);
+    res.json({ success: true, data: cached, details: { cached: true } });
+    return;
+  }
+
   try {
-    const result = await verifyTelebirr(reference);
+    const result = await verifyTelebirr(cleanRef);
     if (!result) {
       res.status(404).json({ success: false, error: 'Receipt not found or could not be processed.' });
       return;
     }
+    receiptCache.set('telebirr', cleanRef, result);
     res.json({ success: true, data: result });
   } catch (err: any) {
     res.status(502).json({ success: false, error: err?.message || 'Telebirr verification failed.' });
