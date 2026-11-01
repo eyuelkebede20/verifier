@@ -3,10 +3,13 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+process.env.NODE_OPTIONS = process.env.NODE_OPTIONS || '--disable-wasm-trap-handler';
 
-// 1. Resolve and bind node_modules paths
-const rootNodeModules = path.resolve(__dirname, 'node_modules');
-const candidatePaths = [rootNodeModules];
+// 1. Resolve candidate paths for node_modules (support isolated ./app/node_modules and root node_modules)
+const appDir = path.resolve(__dirname, 'app');
+const appNodeModules = path.join(appDir, 'node_modules');
+const rootNodeModules = path.join(__dirname, 'node_modules');
+const candidatePaths = [appNodeModules, rootNodeModules];
 
 // Search for CloudLinux nodevenv lib/node_modules if present
 try {
@@ -26,8 +29,23 @@ require('node:module').Module._initPaths();
 
 // 2. Load .env
 try {
-  const dotenv = require('dotenv');
-  dotenv.config({ path: path.join(__dirname, '.env') });
+  const dotenvCandidate = candidatePaths
+    .map(p => path.join(p, 'dotenv'))
+    .find(p => fs.existsSync(p));
+  if (dotenvCandidate) {
+    const dotenv = require(dotenvCandidate);
+    const envCandidates = [
+      path.join(__dirname, '.env'),
+      path.join(appDir, '.env'),
+      path.resolve(__dirname, '..', '.env')
+    ];
+    for (const envFile of envCandidates) {
+      if (fs.existsSync(envFile)) {
+        dotenv.config({ path: envFile, override: true });
+        break;
+      }
+    }
+  }
 } catch (_) {}
 
 // 3. Ensure logs directory exists
@@ -36,5 +54,26 @@ try {
   if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
 } catch (_) {}
 
-// 4. Forward to compiled application
-require(path.join(__dirname, 'dist', 'index.js'));
+// 4. Ensure tmp directory exists
+const tmpDir = path.join(__dirname, 'tmp');
+try {
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+} catch (_) {}
+
+// 5. Forward to compiled application with error boundary
+try {
+  const entryCandidates = [
+    path.join(appDir, 'dist', 'index.js'),
+    path.join(__dirname, 'dist', 'index.js')
+  ];
+  const targetEntry = entryCandidates.find(p => fs.existsSync(p));
+  if (!targetEntry) {
+    throw new Error('Could not find compiled dist/index.js in ./app/dist or ./dist');
+  }
+  require(targetEntry);
+} catch (err) {
+  const errorLog = path.join(__dirname, 'startup-error.log');
+  fs.writeFileSync(errorLog, '[ ' + new Date().toISOString() + ' ] Server startup failed:\n' + (err.stack || err) + '\n', 'utf8');
+  console.error('[Fatal Startup Error]', err);
+  process.exit(1);
+}

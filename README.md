@@ -82,11 +82,21 @@ curl -X POST https://verifier.senaycreatives.com/verify-telebirr \
 
 ## 🛠️ cPanel / Shared Hosting Deployment
 
-1. Set up a Node.js Application in cPanel:
+1. **Automated CI/CD**:
+   - Pushing to `main` triggers [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) which tests, compiles, packages Linux x64 production dependencies, and deploys directly to `api/verifier/` on cPanel.
+2. **Manual Pack / Upload (Alternative)**:
+   - Run `npm run pack:cpanel` to generate the pre-compiled, self-contained `verifier-cpanel-bundle.zip`.
+   - Upload and extract directly to `api/verifier/` in cPanel File Manager.
+3. **cPanel Node.js Selector Setup**:
    - **Application root**: `api/verifier`
+   - **Application URL**: `verifier.senaycreatives.com`
    - **Application startup file**: `app.cjs`
-2. Upload the project files and run `npm install --omit=dev`.
-3. Restart the application from cPanel.
+   - **Node.js version**: 20.x or 22.x
+   - **Environment variables**:
+     - `NODE_ENV=production`
+     - `NODE_OPTIONS=--disable-wasm-trap-handler`
+     - `API_KEYS=your_secret_keys_here`
+     - `PORT=3001`
 
 ---
 

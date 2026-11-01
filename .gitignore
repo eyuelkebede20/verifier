@@ -1,8 +1,10 @@
 node_modules/
 dist/
 dist-stage/
+dist-cpanel/
 logs/
 .env
 *.log
 .DS_Store
+*.zip
 verifier-cpanel-bundle.zip

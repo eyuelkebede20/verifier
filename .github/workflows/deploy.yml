@@ -1,0 +1,69 @@
+name: Deploy Verifier API to cPanel Shared Hosting
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      sync_node_modules:
+        description: 'Upload full node_modules (slow, only needed when dependencies change)'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Check what files are already sent to FTP without uploading (diff-only)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-verifier-cpanel
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: SenayCreatives
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Build & Package Verifier for CloudLinux
+        run: node scripts/pack-cpanel.mjs
+
+      - name: Deploy Staged Files via FTP / FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          timeout: 180000
+          local-dir: ./dist-cpanel/verifier/
+          server-dir: ${{ secrets.FTP_VERIFIER_DIR || 'api/verifier/' }}
+          state-name: .ftp-deploy-sync-state.json
+          log-level: standard
+          dry-run: ${{ inputs.dry_run || false }}
+          exclude: |
+            **/.env
+            **/.git/**
+            **/.htaccess
+            **/.well-known/**
+            **/logs/**
+            **/*.map
+            **/*.md
+            ${{ (inputs.sync_node_modules == true || inputs.sync_node_modules == 'true') && '# allow node_modules' || 'app/node_modules/**' }}

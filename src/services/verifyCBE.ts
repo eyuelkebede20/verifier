@@ -1,4 +1,3 @@
-import puppeteer from 'puppeteer';
 import axios, { AxiosResponse } from 'axios';
 import pdf from 'pdf-parse';
 import https from 'https';
@@ -78,8 +77,10 @@ export async function verifyCBELegacy(
     } catch (directErr: any) {
         logger.warn('⚠️ Direct fetch failed, falling back to Puppeteer:', directErr.message);
 
-        let browser;
+        let browser: any;
         try {
+            const puppeteerMod: any = await import('puppeteer');
+            const puppeteer = puppeteerMod.default || puppeteerMod;
             browser = await puppeteer.launch({
                 headless: true,
                 args: [
@@ -95,7 +96,7 @@ export async function verifyCBELegacy(
             const page = await browser.newPage();
             let detectedPdfUrl: string | null = null;
 
-            page.on('response', async (response) => {
+            page.on('response', async (response: any) => {
                 const contentType = response.headers()['content-type'];
                 if (contentType?.includes('pdf')) {
                     detectedPdfUrl = response.url();

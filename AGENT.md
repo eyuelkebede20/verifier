@@ -108,6 +108,9 @@ When adding a new Ethiopian financial provider (e.g. Awash Bank, Zemen Bank, Hib
 # Install dependencies
 npm install
 
+# Run unit tests
+npm test
+
 # Build TypeScript to dist/
 npm run build
 
@@ -117,6 +120,16 @@ npm start
 # Run with hot reload
 npm run dev
 
-# Pack bundle for cPanel shared hosting
-# Ensure dist/ and production node_modules are bundled into verifier-cpanel-bundle.zip
+# Pack bundle for cPanel shared hosting (outputs to dist-cpanel/verifier and verifier-cpanel-bundle.zip)
+npm run pack:cpanel
 ```
+
+---
+
+## 6. Automated CI/CD & cPanel Deployment
+
+- Automated FTP deployment runs via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on push to `main`.
+- Secrets configured under GitHub environment `SenayCreatives`:
+  - `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, and optionally `FTP_VERIFIER_DIR` (defaults to `api/verifier/`).
+- The deployment maintains isolated production `node_modules` inside `./app/node_modules` to prevent collisions with CloudLinux `nodevenv` symlinks.
+- Passenger reload is automatically triggered via `tmp/restart.txt`.
