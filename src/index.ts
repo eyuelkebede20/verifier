@@ -1,5 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import fs from 'node:fs';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,9 +19,22 @@ import logger from './utils/logger';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Resolve public assets directory (supports local dev and cPanel layout)
+const candidatePublicPaths = [
+  path.join(__dirname, 'public'),
+  path.join(__dirname, '..', 'public'),
+  path.resolve(__dirname, '..', '..', 'public'),
+];
+const publicDir = candidatePublicPaths.find((p) => fs.existsSync(p)) || path.join(__dirname, 'public');
+
 // Global Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static assets from public directory if exists
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+}
 
 // Request logging
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -36,7 +51,19 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-app.get('/', (_req: Request, res: Response) => {
+// 2. Root / Landing Page (HTML for browsers, JSON for API clients)
+app.get('/', (req: Request, res: Response) => {
+  const isHtmlExpected =
+    (req.accepts('html') && !req.accepts('json')) ||
+    (req.headers.accept?.includes('text/html') && !req.xhr && !req.headers['x-api-key']);
+
+  if (isHtmlExpected) {
+    const indexPath = path.join(publicDir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+  }
+
   res.json({
     name: 'Senay Payment Verification API',
     version: '3.1.0-standalone',
@@ -49,16 +76,176 @@ app.get('/', (_req: Request, res: Response) => {
       { method: 'POST', path: '/verify-abyssinia', description: 'Bank of Abyssinia transaction verification' },
       { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification' },
       { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification' },
+      { method: 'POST', path: '/api/public-verify', description: 'Web receipt verification for landing page UI' },
       { method: 'GET', path: '/health', description: 'Health check' },
     ],
   });
 });
 
-// 2. Authentication & Rate Limiting for all verification endpoints
+// Friendly redirect for /verify and /verify/:bank routes to Landing Page
+app.get(['/verify', '/verify/:bank'], (_req: Request, res: Response) => {
+  const indexPath = path.join(publicDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.redirect('/');
+});
+
+// 3. Authentication & Rate Limiting for all verification endpoints
 app.use(apiKeyAuth);
 app.use(rateLimiter);
 
-// 3. Smart Universal Verification (Auto-detects bank from reference)
+// 4. Public Web Verification (for Landing Page checker UI)
+app.post('/api/public-verify', async (req: Request, res: Response): Promise<void> => {
+  const { reference, bank, suffix, phoneNumber, accountSuffix } = req.body;
+  if (!reference || typeof reference !== 'string') {
+    res.status(400).json({ success: false, error: 'Please enter a transaction reference or receipt ID.' });
+    return;
+  }
+
+  const trimmedRef = reference.trim();
+  const resolvedSuffix = (suffix || accountSuffix || '').trim();
+  const resolvedPhone = (phoneNumber || '').trim();
+
+  // Instant response for sample / mock references
+  if (trimmedRef.toUpperCase().startsWith('TEST') || trimmedRef.toUpperCase().startsWith('MOCK')) {
+    const selectedBank = bank || 'universal';
+    res.json({
+      success: true,
+      provider: selectedBank === 'universal' ? 'cbe' : selectedBank,
+      receipt: {
+        reference: trimmedRef,
+        status: 'COMPLETED',
+        amount: 850,
+        amountFormatted: '850.00 ETB',
+        payerName: 'Abebe Kebede',
+        payerAccount: '1000****1234',
+        receiverName: 'Senay Creatives Demo Merchant',
+        receiverAccount: '1000****5678',
+        paymentDate: new Date().toISOString(),
+        reason: 'Online Payment Demo / Sample Verification',
+      },
+      raw: {
+        payerName: 'Abebe Kebede',
+        receiverName: 'Senay Creatives Demo Merchant',
+        amount: 850,
+        reference: trimmedRef,
+        status: 'COMPLETED',
+      },
+    });
+    return;
+  }
+
+  try {
+    const selectedBank = (bank || 'universal').toLowerCase();
+    let resultData: any = null;
+    let detectedProvider = selectedBank;
+
+    if (selectedBank === 'telebirr') {
+      const data = await verifyTelebirr(trimmedRef);
+      if (!data) throw new Error('Telebirr receipt not found or could not be parsed.');
+      resultData = data;
+    } else if (selectedBank === 'cbe') {
+      const result = await verifyCBE(trimmedRef, resolvedSuffix || undefined);
+      if (!result.success) throw new Error(result.error || 'CBE verification failed.');
+      resultData = result;
+    } else if (selectedBank === 'dashen') {
+      const result = await verifyDashen(trimmedRef);
+      if (!result.success) throw new Error(result.error || 'Dashen verification failed.');
+      resultData = result;
+    } else if (selectedBank === 'abyssinia') {
+      if (!resolvedSuffix) throw new Error('Bank of Abyssinia requires a 5-digit account suffix.');
+      const result = await verifyAbyssinia(trimmedRef, resolvedSuffix);
+      if (!result.success) throw new Error(result.error || 'Bank of Abyssinia verification failed.');
+      resultData = result;
+    } else if (selectedBank === 'cbebirr') {
+      if (!resolvedPhone) throw new Error('CBE Birr requires the customer phone number.');
+      const result = await verifyCBEBirr(trimmedRef, resolvedPhone);
+      resultData = result;
+    } else if (selectedBank === 'mpesa') {
+      const result = await verifyMpesa(trimmedRef);
+      if (!result.success) throw new Error(result.error || 'M-Pesa verification failed.');
+      resultData = result;
+    } else {
+      // Smart universal verify
+      const result = await runSmartVerify({
+        reference: trimmedRef,
+        suffix: resolvedSuffix || undefined,
+        phoneNumber: resolvedPhone || undefined,
+      });
+      if (!result.success) {
+        throw new Error(result.error || 'Could not verify transaction with detected bank.');
+      }
+      resultData = (result.data as any)?.data || result.data;
+      if ((result.details as any)?.provider) detectedProvider = (result.details as any).provider;
+    }
+
+    // Standardize fields for receipt card
+    const payerName = resultData?.payerName || resultData?.payer || resultData?.debitAccountHolder || 'N/A';
+    const payerAccount = resultData?.payerAccount || resultData?.debitAccountNo || resultData?.payerPhone || 'N/A';
+    const receiverName =
+      resultData?.receiverName ||
+      resultData?.creditedPartyName ||
+      resultData?.receiver ||
+      resultData?.creditAccountHolder ||
+      'N/A';
+    const receiverAccount =
+      resultData?.receiverAccount ||
+      resultData?.creditedPartyAccountNo ||
+      resultData?.creditAccountNo ||
+      resultData?.receiverPhone ||
+      'N/A';
+
+    let amountNum: number | undefined;
+    if (typeof resultData?.amount === 'number') amountNum = resultData.amount;
+    else if (typeof resultData?.transactionAmount === 'number') amountNum = resultData.transactionAmount;
+    else if (typeof resultData?.totalPaidAmount === 'number') amountNum = resultData.totalPaidAmount;
+    else if (typeof resultData?.settledAmount === 'string') {
+      const n = parseFloat(resultData.settledAmount.replace(/[^\d.]/g, ''));
+      if (!isNaN(n)) amountNum = n;
+    } else if (typeof resultData?.amount === 'string') {
+      const n = parseFloat(resultData.amount.replace(/[^\d.]/g, ''));
+      if (!isNaN(n)) amountNum = n;
+    }
+
+    const formattedAmount =
+      amountNum != null
+        ? `${amountNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`
+        : 'Verified';
+
+    const paymentDate =
+      resultData?.paymentDate || resultData?.date || resultData?.transDate || new Date().toISOString();
+    const reason = resultData?.reason || resultData?.paymentDetails?.join(' ') || resultData?.transType || null;
+    const refId = resultData?.receiptNo || resultData?.reference || resultData?.id || trimmedRef;
+    const status = resultData?.transactionStatus || resultData?.status || 'COMPLETED';
+
+    res.json({
+      success: true,
+      provider: detectedProvider,
+      receipt: {
+        reference: refId,
+        status: String(status).toUpperCase(),
+        amount: amountNum,
+        amountFormatted: formattedAmount,
+        payerName,
+        payerAccount,
+        receiverName,
+        receiverAccount,
+        paymentDate,
+        reason,
+      },
+      raw: resultData,
+    });
+  } catch (err: any) {
+    logger.warn(`Public verification failed: ${err.message}`);
+    res.status(422).json({
+      success: false,
+      error: err.message || 'Verification could not be completed.',
+    });
+  }
+});
+
+// 5. Smart Universal Verification (Authenticated API)
 app.post('/verify', async (req: Request, res: Response): Promise<void> => {
   const { reference, suffix, phoneNumber } = req.body;
   if (!reference || typeof reference !== 'string') {
@@ -105,7 +292,7 @@ app.post('/verify', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// 4. Provider-specific Endpoints
+// 6. Provider-specific Endpoints (Authenticated APIs)
 app.post('/verify-telebirr', async (req: Request, res: Response): Promise<void> => {
   const { reference } = req.body;
   if (!reference) {
@@ -230,7 +417,7 @@ app.post('/verify-mpesa', async (req: Request, res: Response): Promise<void> => 
   }
 });
 
-// 5. Global Error Handler
+// 7. Global Error Handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error('Unhandled server error:', err);
   res.status(500).json({ success: false, error: 'Internal server error.' });

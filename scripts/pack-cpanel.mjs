@@ -41,6 +41,15 @@ console.log('📦 Step 3: Copying compiled backend to app/dist...');
 const serverDist = path.join(rootDir, 'dist');
 fs.cpSync(serverDist, path.join(bundleDir, 'dist'), { recursive: true });
 
+// Copy public assets for landing page
+const publicSource = path.join(rootDir, 'public');
+if (fs.existsSync(publicSource)) {
+  console.log('📦 Staging public landing page assets...');
+  fs.cpSync(publicSource, path.join(bundleDir, 'public'), { recursive: true });
+  fs.cpSync(publicSource, path.join(rootAppDir, 'public'), { recursive: true });
+  fs.cpSync(publicSource, path.join(serverDist, 'public'), { recursive: true });
+}
+
 // 4. Generate clean standalone production package.json
 console.log('📦 Step 4: Generating production package.json...');
 const rootPkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));

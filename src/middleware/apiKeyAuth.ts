@@ -28,8 +28,20 @@ function getAllowedKeys(): Set<string> {
 }
 
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
-  // 1. Allow public health & root endpoints
-  if (req.path === '/' || req.path === '/health') {
+  // 1. Allow public health, root, verify UI, static assets, and public web verify endpoints
+  if (
+    req.path === '/' ||
+    req.path === '/health' ||
+    req.path === '/api/public-verify' ||
+    (req.path.startsWith('/verify') && req.method === 'GET') ||
+    req.path.startsWith('/static') ||
+    req.path.endsWith('.html') ||
+    req.path.endsWith('.css') ||
+    req.path.endsWith('.js') ||
+    req.path.endsWith('.svg') ||
+    req.path.endsWith('.ico') ||
+    req.path.endsWith('.png')
+  ) {
     return next();
   }
 
