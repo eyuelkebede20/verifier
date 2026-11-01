@@ -66,6 +66,7 @@ const getApiSpec = () => ({
     { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification' },
     { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification' },
     { method: 'POST', path: '/api/public-verify', description: 'Web receipt verification for landing page UI' },
+    { method: 'GET', path: '/admin', description: 'Admin console & API usage monitor' },
     { method: 'GET', path: '/health', description: 'Health check' },
     { method: 'GET', path: '/api', description: 'API specification & endpoints' },
   ],
@@ -100,7 +101,7 @@ app.get(['/verify', '/verify/:bank'], (_req: Request, res: Response) => {
 });
 
 // Admin Dashboard UI Route
-app.get(['/admin', '/admin/*'], (_req: Request, res: Response) => {
+app.get(['/admin', '/admin/:subpage'], (_req: Request, res: Response) => {
   const adminPath = path.join(publicDir, 'admin', 'index.html');
   if (fs.existsSync(adminPath)) {
     return res.sendFile(adminPath);
@@ -114,6 +115,49 @@ app.use(rateLimiter);
 
 // Admin Routes (Key management & usage stats)
 app.use('/api/admin', adminRoutes);
+
+// Automatic API Verification Usage Tracking Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const isVerificationRoute =
+    req.path === '/verify' ||
+    req.path.startsWith('/verify-') ||
+    req.path === '/api/public-verify';
+
+  if (!isVerificationRoute || req.method !== 'POST') {
+    return next();
+  }
+
+  const startTime = Date.now();
+  const provider =
+    req.path === '/verify'
+      ? 'universal'
+      : req.path === '/api/public-verify'
+      ? req.body?.bank || 'universal'
+      : req.path.replace(/^\/verify-/, '');
+
+  res.on('finish', () => {
+    const durationMs = Date.now() - startTime;
+    const reference = req.body?.reference || req.body?.receiptNumber || 'N/A';
+    const appName =
+      (req as any).appContext?.appName ||
+      (req.path === '/api/public-verify' ? 'Web Landing Demo' : 'Direct API');
+    const keyId = (req as any).appContext?.keyId;
+    const isSuccess = res.statusCode >= 200 && res.statusCode < 400;
+
+    usageTrackerService.recordUsage({
+      appName,
+      keyId,
+      provider,
+      reference: String(reference),
+      success: isSuccess,
+      statusCode: res.statusCode,
+      durationMs,
+      ip: req.ip || req.socket.remoteAddress,
+    });
+  });
+
+  next();
+});
 
 // 4. Public Web Verification (for Landing Page checker UI)
 app.post('/api/public-verify', async (req: Request, res: Response): Promise<void> => {

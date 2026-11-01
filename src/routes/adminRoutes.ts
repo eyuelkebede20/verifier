@@ -12,7 +12,7 @@ const router = Router();
 
 /**
  * 1. Admin Login
- * Checks master admin key or hash from request against .env
+ * Checks master admin key or hash from request against .env (or Unkey Root Key)
  */
 router.post('/login', (req: Request, res: Response): void => {
   const { key } = req.body;
@@ -27,7 +27,7 @@ router.post('/login', (req: Request, res: Response): void => {
     logger.warn('[ADMIN] Failed admin login attempt.');
     res.status(401).json({
       success: false,
-      error: 'Invalid admin master key. Please verify your secret in .env (ADMIN_KEY / ADMIN_SECRET).',
+      error: 'Invalid admin master key. Please verify your secret in .env (ADMIN_KEY / UNKEY_ROOT_KEY).',
     });
     return;
   }
@@ -50,6 +50,7 @@ router.get('/me', requireAdminAuth, (_req: Request, res: Response): void => {
     authenticated: true,
     role: 'admin',
     user: 'Senay Developer / Admin',
+    headlessManager: process.env.UNKEY_ROOT_KEY ? 'unkey' : 'local',
   });
 });
 
@@ -67,7 +68,7 @@ router.get('/keys', requireAdminAuth, (_req: Request, res: Response): void => {
 /**
  * 4. Generate New App Key
  */
-router.post('/keys', requireAdminAuth, (req: Request, res: Response): void => {
+router.post('/keys', requireAdminAuth, async (req: Request, res: Response): Promise<void> => {
   const { name, description, rateLimit } = req.body;
 
   if (!name || typeof name !== 'string' || !name.trim()) {
@@ -75,26 +76,31 @@ router.post('/keys', requireAdminAuth, (req: Request, res: Response): void => {
     return;
   }
 
-  const result = apiKeyService.generateKey({
-    name: name.trim(),
-    description: description ? String(description).trim() : undefined,
-    rateLimit: rateLimit ? Number(rateLimit) : undefined,
-  });
+  try {
+    const result = await apiKeyService.generateKey({
+      name: name.trim(),
+      description: description ? String(description).trim() : undefined,
+      rateLimit: rateLimit ? Number(rateLimit) : undefined,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: 'API key successfully generated. Copy and store it securely.',
-    key: result.key,
-    rawKey: result.rawKey,
-  });
+    res.status(201).json({
+      success: true,
+      message: 'API key successfully generated. Copy and store it securely.',
+      key: result.key,
+      rawKey: result.rawKey,
+    });
+  } catch (err: any) {
+    logger.error('Failed to generate API key:', err);
+    res.status(500).json({ success: false, error: 'Failed to generate API key' });
+  }
 });
 
 /**
  * 5. Toggle Key Status (Active <-> Revoked)
  */
-router.patch('/keys/:id/toggle', requireAdminAuth, (req: Request, res: Response): void => {
-  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const updated = apiKeyService.toggleKeyStatus(id);
+router.patch('/keys/:id/toggle', requireAdminAuth, async (req: Request, res: Response): Promise<void> => {
+  const id = String(req.params.id);
+  const updated = await apiKeyService.toggleKeyStatus(id);
 
   if (!updated) {
     res.status(404).json({
@@ -114,9 +120,9 @@ router.patch('/keys/:id/toggle', requireAdminAuth, (req: Request, res: Response)
 /**
  * 6. Delete App Key
  */
-router.delete('/keys/:id', requireAdminAuth, (req: Request, res: Response): void => {
-  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const deleted = apiKeyService.deleteKey(id);
+router.delete('/keys/:id', requireAdminAuth, async (req: Request, res: Response): Promise<void> => {
+  const id = String(req.params.id);
+  const deleted = await apiKeyService.deleteKey(id);
 
   if (!deleted) {
     res.status(404).json({

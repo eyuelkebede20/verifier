@@ -3,6 +3,7 @@ dist/
 dist-stage/
 dist-cpanel/
 logs/
+data/*.json
 .env
 *.log
 .DS_Store

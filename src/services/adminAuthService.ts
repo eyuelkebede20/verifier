@@ -51,6 +51,15 @@ export function verifyMasterKey(inputKey: string): boolean {
     }
   }
 
+  // 3. Check against UNKEY_ROOT_KEY in .env
+  const unkeyRoot = process.env.UNKEY_ROOT_KEY?.trim();
+  if (unkeyRoot) {
+    const expectedHash = crypto.createHash('sha256').update(unkeyRoot).digest();
+    if (crypto.timingSafeEqual(inputHash, expectedHash)) {
+      return true;
+    }
+  }
+
   // 3. In non-production, allow fallback dev key if no keys set in .env
   if (!masterKey && !envKeyHash && process.env.NODE_ENV !== 'production') {
     const devHash = crypto.createHash('sha256').update(DEFAULT_DEV_ADMIN_KEY).digest();

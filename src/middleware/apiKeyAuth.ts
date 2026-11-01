@@ -32,7 +32,7 @@ function getAllowedKeys(): Set<string> {
   return keys;
 }
 
-export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
+export const apiKeyAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   // 1. Allow public health, root, admin UI & APIs, static assets, and public web verify endpoints
   if (
     req.path === '/' ||
@@ -79,7 +79,7 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): voi
   }
 
   // 3. Validate against apiKeyService (dynamic app keys + environment keys)
-  const validation = apiKeyService.validateKey(candidateKey);
+  const validation = await apiKeyService.validateKey(candidateKey);
   if (validation.valid) {
     (req as any).apiKey = candidateKey;
     (req as any).appContext = {

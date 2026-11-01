@@ -72,8 +72,15 @@ verifier/
 | **`/verify-abyssinia`**| `POST` | `{ reference, suffix }` | `suffix` must be exactly 5 digits. |
 | **`/verify-cbebirr`**  | `POST` | `{ receiptNumber, phoneNumber }` | `phoneNumber` must start with `251` (12 digits total). |
 | **`/verify-mpesa`**    | `POST` | `{ reference }` | Queries Safaricom M-Pesa receipt API. |
+| **`/api/public-verify`** | `POST` | `{ reference, bank?, suffix?, phoneNumber? }` | Public receipt verification for the landing page tester UI. |
+| **`/admin`**           | `GET`  | *None* | Developer & Admin Console UI for managing app keys & viewing live usage. |
+| **`/api/admin/login`** | `POST` | `{ key }` | Authenticates admin using `ADMIN_KEY`, `ADMIN_KEY_HASH`, or `UNKEY_ROOT_KEY`. |
+| **`/api/admin/keys`**  | `GET`, `POST` | `{ name, description?, rateLimit? }` | Lists or generates new app API keys. |
+| **`/api/admin/keys/:id/toggle`** | `PATCH` | *None* | Toggles key status between active and revoked. |
+| **`/api/admin/keys/:id`** | `DELETE` | *None* | Deletes an app API key. |
+| **`/api/admin/usage`** | `GET`  | *None* | Returns real-time metrics, provider breakdown, per-app volume, and live audit logs. |
 | **`/health`**          | `GET`  | *None* | Returns `{ status: 'ok', uptimeSeconds, timestamp }`. Public. |
-| **`/`**                | `GET`  | *None* | Returns service metadata and endpoints list. Public. |
+| **`/`**                | `GET`  | *None* | Returns landing page (HTML) or API metadata (JSON). Public. |
 
 ---
 
@@ -96,6 +103,10 @@ When adding a new Ethiopian financial provider (e.g. Awash Bank, Zemen Bank, Hib
 
 ### Environment Variables
 - `PORT`: Server port (default `3001`).
+- `ADMIN_KEY`: Master secret to unlock the developer console at `/admin`.
+- `ADMIN_KEY_HASH`: Optional SHA-256 hex hash of the master secret for extra security.
+- `UNKEY_ROOT_KEY`: Optional headless open-source Unkey root key (e.g., `unkey_...`).
+- `UNKEY_API_ID`: Optional Unkey API namespace ID for automated key management and telemetry.
 - `API_KEYS`: Comma-separated list of allowed client keys (e.g., `mentalweg_live_key,shop_key`).
 - `VERIFIER_API_KEY`: Backward-compatible single secret key.
 - `RATE_LIMIT_PER_MINUTE`: Maximum requests per minute per IP / key (default `120`).
