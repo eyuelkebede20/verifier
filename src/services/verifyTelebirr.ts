@@ -132,7 +132,7 @@ function extractWithRegexLegacy(htmlContent: string): { settledAmount: string | 
  * @param html The HTML content to scrape
  * @returns Extracted Telebirr receipt data
  */
-function scrapeTelebirrReceipt(html: string): TelebirrReceipt {
+export function scrapeTelebirrReceipt(html: string): TelebirrReceipt {
     const $ = cheerio.load(html);
 
     // Log HTML content in debug mode to help diagnose scraping issues
@@ -976,7 +976,7 @@ export async function verifyTelebirr(reference: string): Promise<TelebirrReceipt
 }
 
 // Add this helper function to validate receipt data
-function isValidReceipt(receipt: TelebirrReceipt): boolean {
+export function isValidReceipt(receipt: TelebirrReceipt): boolean {
     // Check if essential fields have values
     return Boolean(
         receipt.receiptNo &&

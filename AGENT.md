@@ -65,14 +65,14 @@ verifier/
 
 | Endpoint | Method | Input Body | Key Validation Rules |
 | :--- | :--- | :--- | :--- |
-| **`/verify`** | `POST` | `{ reference, suffix?, phoneNumber? }` | Auto-detects provider based on reference pattern. |
-| **`/verify-telebirr`** | `POST` | `{ reference }` | Scrapes Telebirr receipt portal via `axios` + `cheerio`. |
+| **`/verify`** | `POST` | `{ reference, suffix?, phoneNumber?, html? }` | Auto-detects provider based on reference pattern. Accepts `html` for client bounce. |
+| **`/verify-telebirr`** | `POST` | `{ reference?, html? }` | Scrapes Telebirr receipt portal or parses client-bounced raw HTML to bypass foreign geo-blocks. |
 | **`/verify-cbe`** | `POST` | `{ reference, accountSuffix? }` | Supports new token format or legacy `FT...` reference + 8-digit account suffix. |
 | **`/verify-dashen`** | `POST` | `{ reference }` | Queries Dashen portal. |
 | **`/verify-abyssinia`**| `POST` | `{ reference, suffix }` | `suffix` must be exactly 5 digits. |
 | **`/verify-cbebirr`**  | `POST` | `{ receiptNumber, phoneNumber }` | `phoneNumber` must start with `251` (12 digits total). |
 | **`/verify-mpesa`**    | `POST` | `{ reference }` | Queries Safaricom M-Pesa receipt API. |
-| **`/api/public-verify`** | `POST` | `{ reference, bank?, suffix?, phoneNumber? }` | Public receipt verification for the landing page tester UI. |
+| **`/api/public-verify`** | `POST` | `{ reference, bank?, suffix?, phoneNumber?, html? }` | Public receipt verification for the landing page tester UI with in-browser OCR, QR & Telebirr bounce. |
 | **`/admin`**           | `GET`  | *None* | Developer & Admin Console UI for managing app keys & viewing live usage. |
 | **`/api/admin/login`** | `POST` | `{ key }` | Authenticates admin using `ADMIN_KEY`, `ADMIN_KEY_HASH`, or `UNKEY_ROOT_KEY`. |
 | **`/api/admin/keys`**  | `GET`, `POST` | `{ name, description?, rateLimit? }` | Lists or generates new app API keys. |

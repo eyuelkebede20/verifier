@@ -6,8 +6,8 @@ A lightweight, standalone microservice for verifying Ethiopian bank and mobile m
 
 | Provider | Endpoint | Method | Key Parameters |
 | :--- | :--- | :--- | :--- |
-| **Smart Universal** | `/verify` | `POST` | `reference`, `suffix?`, `phoneNumber?` *(Auto-detects bank)* |
-| **Telebirr** | `/verify-telebirr` | `POST` | `reference` |
+| **Smart Universal** | `/verify` | `POST` | `reference`, `suffix?`, `phoneNumber?`, `html?` *(Auto-detects bank)* |
+| **Telebirr** | `/verify-telebirr` | `POST` | `reference?`, `html?` *(Direct query or Client Bounce)* |
 | **CBE (Commercial Bank of Ethiopia)** | `/verify-cbe` | `POST` | `reference`, `accountSuffix?` |
 | **Dashen Bank** | `/verify-dashen` | `POST` | `reference` |
 | **Bank of Abyssinia (BoA)** | `/verify-abyssinia` | `POST` | `reference`, `suffix` (5 digits) |
@@ -76,6 +76,47 @@ curl -X POST https://verifier.senaycreatives.com/verify-telebirr \
   -H "Content-Type: application/json" \
   -H "x-api-key: mentalweg_key_2026" \
   -d '{"reference": "TB2601019999"}'
+```
+
+#### ⚡ Telebirr Client Bounce (Bypassing Foreign Datacenter Geo-Blocks):
+Because Ethio Telecom's receipt server (`transactioninfo.ethiotelecom.et`) geo-blocks non-Ethiopian cloud datacenters (like European/UK shared hosting), mobile apps (Flutter, React Native, iOS, Android) running on user devices in Ethiopia can fetch the official receipt directly (no CORS restrictions on native apps) and **bounce the raw HTML back** to the Verifier API to parse, audit, and log:
+
+```bash
+curl -X POST https://verifier.senaycreatives.com/verify-telebirr \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: mentalweg_key_2026" \
+  -d '{
+    "reference": "TB2601019999",
+    "html": "<!DOCTYPE html><html>...</html>"
+  }'
+```
+
+##### Flutter / Dart Implementation:
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+Future<Map<String, dynamic>> verifyTelebirrThroughClient(String reference) async {
+  // 1. Fetch official receipt directly from customer device in Ethiopia (no CORS)
+  final telebirrResponse = await http.get(
+    Uri.parse('https://transactioninfo.ethiotelecom.et/receipt/$reference'),
+  );
+
+  // 2. Bounce HTML back to Senay Verifier API to parse, validate & log
+  final verifierResponse = await http.post(
+    Uri.parse('https://verifier.senaycreatives.com/verify-telebirr'),
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'your_app_api_key',
+    },
+    body: jsonEncode({
+      'reference': reference,
+      'html': telebirrResponse.body,
+    }),
+  );
+
+  return jsonDecode(verifierResponse.body);
+}
 ```
 
 ---

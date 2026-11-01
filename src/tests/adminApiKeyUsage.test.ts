@@ -8,6 +8,8 @@ import {
 } from '../services/adminAuthService';
 import apiKeyService from '../services/apiKeyService';
 import usageTrackerService from '../services/usageTrackerService';
+import { scrapeTelebirrReceipt, isValidReceipt } from '../services/verifyTelebirr';
+import { runSmartVerify } from '../services/verifyUniversal';
 
 test('Admin Auth: verifies plain and hashed master keys securely', () => {
   const testSecret = 'test_admin_super_secret_key_12345';
@@ -155,4 +157,52 @@ test('Usage Tracker Service: aggregates verifications and provider stats', () =>
   // Recent logs
   assert.equal(stats.recentLogs.length, 3);
   assert.equal(stats.recentLogs[0].provider, 'dashen'); // newest first
+});
+
+test('Telebirr Client Bounce: parses raw client-fetched HTML without foreign network calls', async () => {
+  const sampleHtml = `
+    <html>
+      <body>
+        <table>
+          <tr>
+            <td>የከፋይ ስም/Payer Name</td>
+            <td>John Doe</td>
+          </tr>
+          <tr>
+            <td>የክፍያው ሁኔታ/transaction status</td>
+            <td>Completed</td>
+          </tr>
+          <tr>
+            <td class="receipttableTd receipttableTd1">Receipt Details</td>
+            <td class="receipttableTd receipttableTd2">TB12345678</td>
+          </tr>
+          <tr>
+            <td>የተከፈለው መጠን/Settled Amount</td>
+            <td>1,250.00 Birr</td>
+          </tr>
+          <tr>
+            <td class="receipttableTd">01-11-2026 13:45:22</td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const parsed = scrapeTelebirrReceipt(sampleHtml);
+  assert.ok(parsed);
+  assert.equal(parsed.receiptNo, 'TB12345678');
+  assert.equal(parsed.payerName, 'John Doe');
+  assert.equal(parsed.settledAmount, '1,250.00 Birr');
+  assert.equal(parsed.transactionStatus, 'Completed');
+  assert.equal(isValidReceipt(parsed), true);
+
+  // Test smart router with client bounce
+  const smartResult = await runSmartVerify({
+    reference: 'TB12345678',
+    html: sampleHtml,
+  });
+  assert.equal(smartResult.success, true);
+  assert.equal(smartResult.provider, 'TELEBIRR');
+  assert.equal((smartResult.data as any)?.receiptNo, 'TB12345678');
+  assert.equal((smartResult.details as any)?.source, 'client_bounce');
 });

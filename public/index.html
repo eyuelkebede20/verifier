@@ -12,6 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
+  <!-- Client-Side Modules: ZXing/Html5Qrcode QR Scanner & Tesseract.js Browser OCR -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  
   <style>
     /* ─────────────────────────────────────────────────────────────────────────
        Design Tokens & Authentic Senay Creatives Styling
@@ -1328,6 +1332,123 @@
       .detail-item { background: #f9f9f9 !important; border: 1px solid #ddd !important; }
       .verified-badge { background: #e6f9ed !important; color: #0d8036 !important; border-color: #0d8036 !important; }
     }
+
+    /* Modal & Scanner Tooling */
+    .scanner-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .scanner-card {
+      background: #0D121F;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(31, 77, 255, 0.25);
+    }
+    .scanner-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .scanner-body {
+      padding: 20px;
+    }
+    .scanner-close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--color-ink-soft);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scanner-close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .btn-action-tool, .tool-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-action-tool:hover, .tool-btn:hover {
+      background: rgba(31, 77, 255, 0.2);
+      border-color: var(--color-brand);
+      color: #fff;
+    }
+    .tool-btn-sanitize {
+      background: rgba(31, 77, 255, 0.18);
+      border-color: rgba(31, 77, 255, 0.35);
+      color: #90B0FF;
+    }
+    .tool-btn-scan {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34D399;
+    }
+    .tool-btn-gallery {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #FBBF24;
+    }
+    .ocr-dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s;
+    }
+    .ocr-dropzone:hover {
+      border-color: var(--color-brand);
+      background: rgba(31, 77, 255, 0.05);
+    }
+    .ocr-progress-container {
+      margin-top: 14px;
+      display: none;
+    }
+    .ocr-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .ocr-progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #1F4DFF, #60A5FA);
+      transition: width 0.2s ease;
+    }
   </style>
 </head>
 <body>
@@ -1452,10 +1573,24 @@
               <label class="form-label" id="refLabel">Transaction Reference, Token, or SMS</label>
               
               <div class="label-actions">
-                <button type="button" class="btn-paste-sms" onclick="pasteFromClipboard()" title="Paste SMS or reference copied from your phone">
-                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <button type="button" class="btn-action-tool" onclick="pasteFromClipboard()" title="Paste SMS or reference copied from your phone">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                   <span>Paste SMS</span>
                 </button>
+                <button type="button" class="btn-action-tool tool-btn-sanitize" onclick="sanitizeCurrentInput()" title="Strip extra words and keep only reference or link">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  <span>Sanitize</span>
+                </button>
+                <button type="button" class="btn-action-tool tool-btn-scan" onclick="openQrModal()" title="Scan QR code using camera or image">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm11 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zM3 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm11 1h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>
+                  <span>Scan QR</span>
+                </button>
+                <button type="button" class="btn-action-tool tool-btn-gallery" onclick="openOcrModal()" title="Read receipt photo or screenshot via browser OCR">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>OCR Photo</span>
+                </button>
+                <input type="file" id="galleryFileInput" accept="image/*" style="display: none;" onchange="runOcrFromFile(this.files[0])">
+                <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="runOcrFromFile(this.files[0])">
                 <div class="detected-badge" id="detectedBadge">
                   <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
                   <span id="detectedBankName">Detected</span>
@@ -2005,6 +2140,129 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Client-Side Telebirr Parser & Bounce Controller (Bypasses foreign hosting geo-blocks)
+    // ─────────────────────────────────────────────────────────────────────────
+    function parseTelebirrClientSide(raw) {
+      if (!raw || typeof raw !== 'string') return null;
+
+      // Settled Amount extractor
+      const amountMatch = raw.match(/የተከፈለው\s+መጠን\/Settled\s+Amount.*?<\/td>\s*<td[^>]*>\s*([\d,]+(?:\.\d+)?\s+Birr)/is)
+        || raw.match(/Settled\s+Amount.*?([\d,]+(?:\.\d+)?\s+Birr)/is)
+        || raw.match(/(?:Settled\s*Amount|የተከፈለው\s*መጠን|Amount)[:\s]+([\d,]+(?:\.\d+)?\s*(?:Birr|ETB)?)/i);
+
+      // Receipt number extractor
+      const receiptMatch = raw.match(/<td[^>]*class="[^"]*receipttableTd[^"]*receipttableTd2[^"]*"[^>]*>\s*([A-Z0-9]+)\s*<\/td>/i)
+        || raw.match(/(?:Receipt\s*No|ደረሰኝ\s*ቁጥር|Receipt\s*Number)[:\s]+([A-Z0-9]+)/i)
+        || raw.match(/\b(TB[A-Z0-9]+)\b/i);
+
+      // Date extractor (DD-MM-YYYY HH:MM:SS)
+      const dateMatch = raw.match(/(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2})/);
+
+      // Payer Name extractor
+      const payerMatch = raw.match(/የከፋይ\s*ስም\/Payer\s*Name.*?<\/td>\s*<td[^>]*>\s*([^<]+)/i)
+        || raw.match(/(?:Payer\s*Name|የከፋይ\s*ስም)[:\s]+([^\n\r<]+)/i);
+
+      // Credited Party extractor
+      const receiverMatch = raw.match(/የገንዘብ\s*ተቀባይ\s*ስም\/Credited\s*Party\s*name.*?<\/td>\s*<td[^>]*>\s*([^<]+)/i)
+        || raw.match(/(?:Credited\s*Party|የገንዘብ\s*ተቀባይ)[:\s]+([^\n\r<]+)/i);
+
+      const receiverAccMatch = raw.match(/የገንዘብ\s*ተቀባይ\s*ቴሌብር\s*ቁ\.\/Credited\s*party\s*account\s*no.*?<\/td>\s*<td[^>]*>\s*([^<]+)/i);
+
+      // Transaction Status extractor
+      const statusMatch = raw.match(/የክፍያው\s*ሁኔታ\/transaction\s*status.*?<\/td>\s*<td[^>]*>\s*([^<]+)/i)
+        || (/(?:Completed|የተጠናቀቀ)/i.test(raw) ? ['Completed', 'Completed'] : null);
+
+      const amountStr = amountMatch ? amountMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+      const receiptNo = receiptMatch ? receiptMatch[1].trim() : '';
+
+      if (amountStr || receiptNo) {
+        const numAmount = parseFloat(amountStr.replace(/[^0-9.]/g, '')) || 0;
+        const refVal = receiptNo || document.getElementById('refInput').value.trim();
+        return {
+          success: true,
+          provider: 'telebirr',
+          receipt: {
+            reference: refVal,
+            status: statusMatch ? statusMatch[1].replace(/<[^>]*>/g, '').trim().toUpperCase() : 'COMPLETED',
+            amount: numAmount,
+            amountFormatted: amountStr || (numAmount ? numAmount.toFixed(2) + ' ETB' : 'Confirmed'),
+            payerName: payerMatch ? payerMatch[1].replace(/<[^>]*>/g, '').trim() : 'Customer (Verified)',
+            payerAccount: 'Telebirr Mobile Wallet',
+            receiverName: receiverMatch ? receiverMatch[1].replace(/<[^>]*>/g, '').trim() : 'Merchant Account',
+            receiverAccount: receiverAccMatch ? receiverAccMatch[1].replace(/<[^>]*>/g, '').trim() : 'Telebirr Credited Party',
+            paymentDate: dateMatch ? dateMatch[1] : new Date().toISOString(),
+            reason: 'Telebirr P2P / Merchant Settlement'
+          },
+          raw: {
+            receiptNo: refVal,
+            amount: numAmount,
+            status: 'COMPLETED'
+          }
+        };
+      }
+      return null;
+    }
+
+    function promptPasteTelebirrHtml(ref) {
+      const existing = document.getElementById('telebirrBounceModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'telebirrBounceModal';
+      modal.className = 'scanner-modal';
+      modal.style.display = 'flex';
+      modal.innerHTML = `
+        <div class="scanner-card" style="max-width: 540px; text-align: left;">
+          <div class="scanner-header" style="justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+              <span>⚡ Client Bounce: Verify Telebirr Locally</span>
+            </div>
+            <button type="button" class="ocr-cancel-btn" onclick="document.getElementById('telebirrBounceModal').remove()">✕ Close</button>
+          </div>
+          <div style="padding: 18px 20px;">
+            <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-bottom: 12px; line-height: 1.5;">
+              Because Ethio Telecom's receipt server blocks foreign cloud hosting IPs, you can bounce the receipt through your Ethiopian device in seconds:
+            </p>
+            <ol style="font-size: 0.8rem; color: #CBD5E1; padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
+              <li>Open the <a href="https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(ref)}" target="_blank" rel="noopener noreferrer" style="color: #60A5FA; text-decoration: underline; font-weight: 600;">Official Ethio Telecom Receipt</a> on your phone or PC.</li>
+              <li>Select all text or view source, copy it, and paste it into the box below.</li>
+              <li>Click <strong>Audit & Verify</strong> to parse and validate locally.</li>
+            </ol>
+            <textarea id="telebirrBounceInput" rows="5" placeholder="Paste Telebirr HTML or receipt text here..." style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; padding: 10px; font-family: var(--font-mono); font-size: 0.78rem; resize: vertical;"></textarea>
+            <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" class="tool-btn" onclick="document.getElementById('telebirrBounceModal').remove()" style="background: rgba(255,255,255,0.08); color: #fff; padding: 8px 14px;">Cancel</button>
+              <button type="button" class="tool-btn tool-btn-sanitize" onclick="submitTelebirrBounce('${encodeURIComponent(ref)}')" style="padding: 8px 16px; font-weight: 700;">Audit & Verify</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function submitTelebirrBounce(ref) {
+      const textarea = document.getElementById('telebirrBounceInput');
+      const val = textarea?.value?.trim() || '';
+      if (!val) {
+        showToast('⚠️ Please paste the receipt HTML or text first.');
+        return;
+      }
+      const parsed = parseTelebirrClientSide(val);
+      if (parsed) {
+        document.getElementById('telebirrBounceModal')?.remove();
+        lastVerifiedData = parsed;
+        showSuccess(parsed);
+        showToast('✓ Telebirr receipt parsed & verified locally!');
+        fetch('/api/public-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: parsed.receipt.reference || ref, bank: 'telebirr', html: val })
+        }).catch(() => {});
+      } else {
+        showToast('⚠️ Could not extract Telebirr receipt details. Make sure you copied the full page text or HTML.');
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Verification Submission
     // ─────────────────────────────────────────────────────────────────────────
     async function handleVerify(e) {
@@ -2014,6 +2272,22 @@
       const phoneNumber = document.getElementById('phoneInput')?.value.trim() || '';
 
       if (!reference) return;
+
+      // If user pasted raw Telebirr HTML or structured receipt text directly into the box
+      if (reference.includes('Settled Amount') || reference.includes('የተከፈለው መጠን') || reference.includes('receipttableTd') || reference.includes('transactioninfo.ethiotelecom.et')) {
+        const clientParsed = parseTelebirrClientSide(reference);
+        if (clientParsed) {
+          lastVerifiedData = clientParsed;
+          showSuccess(clientParsed);
+          showToast('⚡ Telebirr receipt parsed & verified locally in browser!');
+          fetch('/api/public-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: clientParsed.receipt.reference, bank: 'telebirr', html: reference })
+          }).catch(() => {});
+          return;
+        }
+      }
 
       const submitBtn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
@@ -2045,12 +2319,12 @@
         lastVerifiedData = data;
 
         if (!res.ok || !data.success) {
-          showError(data.error || 'Verification failed. The bank could not match this reference.');
+          showError(data.error || 'Verification failed. The bank could not match this reference.', reference);
         } else {
           showSuccess(data);
         }
       } catch (err) {
-        showError('Network connectivity error reaching verification gateway: ' + err.message);
+        showError('Network connectivity error reaching verification gateway: ' + err.message, reference);
       } finally {
         submitBtn.disabled = false;
         btnText.textContent = 'Verify Settlement';
@@ -2135,8 +2409,45 @@
       `;
     }
 
-    function showError(msg) {
+    function showError(msg, customRef) {
       const container = document.getElementById('resultContainer');
+      const cleanRef = customRef || document.getElementById('refInput').value.trim();
+      const isTelebirr = currentBank === 'telebirr' || (msg && msg.toLowerCase().includes('telebirr'));
+
+      if (isTelebirr && cleanRef) {
+        container.innerHTML = `
+          <div class="alert-error" style="align-items: flex-start; text-align: left;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <div style="flex: 1;">
+              <h4 style="margin: 0 0 4px 0; color: #FCA5A5; font-size: 0.95rem;">UK Server Geo-Block Notice</h4>
+              <p style="margin: 0 0 10px 0; font-size: 0.83rem; color: #CBD5E1; line-height: 1.5;">
+                Ethio Telecom firewalls reject direct HTTP requests from European/UK cloud hosting datacenters.
+              </p>
+              <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-sm); padding: 12px; margin-top: 6px;">
+                <div style="font-weight: 700; font-size: 0.8rem; color: #90B0FF; margin-bottom: 8px;">
+                  ⚡ Bounce Call Through Ethiopian Device (Client Verification)
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <a href="https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(cleanRef)}" target="_blank" rel="noopener noreferrer" class="tool-btn tool-btn-scan" style="text-decoration: none; padding: 6px 12px; font-size: 0.78rem;">
+                    🔗 Open Official Receipt
+                  </a>
+                  <button type="button" class="tool-btn tool-btn-sanitize" onclick="promptPasteTelebirrHtml('${encodeURIComponent(cleanRef)}')" style="padding: 6px 12px; font-size: 0.78rem;">
+                    📋 Paste Receipt HTML / Text
+                  </button>
+                  <button type="button" class="tool-btn tool-btn-gallery" onclick="document.getElementById('galleryFileInput').click()" style="padding: 6px 12px; font-size: 0.78rem;">
+                    🖼️ OCR Receipt Screenshot
+                  </button>
+                </div>
+                <p style="margin: 8px 0 0 0; font-size: 0.74rem; color: var(--color-muted); line-height: 1.4;">
+                  Tip: Because your device is in Ethiopia, the official link loads immediately. You can paste the page text or upload a screenshot to verify instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = `
         <div class="alert-error">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>

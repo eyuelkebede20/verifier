@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { runSmartVerify } from './services/verifyUniversal';
-import { verifyTelebirr } from './services/verifyTelebirr';
+import { verifyTelebirr, scrapeTelebirrReceipt, isValidReceipt } from './services/verifyTelebirr';
 import { verifyCBE } from './services/verifyCBE';
 import { verifyDashen } from './services/verifyDashen';
 import { verifyAbyssinia } from './services/verifyAbyssinia';
@@ -31,7 +31,7 @@ const publicDir = candidatePublicPaths.find((p) => fs.existsSync(p)) || path.joi
 
 // Global Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 // Serve static assets from public directory if exists
 if (fs.existsSync(publicDir)) {
@@ -58,13 +58,13 @@ const getApiSpec = () => ({
   version: '3.1.0-standalone',
   description: 'Central Ethiopian bank & mobile money receipt verification microservice',
   endpoints: [
-    { method: 'POST', path: '/verify', description: 'Smart universal verifier (auto-detects provider)' },
-    { method: 'POST', path: '/verify-telebirr', description: 'Ethio Telecom Telebirr receipt verification' },
-    { method: 'POST', path: '/verify-cbe', description: 'Commercial Bank of Ethiopia (CBE) verification' },
-    { method: 'POST', path: '/verify-dashen', description: 'Dashen Bank transaction verification' },
-    { method: 'POST', path: '/verify-abyssinia', description: 'Bank of Abyssinia transaction verification' },
-    { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification' },
-    { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification' },
+    { method: 'POST', path: '/verify', description: 'Smart universal verifier (auto-detects provider). Accepts { reference, suffix?, phoneNumber?, html? }' },
+    { method: 'POST', path: '/verify-telebirr', description: 'Ethio Telecom Telebirr receipt verification. Accepts { reference } or client-bounced { reference?, html } to bypass foreign IP geo-restrictions' },
+    { method: 'POST', path: '/verify-cbe', description: 'Commercial Bank of Ethiopia (CBE) verification. Accepts { reference, accountSuffix? }' },
+    { method: 'POST', path: '/verify-dashen', description: 'Dashen Bank transaction verification. Accepts { reference }' },
+    { method: 'POST', path: '/verify-abyssinia', description: 'Bank of Abyssinia transaction verification. Accepts { reference, suffix } (5-digit account suffix)' },
+    { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification. Accepts { receiptNumber, phoneNumber }' },
+    { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification. Accepts { reference }' },
     { method: 'POST', path: '/api/public-verify', description: 'Web receipt verification for landing page UI' },
     { method: 'GET', path: '/admin', description: 'Admin console & API usage monitor' },
     { method: 'GET', path: '/health', description: 'Health check' },
@@ -161,7 +161,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // 4. Public Web Verification (for Landing Page checker UI)
 app.post('/api/public-verify', async (req: Request, res: Response): Promise<void> => {
-  const { reference, bank, suffix, phoneNumber, accountSuffix } = req.body;
+  const { reference, bank, suffix, phoneNumber, accountSuffix, html } = req.body;
   if (!reference || typeof reference !== 'string') {
     res.status(400).json({ success: false, error: 'Please enter a transaction reference or receipt ID.' });
     return;
@@ -206,9 +206,18 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
     let detectedProvider = selectedBank;
 
     if (selectedBank === 'telebirr') {
-      const data = await verifyTelebirr(trimmedRef);
-      if (!data) throw new Error('Telebirr receipt not found or could not be parsed.');
-      resultData = data;
+      if (html && typeof html === 'string' && html.trim().length > 0) {
+        const parsed = scrapeTelebirrReceipt(html);
+        if (parsed && isValidReceipt(parsed)) {
+          resultData = parsed;
+        } else {
+          throw new Error('Could not parse valid Telebirr receipt from provided HTML.');
+        }
+      } else {
+        const data = await verifyTelebirr(trimmedRef);
+        if (!data) throw new Error('Telebirr receipt not found or could not be parsed.');
+        resultData = data;
+      }
     } else if (selectedBank === 'cbe') {
       const result = await verifyCBE(trimmedRef, resolvedSuffix || undefined);
       if (!result.success) throw new Error(result.error || 'CBE verification failed.');
@@ -236,6 +245,7 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
         reference: trimmedRef,
         suffix: resolvedSuffix || undefined,
         phoneNumber: resolvedPhone || undefined,
+        html: typeof html === 'string' ? html : undefined,
       });
       if (!result.success) {
         throw new Error(result.error || 'Could not verify transaction with detected bank.');
@@ -311,7 +321,7 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
 
 // 5. Smart Universal Verification (Authenticated API)
 app.post('/verify', async (req: Request, res: Response): Promise<void> => {
-  const { reference, suffix, phoneNumber } = req.body;
+  const { reference, suffix, phoneNumber, html } = req.body;
   if (!reference || typeof reference !== 'string') {
     res.status(400).json({ success: false, error: 'Missing or invalid transaction reference.' });
     return;
@@ -337,7 +347,7 @@ app.post('/verify', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const result = await runSmartVerify({ reference, suffix, phoneNumber });
+    const result = await runSmartVerify({ reference, suffix, phoneNumber, html });
     if (!result.success) {
       res.status(result.httpStatus).json({
         success: false,
@@ -358,9 +368,20 @@ app.post('/verify', async (req: Request, res: Response): Promise<void> => {
 
 // 6. Provider-specific Endpoints (Authenticated APIs)
 app.post('/verify-telebirr', async (req: Request, res: Response): Promise<void> => {
-  const { reference } = req.body;
-  if (!reference) {
-    res.status(400).json({ success: false, error: 'Missing reference.' });
+  const { reference, html } = req.body;
+  if (!reference && !html) {
+    res.status(400).json({ success: false, error: 'Missing reference or html.' });
+    return;
+  }
+
+  // Client bounce: parse client-fetched raw HTML
+  if (html && typeof html === 'string' && html.trim().length > 0) {
+    const parsed = scrapeTelebirrReceipt(html);
+    if (parsed && isValidReceipt(parsed)) {
+      res.json({ success: true, data: parsed, source: 'client_bounce' });
+      return;
+    }
+    res.status(400).json({ success: false, error: 'Could not extract valid Telebirr receipt from provided HTML.' });
     return;
   }
 

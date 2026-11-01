@@ -10,7 +10,7 @@
  */
 
 import { verifyCBE } from './verifyCBE';
-import { verifyTelebirr } from './verifyTelebirr';
+import { verifyTelebirr, scrapeTelebirrReceipt, isValidReceipt } from './verifyTelebirr';
 import { verifyDashen } from './verifyDashen';
 import { verifyAbyssinia } from './verifyAbyssinia';
 import { verifyCBEBirr } from './verifyCBEBirr';
@@ -21,6 +21,7 @@ export interface SmartVerifyInput {
   reference: string;
   suffix?: string;
   phoneNumber?: string;
+  html?: string;
   /** Retained for caller compatibility; provider services do not receive it. */
   apiKey?: string;
 }
@@ -205,6 +206,19 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
         return { success: true, data: result, httpStatus: 200, provider: 'CBE_BIRR' };
       } else {
         // Telebirr
+        if (input.html && typeof input.html === 'string' && input.html.trim().length > 0) {
+          const parsed = scrapeTelebirrReceipt(input.html);
+          if (parsed && isValidReceipt(parsed)) {
+            logger.info('Successfully parsed Telebirr receipt from client bounce HTML.');
+            return {
+              success: true,
+              data: parsed,
+              httpStatus: 200,
+              provider: 'TELEBIRR',
+              details: { source: 'client_bounce' },
+            };
+          }
+        }
         const result = await verifyTelebirr(trimmedRef);
         if (!result) {
           return {
