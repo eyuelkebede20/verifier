@@ -205,4 +205,12 @@ test('Telebirr Client Bounce: parses raw client-fetched HTML without foreign net
   assert.equal(smartResult.provider, 'TELEBIRR');
   assert.equal((smartResult.data as any)?.receiptNo, 'TB12345678');
   assert.equal((smartResult.details as any)?.source, 'client_bounce');
+
+  // Test repeat call hits sub-millisecond in-memory cache
+  const cachedCall = await runSmartVerify({
+    reference: 'TB12345678',
+  });
+  assert.equal(cachedCall.success, true);
+  assert.equal(cachedCall.provider, 'TELEBIRR');
+  assert.equal((cachedCall.details as any)?.cached, true);
 });

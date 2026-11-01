@@ -16,6 +16,7 @@ import { verifyAbyssinia } from './verifyAbyssinia';
 import { verifyCBEBirr } from './verifyCBEBirr';
 import logger from '../utils/logger';
 import { extractLegacyCbeUrlData, isNewCbeReference } from '../utils/cbeReference';
+import receiptCache from '../utils/receiptCache';
 
 export interface SmartVerifyInput {
   reference: string;
@@ -86,6 +87,25 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
   }
 
   try {
+    const cacheKeySuffix = suffix || phoneNumber;
+    const cached = receiptCache.get<SmartVerifyResult>('universal', trimmedRef, cacheKeySuffix);
+    if (cached) {
+      logger.info(`⚡ Cache HIT for reference: ${trimmedRef}`);
+      return {
+        ...cached,
+        details: {
+          ...((cached.details as any) || {}),
+          cached: true,
+        },
+      };
+    }
+
+    const returnSuccess = (res: SmartVerifyResult): SmartVerifyResult => {
+      if (res.success && res.data) {
+        receiptCache.set('universal', trimmedRef, res, cacheKeySuffix);
+      }
+      return res;
+    };
     // ── Dashen Bank (16 chars, starts with 3 digits) ───────────────────────────
     if (len === 16 && /^\d{3}/.test(trimmedRef)) {
       if (suffix || phoneNumber) {
@@ -99,7 +119,7 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
       const result = await verifyDashen(trimmedRef);
       const failure = toFailedProviderResult('DASHEN', result);
       if (failure) return failure;
-      return { success: true, data: result, httpStatus: 200, provider: 'DASHEN' };
+      return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'DASHEN' });
     }
 
     // ── Legacy CBE receipt URL (contains FT reference + embedded suffix) ─────
@@ -125,7 +145,7 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
       const result = await verifyCBE(trimmedRef, suffix?.trim());
       const failure = toFailedProviderResult('CBE', result);
       if (failure) return failure;
-      return { success: true, data: result, httpStatus: 200, provider: 'CBE' };
+      return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'CBE' });
     }
 
     // ── CBE & Abyssinia (12 chars, starts with "FT") ───────────────────────────
@@ -142,12 +162,12 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
         const result = await verifyCBE(trimmedRef, trimmedSuffix);
         const failure = toFailedProviderResult('CBE', result);
         if (failure) return failure;
-        return { success: true, data: result, httpStatus: 200, provider: 'CBE' };
+        return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'CBE' });
       } else if (trimmedSuffix.length === 5) {
         const result = await verifyAbyssinia(trimmedRef, trimmedSuffix);
         const failure = toFailedProviderResult('ABYSSINIA', result);
         if (failure) return failure;
-        return { success: true, data: result, httpStatus: 200, provider: 'ABYSSINIA' };
+        return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'ABYSSINIA' });
       } else {
         return {
           success: false,
@@ -170,7 +190,7 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
       const result = await verifyCBE(trimmedRef);
       const failure = toFailedProviderResult('CBE', result);
       if (failure) return failure;
-      return { success: true, data: result, httpStatus: 200, provider: 'CBE' };
+      return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'CBE' });
     }
 
     // ── CBE Birr & Telebirr (10 alphanumeric chars) ───────────────────────────
@@ -203,20 +223,20 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
         const result = await verifyCBEBirr(trimmedRef, trimmedPhone);
         const failure = toFailedProviderResult('CBE_BIRR', result);
         if (failure) return failure;
-        return { success: true, data: result, httpStatus: 200, provider: 'CBE_BIRR' };
+        return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'CBE_BIRR' });
       } else {
         // Telebirr
         if (input.html && typeof input.html === 'string' && input.html.trim().length > 0) {
           const parsed = scrapeTelebirrReceipt(input.html);
           if (parsed && isValidReceipt(parsed)) {
             logger.info('Successfully parsed Telebirr receipt from client bounce HTML.');
-            return {
+            return returnSuccess({
               success: true,
               data: parsed,
               httpStatus: 200,
               provider: 'TELEBIRR',
               details: { source: 'client_bounce' },
-            };
+            });
           }
         }
         const result = await verifyTelebirr(trimmedRef);
@@ -228,7 +248,7 @@ export async function runSmartVerify(input: SmartVerifyInput): Promise<SmartVeri
             provider: 'TELEBIRR',
           };
         }
-        return { success: true, data: result, httpStatus: 200, provider: 'TELEBIRR' };
+        return returnSuccess({ success: true, data: result, httpStatus: 200, provider: 'TELEBIRR' });
       }
     }
 
