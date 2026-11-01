@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { Unkey } from '@unkey/api';
 import logger from '../utils/logger';
 
 export interface AppApiKey {
@@ -36,7 +35,7 @@ const KEYS_FILE = path.join(DATA_DIR, 'api_keys.json');
 class ApiKeyService {
   private dynamicKeys: Map<string, AppApiKey> = new Map();
   private envKeys: Map<string, AppApiKey> = new Map();
-  private unkeyClient: Unkey | null = null;
+  private unkeyClient: any = null;
   private unkeyApiId: string | null = null;
   private initialized = false;
 
@@ -59,11 +58,22 @@ class ApiKeyService {
 
     if (rootKey) {
       try {
+        let UnkeyClass: any = null;
+        try {
+          // Dynamic require so missing optional package on shared hosting does not crash application
+          const unkeyPkg = require('@unkey/api');
+          UnkeyClass = unkeyPkg.Unkey || unkeyPkg.default?.Unkey || unkeyPkg;
+        } catch (pkgErr: any) {
+          logger.warn(`[UNKEY] Optional package @unkey/api not found in node_modules, falling back to local keys: ${pkgErr?.message || pkgErr}`);
+          this.unkeyClient = null;
+          return;
+        }
+
         const options: any = { rootKey };
         if (process.env.UNKEY_BASE_URL?.trim()) {
           options.baseURL = process.env.UNKEY_BASE_URL.trim();
         }
-        this.unkeyClient = new Unkey(options);
+        this.unkeyClient = new UnkeyClass(options);
         this.unkeyApiId = apiId || null;
         logger.info(`[UNKEY] Initialized headless open-source Unkey client (API ID: ${apiId || 'default'}).`);
       } catch (err: any) {
