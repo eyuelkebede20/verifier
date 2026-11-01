@@ -2,44 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Senay Verifier — Ethiopian Bank & Mobile Money Receipt Verifier</title>
-  <meta name="description" content="Bank-grade instant receipt verification for Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.">
+  <meta name="description" content="Never release goods on a fake screenshot. Instantly verify Ethiopian bank and mobile money receipts across CBE, Telebirr, Dashen, BoA, CBE Birr, and M-Pesa.">
   <link rel="icon" type="image/png" href="/logo-mark.png">
   
-  <!-- Fonts: Bricolage Grotesque (display), Inter (body), JetBrains Mono (code/numbers) -->
+  <!-- Fonts: Bricolage Grotesque (display), Inter (body), JetBrains Mono (numbers/code) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     /* ─────────────────────────────────────────────────────────────────────────
-       SenayCreatives Design Tokens & Theme
+       Design Tokens & Authentic Senay Creatives Styling
        ───────────────────────────────────────────────────────────────────────── */
     :root {
-      --font-display: 'Bricolage Grotesque', -apple-system, sans-serif;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
 
-      /* Authentic SenayCreatives Palette */
-      --color-brand: #1F4DFF;        /* Electric Cobalt */
-      --color-brand-ink: #0A1F8A;    /* Deep Brand Hover */
+      --color-brand: #1F4DFF;
+      --color-brand-ink: #0A1F8A;
       --color-brand-glow: rgba(31, 77, 255, 0.28);
-      --color-ember: #FF5630;        /* Rare Warm Highlight */
-      --color-ember-glow: rgba(255, 86, 48, 0.22);
+      --color-ember: #FF5630;
+      --color-ember-glow: rgba(255, 86, 48, 0.2);
 
-      --color-paper: #090C12;        /* Dark Canvas */
-      --color-paper-dim: #121722;    /* Raised Surface */
-      --color-paper-raised: #182030; /* Elevated Interactive */
-      --color-paper-card: rgba(18, 23, 34, 0.78);
+      --color-paper: #090C12;
+      --color-paper-dim: #121722;
+      --color-paper-raised: #182030;
+      --color-paper-card: rgba(18, 23, 34, 0.85);
       --color-line: rgba(255, 255, 255, 0.08);
       --color-line-hover: rgba(255, 255, 255, 0.16);
 
-      --color-ink: #F8FAFC;          /* High-contrast Text */
-      --color-ink-soft: #94A3B8;     /* Secondary Text */
-      --color-muted: #64748B;        /* Tertiary / Captions */
+      --color-ink: #F8FAFC;
+      --color-ink-soft: #94A3B8;
+      --color-muted: #64748B;
 
-      /* Bank Identity Accents */
       --cbe: #8B5CF6;
       --telebirr: #0284C7;
       --dashen: #2563EB;
@@ -66,10 +64,7 @@
 
     html, body {
       max-width: 100%;
-      overflow-x: clip;
-    }
-
-    body {
+      overflow-x: hidden;
       background-color: var(--color-paper);
       color: var(--color-ink);
       font-family: var(--font-sans);
@@ -79,10 +74,8 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      position: relative;
     }
 
-    /* Accessibility visible focus */
     :focus-visible {
       outline: 2px solid var(--color-brand);
       outline-offset: 2px;
@@ -93,17 +86,20 @@
       color: #fff;
     }
 
-    /* Container */
     .container {
       width: 100%;
       max-width: 1100px;
       margin: 0 auto;
-      padding: 0 24px;
+      padding: 0 16px;
     }
 
-    /* ─────────────────────────────────────────────────────────────────────────
-       Interactive Ambient Backdrop (Electric Cobalt & Ember glow + Parallax Spark)
-       ───────────────────────────────────────────────────────────────────────── */
+    @media (min-width: 640px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+
+    /* Ambient Background Glow */
     .ambient-backdrop {
       position: absolute;
       inset: 0;
@@ -117,10 +113,10 @@
       position: absolute;
       top: -120px;
       right: 5%;
-      width: 620px;
-      height: 620px;
+      width: clamp(300px, 50vw, 620px);
+      height: clamp(300px, 50vw, 620px);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(31, 77, 255, 0.16) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(31, 77, 255, 0.15) 0%, transparent 70%);
       filter: blur(80px);
       transition: transform 0.4s var(--ease-out-expo);
       will-change: transform;
@@ -129,37 +125,30 @@
     .ambient-glow-ember {
       position: absolute;
       top: 180px;
-      left: -100px;
-      width: 520px;
-      height: 520px;
+      left: -80px;
+      width: clamp(260px, 45vw, 520px);
+      height: clamp(260px, 45vw, 520px);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 86, 48, 0.09) 0%, transparent 70%);
-      filter: blur(90px);
+      background: radial-gradient(circle, rgba(255, 86, 48, 0.08) 0%, transparent 70%);
+      filter: blur(80px);
       transition: transform 0.4s var(--ease-out-expo);
       will-change: transform;
     }
 
     .ambient-spark-watermark {
       position: absolute;
-      top: 20px;
-      right: 3%;
-      width: 480px;
-      height: 480px;
-      color: rgba(31, 77, 255, 0.04);
+      top: 30px;
+      right: 2%;
+      width: clamp(240px, 40vw, 480px);
+      height: clamp(240px, 40vw, 480px);
+      color: rgba(31, 77, 255, 0.035);
       transition: transform 0.6s var(--ease-out-expo);
       will-change: transform;
     }
 
-    /* CSS Rise animation */
     @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .rise {
@@ -173,7 +162,7 @@
       border-bottom: 1px solid var(--color-line);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      background: rgba(9, 12, 18, 0.82);
+      background: rgba(9, 12, 18, 0.85);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -183,29 +172,30 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 72px;
+      height: 68px;
+      gap: 12px;
     }
 
-    /* Wordmark */
     .wordmark {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       text-decoration: none;
       color: inherit;
+      flex-shrink: 0;
     }
 
     .logo-badge {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 1px solid var(--color-line-hover);
       background: var(--color-paper-dim);
       display: grid;
       place-items: center;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      transition: border-color 0.2s, transform 0.2s;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
     }
 
     .logo-badge img {
@@ -214,68 +204,57 @@
       object-fit: contain;
     }
 
-    .logo-badge svg {
-      width: 20px;
-      height: 20px;
-      color: var(--color-brand);
-    }
-
-    .wordmark:hover .logo-badge {
-      border-color: var(--color-brand);
-      transform: scale(1.04);
-    }
-
     .wordmark-text {
       font-family: var(--font-display);
-      font-size: 1.18rem;
+      font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
 
-    .wordmark-text span.brand-part {
-      color: #FFFFFF;
-    }
-
-    .wordmark-text span.creatives-part {
-      color: var(--color-ink-soft);
-      font-weight: 500;
-    }
+    .wordmark-text span.brand-part { color: #FFFFFF; }
+    .wordmark-text span.creatives-part { color: var(--color-ink-soft); font-weight: 500; }
 
     .service-pill {
-      margin-left: 8px;
       font-family: var(--font-display);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       background: rgba(31, 77, 255, 0.12);
       border: 1px solid rgba(31, 77, 255, 0.28);
-      color: #7094FF;
-      padding: 2px 8px;
+      color: #90B0FF;
+      padding: 2px 7px;
       border-radius: var(--radius-full);
+      margin-left: 4px;
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    @media (min-width: 640px) {
+      .nav-actions {
+        gap: 12px;
+      }
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
+      gap: 6px;
+      padding: 5px 12px;
       border-radius: var(--radius-full);
       background: rgba(16, 185, 129, 0.08);
       border: 1px solid rgba(16, 185, 129, 0.22);
       color: #34D399;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      transition: background 0.2s;
+      white-space: nowrap;
     }
 
     .pulse-dot {
@@ -285,6 +264,7 @@
       background: #10B981;
       box-shadow: 0 0 8px #10B981;
       animation: pulse 2.2s infinite;
+      flex-shrink: 0;
     }
 
     @keyframes pulse {
@@ -297,36 +277,33 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--color-line);
       color: var(--color-ink-soft);
-      padding: 7px 14px;
+      padding: 6px 12px;
       border-radius: var(--radius-full);
-      font-size: 0.84rem;
-      font-weight: 500;
+      font-size: 0.82rem;
+      font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       transition: all 0.2s var(--ease-out-expo);
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      white-space: nowrap;
     }
 
     .btn-nav:hover {
       background: rgba(255, 255, 255, 0.08);
-      border-color: var(--color-line-hover);
       color: var(--color-ink);
     }
 
     .btn-nav-primary {
       background: var(--color-brand);
-      border: 1px solid var(--color-brand);
+      border-color: var(--color-brand);
       color: #fff;
-      box-shadow: 0 2px 12px var(--color-brand-glow);
     }
 
     .btn-nav-primary:hover {
       background: var(--color-brand-ink);
-      border-color: var(--color-brand-ink);
       color: #fff;
-      transform: translateY(-1px);
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
@@ -334,48 +311,48 @@
        ───────────────────────────────────────────────────────────────────────── */
     .hero {
       text-align: center;
-      padding: 56px 0 36px;
+      padding: 44px 0 28px;
       position: relative;
       z-index: 1;
+    }
+
+    @media (min-width: 640px) {
+      .hero {
+        padding: 60px 0 36px;
+      }
     }
 
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       padding: 5px 14px;
       border-radius: var(--radius-full);
       background: rgba(31, 77, 255, 0.08);
       border: 1px solid rgba(31, 77, 255, 0.22);
       color: #90B0FF;
       font-family: var(--font-display);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .hero-eyebrow svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       color: var(--color-brand);
     }
 
     .hero h1 {
       font-family: var(--font-display);
-      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-size: clamp(2rem, 5.5vw, 3.6rem);
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.08;
-      max-width: 860px;
-      margin: 0 auto 18px;
-    }
-
-    .hero h1 span.gradient-brand {
-      background: linear-gradient(135deg, #FFFFFF 30%, #A5B4FC 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+      max-width: 820px;
+      margin: 0 auto 16px;
     }
 
     .hero h1 span.gradient-highlight {
@@ -385,85 +362,128 @@
     }
 
     .hero p.subtitle {
-      font-size: 1.12rem;
+      font-size: clamp(0.95rem, 2vw, 1.12rem);
       color: var(--color-ink-soft);
-      max-width: 680px;
+      max-width: 640px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
+    /* Human Reassurance Banner */
+    .reassurance-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    .reassurance-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .reassurance-item svg {
+      color: var(--color-success);
+    }
+
     /* ─────────────────────────────────────────────────────────────────────────
-       Main Verifier Card
+       Verifier Card & Form
        ───────────────────────────────────────────────────────────────────────── */
     .verifier-wrapper {
       position: relative;
       z-index: 10;
-      margin-top: 10px;
-      margin-bottom: 64px;
+      margin-top: 8px;
+      margin-bottom: 56px;
     }
 
     .verifier-card {
       background: var(--color-paper-card);
       border: 1px solid var(--color-line);
       border-radius: var(--radius-xl);
-      padding: 32px;
+      padding: 20px;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       box-shadow: 
         0 24px 60px -15px rgba(0, 0, 0, 0.7),
         0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-      transition: border-color 0.3s;
+    }
+
+    @media (min-width: 640px) {
+      .verifier-card {
+        padding: 32px;
+      }
     }
 
     /* Bank Selector Tabs */
     .bank-selector-wrap {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
-    .bank-selector-label {
+    .bank-selector-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 10px;
-      font-size: 0.8rem;
+    }
+
+    .bank-selector-title {
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--color-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
+    .bank-scroll-hint {
+      font-size: 0.72rem;
+      color: #90B0FF;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .bank-selector {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 6px;
-      scrollbar-width: none;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
 
     .bank-selector::-webkit-scrollbar {
-      display: none;
+      height: 4px;
+    }
+    .bank-selector::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
     }
 
     .bank-pill {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--color-line);
       color: var(--color-ink-soft);
-      padding: 9px 16px;
+      padding: 8px 14px;
       border-radius: var(--radius-full);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       white-space: nowrap;
       transition: all 0.2s var(--ease-out-expo);
       user-select: none;
+      min-height: 40px;
     }
 
     .bank-pill:hover {
       background: rgba(255, 255, 255, 0.07);
-      border-color: var(--color-line-hover);
       color: var(--color-ink);
     }
 
@@ -474,19 +494,18 @@
       box-shadow: 0 4px 16px var(--color-brand-glow);
     }
 
-    .bank-pill[data-bank="cbe"].active { background: #7C3AED; border-color: #8B5CF6; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35); }
-    .bank-pill[data-bank="telebirr"].active { background: #0284C7; border-color: #38BDF8; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35); }
-    .bank-pill[data-bank="abyssinia"].active { background: #D97706; border-color: #FBBF24; box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35); }
-    .bank-pill[data-bank="dashen"].active { background: #1D4ED8; border-color: #60A5FA; box-shadow: 0 4px 16px rgba(29, 78, 216, 0.35); }
-    .bank-pill[data-bank="cbebirr"].active { background: #059669; border-color: #34D399; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35); }
-    .bank-pill[data-bank="mpesa"].active { background: #DC2626; border-color: #F87171; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35); }
+    .bank-pill[data-bank="cbe"].active { background: #7C3AED; border-color: #8B5CF6; }
+    .bank-pill[data-bank="telebirr"].active { background: #0284C7; border-color: #38BDF8; }
+    .bank-pill[data-bank="abyssinia"].active { background: #D97706; border-color: #FBBF24; }
+    .bank-pill[data-bank="dashen"].active { background: #1D4ED8; border-color: #60A5FA; }
+    .bank-pill[data-bank="cbebirr"].active { background: #059669; border-color: #34D399; }
+    .bank-pill[data-bank="mpesa"].active { background: #DC2626; border-color: #F87171; }
 
     .bank-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--color-muted);
-      transition: background 0.2s;
     }
 
     .bank-pill[data-bank="cbe"] .bank-dot { background: var(--cbe); }
@@ -497,9 +516,9 @@
     .bank-pill[data-bank="mpesa"] .bank-dot { background: var(--mpesa); }
     .bank-pill.active .bank-dot { background: #fff; box-shadow: 0 0 6px #fff; }
 
-    /* Form Fields */
+    /* Form Fields & Paste Action */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .form-label-row {
@@ -507,29 +526,60 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .form-label {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 600;
       color: var(--color-ink);
+    }
+
+    .label-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .detected-badge {
       display: none;
       align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
+      gap: 5px;
+      font-size: 0.72rem;
       font-weight: 600;
-      padding: 2px 10px;
+      padding: 2px 9px;
       border-radius: var(--radius-full);
       background: rgba(31, 77, 255, 0.12);
       border: 1px solid rgba(31, 77, 255, 0.28);
       color: #90B0FF;
     }
 
+    .btn-paste-sms {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-paste-sms:hover {
+      background: rgba(31, 77, 255, 0.2);
+      border-color: var(--color-brand);
+      color: #fff;
+    }
+
     .form-input-wrap {
       position: relative;
+      display: flex;
+      align-items: center;
     }
 
     .form-input {
@@ -537,11 +587,12 @@
       background: rgba(10, 14, 22, 0.85);
       border: 1px solid var(--color-line);
       border-radius: var(--radius-md);
-      padding: 16px 46px 16px 18px;
-      font-size: 1.05rem;
+      padding: 14px 44px 14px 16px;
+      font-size: 1rem;
       font-family: var(--font-sans);
       color: var(--color-ink);
       transition: all 0.2s var(--ease-out-expo);
+      min-height: 50px;
     }
 
     .form-input:focus {
@@ -552,15 +603,13 @@
 
     .clear-btn {
       position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
+      right: 12px;
       background: none;
       border: none;
       color: var(--color-muted);
       cursor: pointer;
       display: none;
-      padding: 4px;
+      padding: 6px;
       border-radius: 50%;
       transition: color 0.2s;
     }
@@ -570,17 +619,32 @@
     }
 
     .form-helper {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--color-muted);
       margin-top: 6px;
+      line-height: 1.4;
     }
 
-    /* Secondary Inputs */
+    /* Extracted Notification */
+    .extract-notice {
+      background: rgba(31, 77, 255, 0.1);
+      border: 1px solid rgba(31, 77, 255, 0.25);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      color: #90B0FF;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    /* Secondary Inputs Grid */
     .secondary-inputs {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
 
     @media (min-width: 640px) {
@@ -589,13 +653,13 @@
       }
     }
 
-    /* Action Controls & Sample Pills */
+    /* Action Row */
     .action-row {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-top: 24px;
-      padding-top: 20px;
+      margin-top: 20px;
+      padding-top: 18px;
       border-top: 1px solid var(--color-line);
     }
 
@@ -610,12 +674,12 @@
     .sample-pill-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .sample-label {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--color-muted);
       text-transform: uppercase;
@@ -626,9 +690,9 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--color-line);
       color: var(--color-ink-soft);
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: var(--radius-full);
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-family: var(--font-mono);
       cursor: pointer;
       transition: all 0.2s;
@@ -636,7 +700,6 @@
 
     .btn-sample:hover {
       background: rgba(255, 255, 255, 0.08);
-      border-color: var(--color-line-hover);
       color: var(--color-ink);
     }
 
@@ -644,37 +707,43 @@
       background: var(--color-brand);
       color: #fff;
       border: none;
-      padding: 14px 28px;
+      padding: 13px 26px;
       border-radius: var(--radius-full);
       font-family: var(--font-display);
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 20px var(--color-brand-glow);
+      gap: 8px;
+      box-shadow: 0 4px 18px var(--color-brand-glow);
       transition: all 0.2s var(--ease-out-expo);
+      width: 100%;
+      min-height: 48px;
+    }
+
+    @media (min-width: 768px) {
+      .btn-verify {
+        width: auto;
+      }
     }
 
     .btn-verify:hover:not(:disabled) {
       background: var(--color-brand-ink);
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px var(--color-brand-glow);
     }
 
     .btn-verify:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
        Receipt Verification Presentation Card
        ───────────────────────────────────────────────────────────────────────── */
     .result-container {
-      margin-top: 32px;
+      margin-top: 28px;
       display: none;
     }
 
@@ -682,10 +751,16 @@
       background: linear-gradient(180deg, rgba(20, 26, 40, 0.95) 0%, rgba(13, 17, 26, 0.95) 100%);
       border: 1px solid var(--color-line);
       border-radius: var(--radius-lg);
-      padding: 28px;
+      padding: 20px;
       position: relative;
       overflow: hidden;
       box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    @media (min-width: 640px) {
+      .receipt-card {
+        padding: 28px;
+      }
     }
 
     .receipt-card::before {
@@ -709,9 +784,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--color-line);
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .provider-tag {
@@ -719,65 +796,72 @@
       align-items: center;
       gap: 8px;
       font-family: var(--font-display);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
       color: var(--color-ink);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
     }
 
     .verified-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: var(--radius-full);
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34D399;
       font-family: var(--font-display);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
-    /* Big Amount Presentation */
     .amount-display {
       text-align: center;
-      padding: 16px 0 24px;
-      margin-bottom: 24px;
+      padding: 12px 0 20px;
+      margin-bottom: 20px;
       border-bottom: 1px dashed var(--color-line);
     }
 
     .amount-label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--color-muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .amount-val {
       font-family: var(--font-mono);
-      font-size: clamp(2rem, 4vw, 3rem);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
       font-weight: 700;
       color: #FFFFFF;
       letter-spacing: -0.02em;
+      word-break: break-all;
     }
 
-    /* Key-Value Details Grid */
+    .amount-amharic {
+      font-size: 0.82rem;
+      color: #34D399;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
     .receipt-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     @media (min-width: 640px) {
       .receipt-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
       }
     }
 
@@ -785,11 +869,12 @@
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: var(--radius-md);
-      padding: 14px 16px;
+      padding: 12px 14px;
+      overflow-wrap: anywhere;
     }
 
     .detail-k {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--color-muted);
       text-transform: uppercase;
@@ -798,10 +883,9 @@
     }
 
     .detail-v {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: var(--color-ink);
-      word-break: break-all;
     }
 
     .detail-v.copyable {
@@ -816,70 +900,44 @@
       color: #90B0FF;
     }
 
-    /* Result View Tabs (Voucher vs JSON vs cURL) */
-    .result-tabs {
+    /* Receipt Actions (Print, Share, Copy) */
+    .receipt-actions {
       display: flex;
-      gap: 6px;
-      border-bottom: 1px solid var(--color-line);
-      margin-bottom: 18px;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-line);
     }
 
-    .result-tab-btn {
-      background: none;
-      border: none;
-      color: var(--color-muted);
+    .btn-receipt-action {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink);
+      font-size: 0.8rem;
+      font-weight: 600;
       padding: 8px 14px;
-      font-size: 0.82rem;
-      font-weight: 600;
+      border-radius: var(--radius-full);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.2s;
+      flex: 1;
+      justify-content: center;
+      min-height: 40px;
     }
 
-    .result-tab-btn.active {
-      color: #fff;
-      border-bottom-color: var(--color-brand);
+    @media (min-width: 640px) {
+      .btn-receipt-action {
+        flex: initial;
+      }
     }
 
-    .tab-content-panel {
-      display: none;
-    }
-
-    .tab-content-panel.active {
-      display: block;
-    }
-
-    .code-pre-box {
-      background: rgba(8, 11, 16, 0.95);
-      border: 1px solid var(--color-line);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: #CBD5E1;
-      overflow-x: auto;
-      max-height: 380px;
-      position: relative;
-    }
-
-    .code-copy-float {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--color-line);
-      color: var(--color-ink-soft);
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .code-copy-float:hover {
-      background: rgba(255, 255, 255, 0.16);
-      color: #fff;
+    .btn-receipt-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--color-line-hover);
     }
 
     /* Error Message Alert */
@@ -887,65 +945,126 @@
       background: rgba(239, 68, 68, 0.08);
       border: 1px solid rgba(239, 68, 68, 0.25);
       border-radius: var(--radius-lg);
-      padding: 20px;
+      padding: 18px;
       display: flex;
       align-items: flex-start;
-      gap: 14px;
+      gap: 12px;
       color: #FCA5A5;
     }
 
     .alert-error h4 {
       font-family: var(--font-display);
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #F87171;
       margin-bottom: 4px;
     }
 
     .alert-error p {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: #FECACA;
       line-height: 1.5;
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
-       Supported Providers Matrix Section
+       Helpful Human Guide: Where to find receipt references
+       ───────────────────────────────────────────────────────────────────────── */
+    .guide-section {
+      margin-top: 24px;
+      background: var(--color-paper-dim);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .guide-toggle {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--color-ink);
+      padding: 16px 20px;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .guide-content {
+      padding: 0 20px 20px;
+      display: none;
+      font-size: 0.88rem;
+      color: var(--color-ink-soft);
+      line-height: 1.6;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .guide-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .guide-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+
+    .guide-card strong {
+      display: block;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Supported Providers Matrix
        ───────────────────────────────────────────────────────────────────────── */
     .providers-section {
-      padding: 48px 0;
-      position: relative;
-      z-index: 1;
+      padding: 36px 0 48px;
     }
 
     .section-eyebrow {
       text-align: center;
       font-family: var(--font-display);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--color-brand);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .section-title {
       text-align: center;
       font-family: var(--font-display);
-      font-size: 2rem;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .providers-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 14px;
     }
 
     @media (min-width: 640px) {
       .providers-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
       }
     }
 
@@ -959,64 +1078,47 @@
       background: var(--color-paper-dim);
       border: 1px solid var(--color-line);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      transition: all 0.3s var(--ease-out-expo);
+      padding: 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transition: border-color 0.2s, transform 0.2s;
     }
 
     .provider-card:hover {
       border-color: var(--color-line-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+      transform: translateY(-2px);
     }
 
     .provider-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .provider-title {
       font-family: var(--font-display);
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #fff;
     }
 
     .provider-live-pill {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: #34D399;
       background: rgba(16, 185, 129, 0.1);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: var(--radius-full);
       border: 1px solid rgba(16, 185, 129, 0.25);
     }
 
     .provider-desc {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--color-ink-soft);
       line-height: 1.5;
-      margin-bottom: 16px;
-    }
-
-    .provider-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .provider-channel-tag {
-      font-size: 0.72rem;
-      font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--color-muted);
-      padding: 2px 8px;
-      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
     }
 
     .btn-card-test {
@@ -1025,12 +1127,13 @@
       color: var(--color-ink);
       padding: 8px 14px;
       border-radius: var(--radius-full);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
       text-align: center;
       transition: all 0.2s;
+      min-height: 38px;
     }
 
     .btn-card-test:hover {
@@ -1052,34 +1155,39 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .modal-box {
       background: var(--color-paper-dim);
       border: 1px solid var(--color-line-hover);
       border-radius: var(--radius-xl);
-      max-width: 640px;
+      max-width: 600px;
       width: 100%;
       max-height: 85vh;
       overflow-y: auto;
-      padding: 32px;
+      padding: 24px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-      position: relative;
+    }
+
+    @media (min-width: 640px) {
+      .modal-box {
+        padding: 32px;
+      }
     }
 
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--color-line);
     }
 
     .modal-title {
       font-family: var(--font-display);
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #fff;
     }
@@ -1092,11 +1200,17 @@
       cursor: pointer;
       line-height: 1;
       padding: 4px;
-      transition: color 0.2s;
     }
 
-    .modal-close:hover {
-      color: #fff;
+    .code-pre-box {
+      background: rgba(8, 11, 16, 0.95);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #CBD5E1;
+      overflow-x: auto;
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
@@ -1104,7 +1218,7 @@
        ───────────────────────────────────────────────────────────────────────── */
     footer {
       border-top: 1px solid var(--color-line);
-      padding: 40px 0;
+      padding: 32px 0;
       margin-top: auto;
       background: rgba(9, 12, 18, 0.6);
       position: relative;
@@ -1116,7 +1230,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       text-align: center;
     }
 
@@ -1130,9 +1244,9 @@
     .footer-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-family: var(--font-display);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       color: var(--color-ink-soft);
     }
 
@@ -1145,15 +1259,14 @@
     .footer-links {
       display: flex;
       align-items: center;
-      gap: 16px;
-      font-size: 0.85rem;
+      gap: 14px;
+      font-size: 0.82rem;
       color: var(--color-muted);
     }
 
     .footer-links a {
       color: var(--color-ink-soft);
       text-decoration: none;
-      transition: color 0.2s;
     }
 
     .footer-links a:hover {
@@ -1163,25 +1276,63 @@
     /* Toast Notification */
     .toast-msg {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 20px;
+      right: 20px;
       background: var(--color-paper-raised);
       border: 1px solid var(--color-line-hover);
       color: #fff;
-      padding: 10px 18px;
+      padding: 9px 16px;
       border-radius: var(--radius-full);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
       z-index: 200;
       display: none;
       animation: rise 0.3s var(--ease-out-expo);
     }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      header, footer, .hero, .bank-selector-wrap, form, .providers-section, .ambient-backdrop, .receipt-actions, .guide-section {
+        display: none !important;
+      }
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .verifier-wrapper {
+        margin: 0 !important;
+      }
+      .verifier-card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        background: none !important;
+      }
+      .result-container {
+        display: block !important;
+        margin-top: 0 !important;
+      }
+      .receipt-card {
+        background: #fff !important;
+        border: 2px solid #000 !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+      .receipt-card::before { display: none !important; }
+      .amount-val, .provider-title, .detail-v { color: #000 !important; }
+      .detail-item { background: #f9f9f9 !important; border: 1px solid #ddd !important; }
+      .verified-badge { background: #e6f9ed !important; color: #0d8036 !important; border-color: #0d8036 !important; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Ambient Backdrop with Spring-drift Parallax -->
+  <!-- Ambient Backdrop with Spring Parallax -->
   <div class="ambient-backdrop" aria-hidden="true" id="ambientBackdrop">
     <div class="ambient-glow-brand" id="glowBrand"></div>
     <div class="ambient-glow-ember" id="glowEmber"></div>
@@ -1194,7 +1345,7 @@
   <header>
     <div class="container">
       <div class="nav-inner">
-        <!-- Authentic SenayCreatives Wordmark -->
+        <!-- Brand Wordmark -->
         <a href="/" class="wordmark" aria-label="Senay Creatives Verifier Home">
           <span class="logo-badge">
             <img src="/logo-mark.png" alt="Senay Creatives" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -1211,51 +1362,66 @@
         <div class="nav-actions">
           <div class="status-badge" id="systemHealthBadge" title="Live Microservice Availability">
             <span class="pulse-dot"></span>
-            <span id="statusText">Gateway Live</span>
+            <span id="statusText">Active</span>
           </div>
           <button class="btn-nav" onclick="openDocsModal()" title="View API Documentation">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-            API Docs
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span class="btn-label-desktop">API Docs</span>
           </button>
           <a href="/admin" class="btn-nav btn-nav-primary" title="Open Verifier Console">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            Console
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>Console</span>
           </a>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Main Hero -->
   <main class="container">
     <section class="hero">
       <div class="hero-eyebrow rise" style="animation-delay: 0ms;">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
-        Ethiopian Payment Infrastructure
+        Ethiopian Payment Verification
       </div>
       <h1 class="rise" style="animation-delay: 60ms;">
-        <span class="gradient-brand">Instant Receipt Verification</span>
-        <br>
-        <span class="gradient-highlight">for Ethiopian Banks</span>
+        Never Release Goods on a <span class="gradient-highlight">Fake Screenshot</span>
       </h1>
       <p class="subtitle rise" style="animation-delay: 120ms;">
-        Verify settlements in milliseconds across Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.
+        Instantly confirm receipt authenticity directly from the bank's live ledger. Works with CBE, Telebirr, Dashen, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.
       </p>
+
+      <div class="reassurance-strip rise" style="animation-delay: 150ms;">
+        <span class="reassurance-item">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+          Direct Banking Ledger Audit
+        </span>
+        <span class="reassurance-item">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+          Zero Storage of Banking Secrets
+        </span>
+        <span class="reassurance-item">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+          Instant Microsecond Verification
+        </span>
+      </div>
     </section>
 
-    <!-- Verifier Interactive Box -->
+    <!-- Verifier Interactive Card -->
     <section class="verifier-wrapper rise" style="animation-delay: 180ms;">
       <div class="verifier-card">
 
-        <!-- Bank Selector Pills -->
+        <!-- Bank Selector Tabs -->
         <div class="bank-selector-wrap">
-          <div class="bank-selector-label">
-            <span>Select Settlement Provider</span>
-            <span style="font-size: 0.72rem; color: #90B0FF;">Auto-Detect Active</span>
+          <div class="bank-selector-header">
+            <span class="bank-selector-title">Select Settlement Channel</span>
+            <span class="bank-scroll-hint">
+              <span>Auto-detect enabled</span>
+            </span>
           </div>
           <div class="bank-selector" id="bankSelector">
             <button type="button" class="bank-pill active" data-bank="universal">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
               Auto-Detect
             </button>
             <button type="button" class="bank-pill" data-bank="cbe">
@@ -1284,17 +1450,25 @@
           <div class="form-group">
             <div class="form-label-row">
               <label class="form-label" id="refLabel">Transaction Reference, Token, or SMS</label>
-              <div class="detected-badge" id="detectedBadge">
-                <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
-                <span id="detectedBankName">Detected</span>
+              
+              <div class="label-actions">
+                <button type="button" class="btn-paste-sms" onclick="pasteFromClipboard()" title="Paste SMS or reference copied from your phone">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                  <span>Paste SMS</span>
+                </button>
+                <div class="detected-badge" id="detectedBadge">
+                  <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
+                  <span id="detectedBankName">Detected</span>
+                </div>
               </div>
             </div>
+
             <div class="form-input-wrap">
               <input 
                 type="text" 
                 id="refInput" 
                 class="form-input" 
-                placeholder="Paste CBE token, FT reference, Telebirr SMS, or M-Pesa code..." 
+                placeholder="Paste reference code, link, or the entire SMS received on your phone..." 
                 autocomplete="off" 
                 spellcheck="false" 
                 required
@@ -1304,8 +1478,15 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
+
+            <!-- Smart Extraction Notification -->
+            <div id="extractNotice" class="extract-notice">
+              <span id="extractNoticeText">✨ Extracted reference code from SMS</span>
+              <button type="button" style="background:none; border:none; color:inherit; text-decoration:underline; font-size:0.75rem; cursor:pointer;" onclick="undoExtraction()">Undo</button>
+            </div>
+
             <div class="form-helper" id="refHelper">
-              Direct live check with bank portals. Test simulated keys start with <code>TEST</code>.
+              Direct verification with the bank. You can paste an entire SMS message — we'll extract the reference code automatically.
             </div>
           </div>
 
@@ -1314,7 +1495,7 @@
             <div class="form-group" id="suffixGroup" style="display: none;">
               <label class="form-label" id="suffixLabel">Credited Account Suffix</label>
               <input type="text" id="suffixInput" class="form-input" placeholder="e.g. 10001234 (last 8 digits)" autocomplete="off">
-              <div class="form-helper">Required only for legacy CBE FT-format receipts.</div>
+              <div class="form-helper">Required for legacy CBE FT-slips and BoA transactions.</div>
             </div>
 
             <div class="form-group" id="phoneGroup" style="display: none;">
@@ -1328,7 +1509,7 @@
           <div class="action-row">
             <div class="sample-pill-group">
               <span class="sample-label">Try Demo:</span>
-              <button type="button" class="btn-sample" onclick="loadSample('universal', 'TEST12345678')">Auto (Telebirr)</button>
+              <button type="button" class="btn-sample" onclick="loadSample('universal', 'TEST12345678')">Auto-Detect</button>
               <button type="button" class="btn-sample" onclick="loadSample('cbe', 'TESTCBE1234', '1234')">CBE Demo</button>
               <button type="button" class="btn-sample" onclick="loadSample('dashen', 'TESTDASHEN1234')">Dashen Demo</button>
               <button type="button" class="btn-sample" onclick="loadSample('abyssinia', 'TESTBOA1234', '12345')">BoA Demo</button>
@@ -1346,9 +1527,38 @@
         <div class="result-container" id="resultContainer"></div>
 
       </div>
+
+      <!-- Human Guide: Where to find receipt references -->
+      <div class="guide-section">
+        <button type="button" class="guide-toggle" onclick="toggleGuide()">
+          <span>Where do I find my transaction reference?</span>
+          <span id="guideArrow">↓</span>
+        </button>
+        <div class="guide-content" id="guideContent">
+          <p>Different Ethiopian banks print references differently. Here is how to locate yours:</p>
+          <div class="guide-grid">
+            <div class="guide-card">
+              <strong>Commercial Bank of Ethiopia (CBE)</strong>
+              <span>New CBE Mobile Banking creates an 8-character token in the shareable link. Legacy slips start with <code>FT...</code> (e.g., <code>FT240101ABCD</code>) and need the credited account's last digits.</span>
+            </div>
+            <div class="guide-card">
+              <strong>Ethio Telecom Telebirr</strong>
+              <span>Look at your Telebirr SMS or transaction history. Reference usually starts with <code>TB</code> or is a 10-14 digit transaction number.</span>
+            </div>
+            <div class="guide-card">
+              <strong>Dashen Bank / Amole</strong>
+              <span>Located on the payment receipt SMS or app transaction voucher. Starts with <code>DB</code> or 8-12 numeric characters.</span>
+            </div>
+            <div class="guide-card">
+              <strong>Bank of Abyssinia (BoA Apollo)</strong>
+              <span>Found on the Apollo transfer voucher or core banking receipt. Also requires your 5-digit account suffix.</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Supported Providers Matrix -->
+    <!-- Supported Banks Grid -->
     <section class="providers-section">
       <div class="section-eyebrow">Enterprise Multi-Tenant Coverage</div>
       <h2 class="section-title">Supported Ethiopian Payment Gateways</h2>
@@ -1362,13 +1572,8 @@
               <span class="provider-live-pill">Direct Portal</span>
             </div>
             <p class="provider-desc">
-              Instant verification for both new CBE Mobile Banking receipt tokens and legacy FT transaction slips with credited account suffix match.
+              Verifies both new CBE Mobile Banking receipt tokens and legacy FT transaction slips with credited account suffix match.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">Tokens</span>
-              <span class="provider-channel-tag">FT Slips</span>
-              <span class="provider-channel-tag">PDF Extract</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('cbe', 'TESTCBE1234', '1234')">Test CBE Verification</button>
         </div>
@@ -1381,13 +1586,8 @@
               <span class="provider-live-pill">Direct + Relay</span>
             </div>
             <p class="provider-desc">
-              Queries Ethio Telecom's receipt confirmation portal with automatic relay hedging and intelligent fallback circuits.
+              Queries Ethio Telecom's confirmation service directly with automatic relay hedging and intelligent fallback circuits.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">App Slips</span>
-              <span class="provider-channel-tag">SMS Receipts</span>
-              <span class="provider-channel-tag">USSD Codes</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('telebirr', 'TEST12345678')">Test Telebirr Verification</button>
         </div>
@@ -1400,13 +1600,8 @@
               <span class="provider-live-pill">Direct Portal</span>
             </div>
             <p class="provider-desc">
-              Verifies Dashen Bank and Amole digital banking receipts directly via the official Dashen transaction inquiry endpoints.
+              Authenticates Dashen Bank and Amole digital banking receipts directly via the official Dashen transaction gateway.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">Amole</span>
-              <span class="provider-channel-tag">Dashen Mobile</span>
-              <span class="provider-channel-tag">Core Ref</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('dashen', 'TESTDASHEN1234')">Test Dashen Verification</button>
         </div>
@@ -1421,11 +1616,6 @@
             <p class="provider-desc">
               Validates Apollo and BoA core banking transactions with exact 5-digit account suffix validation for zero fraud tolerance.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">Apollo</span>
-              <span class="provider-channel-tag">Core Banking</span>
-              <span class="provider-channel-tag">BoA Slip</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('abyssinia', 'TESTBOA1234', '12345')">Test BoA Verification</button>
         </div>
@@ -1440,11 +1630,6 @@
             <p class="provider-desc">
               Authenticates mobile wallet transfers using receipt number paired with customer phone number verification.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">CBE Wallet</span>
-              <span class="provider-channel-tag">Agent P2P</span>
-              <span class="provider-channel-tag">USSD Birr</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('cbebirr', 'TESTCBEBIRR1234', '', '0911223344')">Test CBE Birr</button>
         </div>
@@ -1459,11 +1644,6 @@
             <p class="provider-desc">
               Direct receipt authentication for Safaricom Ethiopia M-Pesa transactions, merchant tills, and consumer transfers.
             </p>
-            <div class="provider-tags">
-              <span class="provider-channel-tag">M-Pesa ET</span>
-              <span class="provider-channel-tag">Buy Goods</span>
-              <span class="provider-channel-tag">Paybill</span>
-            </div>
           </div>
           <button type="button" class="btn-card-test" onclick="loadSample('mpesa', 'TESTMPESA1234')">Test M-Pesa Verification</button>
         </div>
@@ -1475,15 +1655,15 @@
   <div class="modal-backdrop" id="docsModal" onclick="closeModalOnBackdrop(event, 'docsModal')">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">REST API Integration</h3>
+        <h3 class="modal-title">Developer Integration</h3>
         <button class="modal-close" onclick="closeModal('docsModal')">&times;</button>
       </div>
-      <p style="color: var(--color-ink-soft); font-size: 0.92rem; margin-bottom: 20px; line-height: 1.6;">
-        Senay Verifier exposes high-speed endpoints for client apps (e-commerce carts, Telegram bots, POS systems, ERPs). Zero database latency.
+      <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5;">
+        Integrate payment verification directly into your backend with a single <code>POST /verify</code> call. For production API keys and rate-limit provisioning, visit the <a href="/admin" style="color: #90B0FF; text-decoration: underline;">Admin Console</a>.
       </p>
 
-      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">1. Smart Universal Endpoint (cURL)</h4>
-      <div class="code-pre-box" style="margin-bottom: 20px;">curl -X POST https://verifier.senaycreatives.com/verify \
+      <h4 style="font-family: var(--font-display); font-size: 0.92rem; color: #90B0FF; margin-bottom: 6px;">cURL Example</h4>
+      <div class="code-pre-box" style="margin-bottom: 16px;">curl -X POST https://verifier.senaycreatives.com/verify \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_api_key_here" \
   -d '{
@@ -1491,28 +1671,15 @@
     "suffix": "10001234"
   }'</div>
 
-      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">2. Node.js / TypeScript (Fetch)</h4>
-      <div class="code-pre-box" style="margin-bottom: 20px;">const res = await fetch('https://verifier.senaycreatives.com/verify', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': process.env.VERIFIER_API_KEY
-  },
-  body: JSON.stringify({ reference: receiptReference })
-});
-const result = await res.json();
-if (result.success) {
-  console.log('Settlement confirmed:', result.data.amount, 'ETB');
-}</div>
-
-      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">3. Direct Dedicated Endpoints</h4>
-      <ul style="color: var(--color-ink-soft); font-size: 0.85rem; padding-left: 20px; line-height: 1.8;">
-        <li><code>POST /verify-telebirr</code> — { reference }</li>
-        <li><code>POST /verify-cbe</code> — { reference, accountSuffix? }</li>
-        <li><code>POST /verify-dashen</code> — { reference }</li>
-        <li><code>POST /verify-abyssinia</code> — { reference, suffix }</li>
-        <li><code>POST /verify-cbebirr</code> — { receiptNumber, phoneNumber }</li>
-        <li><code>POST /verify-mpesa</code> — { reference }</li>
+      <h4 style="font-family: var(--font-display); font-size: 0.92rem; color: #90B0FF; margin-bottom: 6px;">Available Endpoints</h4>
+      <ul style="color: var(--color-ink-soft); font-size: 0.85rem; padding-left: 18px; line-height: 1.7;">
+        <li><code>POST /verify</code> — Universal smart detector</li>
+        <li><code>POST /verify-telebirr</code> — Telebirr direct inquiry</li>
+        <li><code>POST /verify-cbe</code> — CBE tokens & legacy FT-slips</li>
+        <li><code>POST /verify-dashen</code> — Dashen Bank / Amole</li>
+        <li><code>POST /verify-abyssinia</code> — Bank of Abyssinia</li>
+        <li><code>POST /verify-cbebirr</code> — CBE Birr mobile wallet</li>
+        <li><code>POST /verify-mpesa</code> — Safaricom M-Pesa</li>
       </ul>
     </div>
   </div>
@@ -1525,17 +1692,17 @@ if (result.success) {
     <div class="container">
       <div class="footer-inner">
         <div class="footer-brand">
-          <svg style="width: 16px; height: 16px; color: var(--color-brand);" viewBox="0 0 24 24" fill="currentColor">
+          <svg style="width: 15px; height: 15px; color: var(--color-brand);" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z" />
           </svg>
-          <span>Crafted by <a href="https://senaycreatives.com" target="_blank" rel="noopener">Senay Creatives</a> &bull; Payment Engineering</span>
+          <span>Crafted by <a href="https://senaycreatives.com" target="_blank" rel="noopener">Senay Creatives</a> &bull; Payment Infrastructure</span>
         </div>
         <div class="footer-links">
           <a href="/api" target="_blank">API Specification</a>
           <span>&bull;</span>
           <a href="/admin">Console</a>
           <span>&bull;</span>
-          <a href="/health" target="_blank">Health Status</a>
+          <a href="/health" target="_blank">Health</a>
         </div>
       </div>
     </div>
@@ -1543,7 +1710,7 @@ if (result.success) {
 
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    // Interactive Ambient Parallax Backdrop (Spring-damped mouse tracking)
+    // Ambient Parallax Motion
     // ─────────────────────────────────────────────────────────────────────────
     (function initBackdropMotion() {
       const glowBrand = document.getElementById('glowBrand');
@@ -1554,41 +1721,35 @@ if (result.success) {
       let currentX = 0, currentY = 0;
 
       window.addEventListener('pointermove', (e) => {
-        const nx = (e.clientX / window.innerWidth) * 2 - 1;
-        const ny = (e.clientY / window.innerHeight) * 2 - 1;
-        targetX = nx;
-        targetY = ny;
+        targetX = (e.clientX / window.innerWidth) * 2 - 1;
+        targetY = (e.clientY / window.innerHeight) * 2 - 1;
       }, { passive: true });
 
       function animate() {
         currentX += (targetX - currentX) * 0.05;
         currentY += (targetY - currentY) * 0.05;
 
-        if (glowBrand) {
-          glowBrand.style.transform = `translate(${currentX * 36}px, ${currentY * 36}px)`;
-        }
-        if (glowEmber) {
-          glowEmber.style.transform = `translate(${-currentX * 28}px, ${-currentY * 28}px)`;
-        }
-        if (sparkWatermark) {
-          sparkWatermark.style.transform = `translate(${-currentX * 18}px, ${-currentY * 18}px) rotate(${currentX * 8}deg)`;
-        }
+        if (glowBrand) glowBrand.style.transform = `translate(${currentX * 30}px, ${currentY * 30}px)`;
+        if (glowEmber) glowEmber.style.transform = `translate(${-currentX * 24}px, ${-currentY * 24}px)`;
+        if (sparkWatermark) sparkWatermark.style.transform = `translate(${-currentX * 14}px, ${-currentY * 14}px) rotate(${currentX * 6}deg)`;
+
         requestAnimationFrame(animate);
       }
       requestAnimationFrame(animate);
     })();
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Bank Configuration & Form State
+    // Form & Bank Configuration
     // ─────────────────────────────────────────────────────────────────────────
     let currentBank = 'universal';
     let lastVerifiedData = null;
+    let originalRawPastedText = '';
 
     const bankConfigs = {
       universal: {
         label: 'Transaction Reference, Link, or SMS',
-        placeholder: 'Paste CBE token, FT reference, Telebirr SMS, or M-Pesa code...',
-        helper: 'Auto-detects bank from reference syntax. Supports test keys starting with TEST.',
+        placeholder: 'Paste reference code, link, or the entire SMS received on your phone...',
+        helper: 'Direct verification with the bank. You can paste an entire SMS message — we\'ll extract the reference code automatically.',
         showSuffix: true,
         suffixLabel: 'Account Suffix (Optional)',
         suffixPlaceholder: 'Required only for legacy CBE FT-slips or BoA',
@@ -1605,7 +1766,7 @@ if (result.success) {
       },
       telebirr: {
         label: 'Telebirr Transaction Number',
-        placeholder: 'e.g. TB2601019999 or paste full Telebirr SMS receipt...',
+        placeholder: 'e.g. TB2601019999 or paste full Telebirr SMS...',
         helper: 'Queries Ethio Telecom live receipt confirmation service.',
         showSuffix: false,
         showPhone: false,
@@ -1674,11 +1835,112 @@ if (result.success) {
       secondaryInputs.style.display = (cfg.showSuffix || cfg.showPhone) ? 'grid' : 'none';
     }
 
-    // Live Auto-Detection logic as user types
+    // ─────────────────────────────────────────────────────────────────────────
+    // Human Touch: Smart SMS & Clipboard Extractor
+    // ─────────────────────────────────────────────────────────────────────────
+    async function pasteFromClipboard() {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          document.getElementById('refInput').focus();
+          showToast('Long-press input box to paste');
+          return;
+        }
+        const text = await navigator.clipboard.readText();
+        if (!text) {
+          showToast('Clipboard is empty');
+          return;
+        }
+        processPastedText(text);
+      } catch (err) {
+        document.getElementById('refInput').focus();
+        showToast('Please paste directly into input');
+      }
+    }
+
+    function processPastedText(raw) {
+      originalRawPastedText = raw;
+      const extracted = extractReferenceFromRawText(raw);
+
+      document.getElementById('refInput').value = extracted.reference;
+      onReferenceChange(extracted.reference);
+
+      if (extracted.suffix && document.getElementById('suffixInput')) {
+        document.getElementById('suffixInput').value = extracted.suffix;
+      }
+
+      if (extracted.wasExtracted) {
+        const notice = document.getElementById('extractNotice');
+        const noticeText = document.getElementById('extractNoticeText');
+        noticeText.textContent = `✨ Cleaned SMS: found ${extracted.bank || 'code'} "${extracted.reference}"`;
+        notice.style.display = 'flex';
+      }
+
+      showToast('Pasted and analyzed!');
+    }
+
+    function undoExtraction() {
+      if (originalRawPastedText) {
+        document.getElementById('refInput').value = originalRawPastedText;
+        onReferenceChange(originalRawPastedText);
+        document.getElementById('extractNotice').style.display = 'none';
+      }
+    }
+
+    function extractReferenceFromRawText(text) {
+      if (!text) return { reference: '', wasExtracted: false };
+      const trimmed = text.trim();
+
+      // If it's already short and looks like a single token or ref, return as-is
+      if (!trimmed.includes(' ') && !trimmed.includes('\n') && trimmed.length < 50) {
+        return { reference: trimmed, wasExtracted: false };
+      }
+
+      // Check for CBE token in link (e.g. apps.cbe.com.et/.../96f8a3d1-...)
+      const cbeLinkMatch = trimmed.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (cbeLinkMatch) {
+        return { reference: cbeLinkMatch[1], bank: 'CBE token', wasExtracted: true };
+      }
+
+      // Check for FT slip (e.g. Ref: FT240101ABCD)
+      const ftMatch = trimmed.match(/\b(FT[0-9A-Z]{8,14})\b/i);
+      if (ftMatch) {
+        // Also check if an account number appears
+        const accMatch = trimmed.match(/1000\d{8,10}/);
+        const suffix = accMatch ? accMatch[0].slice(-8) : '';
+        return { reference: ftMatch[1].toUpperCase(), suffix, bank: 'CBE FT', wasExtracted: true };
+      }
+
+      // Check for Telebirr SMS (e.g. trans no: TB... or transaction id ... is ...)
+      const tbMatch = trimmed.match(/\b(TB[0-9A-Z]{8,14})\b/i) || trimmed.match(/transaction\s*(?:no|id|number)?[:\s]+([A-Z0-9]{8,14})/i);
+      if (tbMatch) {
+        return { reference: (tbMatch[1] || tbMatch[0]).toUpperCase(), bank: 'Telebirr', wasExtracted: true };
+      }
+
+      // Check for Dashen (e.g. DB... or Dashen Ref: ...)
+      const dbMatch = trimmed.match(/\b(DB[0-9A-Z]{8,14})\b/i);
+      if (dbMatch) {
+        return { reference: dbMatch[1].toUpperCase(), bank: 'Dashen', wasExtracted: true };
+      }
+
+      // Check for M-Pesa (e.g. NL..., WA...)
+      const mpMatch = trimmed.match(/\b([A-Z]{2}[0-9A-Z]{8,10})\b/);
+      if (mpMatch) {
+        return { reference: mpMatch[1].toUpperCase(), bank: 'M-Pesa', wasExtracted: true };
+      }
+
+      // Fallback: take first clean alphanumeric token with length >= 8
+      const tokenMatch = trimmed.match(/[A-Z0-9-]{8,36}/i);
+      if (tokenMatch) {
+        return { reference: tokenMatch[0], wasExtracted: true };
+      }
+
+      return { reference: trimmed, wasExtracted: false };
+    }
+
+    // Auto-detection badge as user types
     function onReferenceChange(val) {
       const trimmed = val.trim();
-      const clearBtn = document.getElementById('clearBtn');
-      clearBtn.style.display = trimmed ? 'block' : 'none';
+      document.getElementById('clearBtn').style.display = trimmed ? 'block' : 'none';
 
       const badge = document.getElementById('detectedBadge');
       const nameSpan = document.getElementById('detectedBankName');
@@ -1688,7 +1950,6 @@ if (result.success) {
         return;
       }
 
-      // Syntax pattern check
       const upper = trimmed.toUpperCase();
       let detected = null;
 
@@ -1696,13 +1957,13 @@ if (result.success) {
         detected = 'CBE';
       } else if (upper.startsWith('TB') || upper.startsWith('R') || upper.includes('TELEBIRR') || /^\d{10,14}$/.test(trimmed)) {
         detected = 'Telebirr';
-      } else if (upper.startsWith('DB') || upper.startsWith('DASHEN') || upper.includes('DASHEN')) {
-        detected = 'Dashen Bank';
-      } else if (upper.startsWith('BOA') || upper.startsWith('ABYSSINIA') || upper.includes('ABYSSINIA')) {
-        detected = 'Bank of Abyssinia';
-      } else if (upper.startsWith('CB') || upper.includes('CBE BIRR') || upper.includes('CBEBIRR')) {
+      } else if (upper.startsWith('DB') || upper.startsWith('DASHEN')) {
+        detected = 'Dashen';
+      } else if (upper.startsWith('BOA') || upper.startsWith('ABYSSINIA')) {
+        detected = 'BoA';
+      } else if (upper.startsWith('CB') || upper.includes('CBE BIRR')) {
         detected = 'CBE Birr';
-      } else if (upper.startsWith('MP') || upper.startsWith('NL') || upper.startsWith('WA') || upper.includes('MPESA') || upper.includes('SAFARICOM')) {
+      } else if (upper.startsWith('MP') || upper.startsWith('NL') || upper.startsWith('WA') || upper.includes('MPESA')) {
         detected = 'M-Pesa';
       }
 
@@ -1717,7 +1978,16 @@ if (result.success) {
     function clearInput() {
       document.getElementById('refInput').value = '';
       document.getElementById('refInput').focus();
+      document.getElementById('extractNotice').style.display = 'none';
       onReferenceChange('');
+    }
+
+    function toggleGuide() {
+      const content = document.getElementById('guideContent');
+      const arrow = document.getElementById('guideArrow');
+      const isOpen = content.style.display === 'block';
+      content.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent = isOpen ? '↓' : '↑';
     }
 
     // Quick sample loader
@@ -1728,18 +1998,20 @@ if (result.success) {
       document.getElementById('refInput').value = ref;
       onReferenceChange(ref);
 
-      if (suffix) document.getElementById('suffixInput').value = suffix;
-      if (phone) document.getElementById('phoneInput').value = phone;
+      if (suffix && document.getElementById('suffixInput')) document.getElementById('suffixInput').value = suffix;
+      if (phone && document.getElementById('phoneInput')) document.getElementById('phoneInput').value = phone;
 
       document.getElementById('verifyForm').dispatchEvent(new Event('submit'));
     }
 
-    // Submit handler
+    // ─────────────────────────────────────────────────────────────────────────
+    // Verification Submission
+    // ─────────────────────────────────────────────────────────────────────────
     async function handleVerify(e) {
       e.preventDefault();
       const reference = document.getElementById('refInput').value.trim();
-      const suffix = document.getElementById('suffixInput').value.trim();
-      const phoneNumber = document.getElementById('phoneInput').value.trim();
+      const suffix = document.getElementById('suffixInput')?.value.trim() || '';
+      const phoneNumber = document.getElementById('phoneInput')?.value.trim() || '';
 
       if (!reference) return;
 
@@ -1751,28 +2023,22 @@ if (result.success) {
       btnText.textContent = 'Verifying with Bank...';
       resultContainer.style.display = 'block';
       resultContainer.innerHTML = `
-        <div style="text-align: center; padding: 48px 24px;">
-          <div class="pulse-dot" style="margin: 0 auto 16px; width: 14px; height: 14px;"></div>
-          <p style="font-family: var(--font-display); font-size: 1.1rem; color: #fff; font-weight: 700; margin-bottom: 6px;">
-            Connecting to ${currentBank.toUpperCase()} Bank Gateway...
+        <div style="text-align: center; padding: 40px 16px;">
+          <div class="pulse-dot" style="margin: 0 auto 16px; width: 12px; height: 12px;"></div>
+          <p style="font-family: var(--font-display); font-size: 1.05rem; color: #fff; font-weight: 700; margin-bottom: 4px;">
+            Auditing with ${currentBank.toUpperCase()} Banking Ledger...
           </p>
-          <p style="color: var(--color-ink-soft); font-size: 0.88rem;">Executing zero-database real-time settlement audit</p>
+          <p style="color: var(--color-ink-soft); font-size: 0.85rem;">Zero storage. Real-time verification response.</p>
         </div>
       `;
 
-      // Scroll smoothly to result container
       resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       try {
         const res = await fetch('/api/public-verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reference,
-            bank: currentBank,
-            suffix,
-            phoneNumber
-          })
+          body: JSON.stringify({ reference, bank: currentBank, suffix, phoneNumber })
         });
 
         const data = await res.json();
@@ -1784,7 +2050,7 @@ if (result.success) {
           showSuccess(data);
         }
       } catch (err) {
-        showError('Network connectivity error connecting to verification gateway: ' + err.message);
+        showError('Network connectivity error reaching verification gateway: ' + err.message);
       } finally {
         submitBtn.disabled = false;
         btnText.textContent = 'Verify Settlement';
@@ -1799,7 +2065,6 @@ if (result.success) {
 
       container.innerHTML = `
         <div class="receipt-card bank-${providerKey}">
-          <!-- Header -->
           <div class="receipt-header">
             <div class="provider-tag">
               <span class="bank-dot"></span>
@@ -1807,79 +2072,64 @@ if (result.success) {
             </div>
             <div class="verified-badge">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-              ${r.status || 'SETTLED & VERIFIED'}
+              ${r.status || 'SETTLED & CONFIRMED'}
             </div>
           </div>
 
-          <!-- Big Amount Display -->
           <div class="amount-display">
             <div class="amount-label">Verified Settlement Value</div>
-            <div class="amount-val">${r.amountFormatted || (r.amount ? r.amount + ' ETB' : 'Verified')}</div>
+            <div class="amount-val">${r.amountFormatted || (r.amount ? r.amount + ' ETB' : 'Confirmed')}</div>
+            <div class="amount-amharic">✓ የተረጋገጠ ክፍያ — ገንዘቡ ወደ ሂሳብዎ ገብቷል</div>
           </div>
 
-          <!-- Tabs: Receipt Voucher | Raw JSON | Integration Snippets -->
-          <div class="result-tabs">
-            <button type="button" class="result-tab-btn active" onclick="switchResultTab(event, 'tabVoucher')">Receipt Details</button>
-            <button type="button" class="result-tab-btn" onclick="switchResultTab(event, 'tabJson')">Raw Bank JSON</button>
-            <button type="button" class="result-tab-btn" onclick="switchResultTab(event, 'tabCode')">API Integration</button>
-          </div>
-
-          <!-- Panel 1: Voucher Details Grid -->
-          <div class="tab-content-panel active" id="tabVoucher">
-            <div class="receipt-grid">
-              <div class="detail-item">
-                <div class="detail-k">Transaction Reference</div>
-                <div class="detail-v copyable" onclick="copyText('${r.reference}')" title="Click to copy">
-                  <span style="font-family: var(--font-mono);">${r.reference}</span>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                </div>
+          <div class="receipt-grid">
+            <div class="detail-item">
+              <div class="detail-k">Transaction Reference</div>
+              <div class="detail-v copyable" onclick="copyText('${r.reference}')" title="Click to copy">
+                <span style="font-family: var(--font-mono);">${r.reference}</span>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               </div>
-
-              <div class="detail-item">
-                <div class="detail-k">Settlement Timestamp</div>
-                <div class="detail-v">${dateStr}</div>
-              </div>
-
-              <div class="detail-item">
-                <div class="detail-k">Payer / Remitter</div>
-                <div class="detail-v">${r.payerName || 'Payer Confirmed'}</div>
-                ${r.payerAccount && r.payerAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.payerAccount}</div>` : ''}
-              </div>
-
-              <div class="detail-item">
-                <div class="detail-k">Beneficiary / Merchant</div>
-                <div class="detail-v">${r.receiverName || 'Merchant Account'}</div>
-                ${r.receiverAccount && r.receiverAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.receiverAccount}</div>` : ''}
-              </div>
-
-              ${r.reason ? `
-              <div class="detail-item" style="grid-column: 1 / -1;">
-                <div class="detail-k">Narration / Payment Purpose</div>
-                <div class="detail-v" style="font-size: 0.88rem; color: #E2E8F0;">${r.reason}</div>
-              </div>
-              ` : ''}
             </div>
+
+            <div class="detail-item">
+              <div class="detail-k">Settlement Timestamp</div>
+              <div class="detail-v">${dateStr}</div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-k">Payer / Remitter</div>
+              <div class="detail-v">${r.payerName || 'Payer Confirmed'}</div>
+              ${r.payerAccount && r.payerAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.payerAccount}</div>` : ''}
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-k">Beneficiary / Merchant</div>
+              <div class="detail-v">${r.receiverName || 'Merchant Account'}</div>
+              ${r.receiverAccount && r.receiverAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.receiverAccount}</div>` : ''}
+            </div>
+
+            ${r.reason ? `
+            <div class="detail-item" style="grid-column: 1 / -1;">
+              <div class="detail-k">Payment Narration / Purpose</div>
+              <div class="detail-v" style="font-size: 0.88rem; color: #E2E8F0;">${r.reason}</div>
+            </div>
+            ` : ''}
           </div>
 
-          <!-- Panel 2: Raw JSON -->
-          <div class="tab-content-panel" id="tabJson">
-            <div class="code-pre-box">
-              <button type="button" class="code-copy-float" onclick="copyJson()">Copy JSON</button>
-              <pre id="jsonPreText">${JSON.stringify(data.raw || data, null, 2)}</pre>
-            </div>
-          </div>
-
-          <!-- Panel 3: Developer Integration -->
-          <div class="tab-content-panel" id="tabCode">
-            <div class="code-pre-box">
-              <button type="button" class="code-copy-float" onclick="copyCodeSnippet()">Copy cURL</button>
-              <pre id="curlSnippetPre">curl -X POST https://verifier.senaycreatives.com/verify \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: your_api_key" \\
-  -d '{
-    "reference": "${r.reference}"
-  }'</pre>
-            </div>
+          <!-- Human Receipt Actions: Print, Share, Copy -->
+          <div class="receipt-actions">
+            <button type="button" class="btn-receipt-action" onclick="window.print()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>Print Slip</span>
+            </button>
+            <button type="button" class="btn-receipt-action" onclick="shareReceipt()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              <span>Share Voucher</span>
+            </button>
+            <button type="button" class="btn-receipt-action" onclick="copyReceiptSummary()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span>Copy Summary</span>
+            </button>
           </div>
         </div>
       `;
@@ -1889,21 +2139,13 @@ if (result.success) {
       const container = document.getElementById('resultContainer');
       container.innerHTML = `
         <div class="alert-error">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           <div>
-            <h4>Settlement Verification Failed</h4>
+            <h4>Verification Failed</h4>
             <p>${msg}</p>
           </div>
         </div>
       `;
-    }
-
-    function switchResultTab(e, tabId) {
-      document.querySelectorAll('.result-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.remove('active'));
-
-      e.currentTarget.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
     }
 
     function copyText(str) {
@@ -1911,18 +2153,22 @@ if (result.success) {
       showToast('Copied: ' + str);
     }
 
-    function copyJson() {
-      if (lastVerifiedData) {
-        navigator.clipboard.writeText(JSON.stringify(lastVerifiedData.raw || lastVerifiedData, null, 2));
-        showToast('Raw JSON copied to clipboard');
-      }
+    function copyReceiptSummary() {
+      if (!lastVerifiedData || !lastVerifiedData.receipt) return;
+      const r = lastVerifiedData.receipt;
+      const summary = `✓ SENAY VERIFIED PAYMENT\nBank: ${lastVerifiedData.provider || currentBank}\nRef: ${r.reference}\nAmount: ${r.amountFormatted || r.amount + ' ETB'}\nPayer: ${r.payerName || 'N/A'}\nReceiver: ${r.receiverName || 'Merchant'}\nStatus: SETTLED & CONFIRMED`;
+      navigator.clipboard.writeText(summary);
+      showToast('Summary copied for WhatsApp/Telegram');
     }
 
-    function copyCodeSnippet() {
-      const pre = document.getElementById('curlSnippetPre');
-      if (pre) {
-        navigator.clipboard.writeText(pre.textContent);
-        showToast('cURL snippet copied to clipboard');
+    function shareReceipt() {
+      if (!lastVerifiedData || !lastVerifiedData.receipt) return;
+      const r = lastVerifiedData.receipt;
+      const text = `✓ Verified Settlement: ${r.amountFormatted || r.amount + ' ETB'} via ${lastVerifiedData.provider || currentBank}. Ref: ${r.reference}`;
+      if (navigator.share) {
+        navigator.share({ title: 'Senay Payment Verification', text, url: window.location.href });
+      } else {
+        copyReceiptSummary();
       }
     }
 
@@ -1930,25 +2176,22 @@ if (result.success) {
       const el = document.getElementById('toastMsg');
       el.textContent = '📋 ' + msg;
       el.style.display = 'block';
-      setTimeout(() => {
-        el.style.display = 'none';
-      }, 2500);
+      setTimeout(() => { el.style.display = 'none'; }, 2500);
     }
 
-    // Modal helpers
+    // Modal controls
     function openDocsModal() { document.getElementById('docsModal').style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function closeModalOnBackdrop(e, id) { if (e.target.id === id) closeModal(id); }
 
-    // Live health monitor ping
+    // Live health check
     async function checkHealth() {
       try {
         const start = performance.now();
         const res = await fetch('/health');
         const latency = Math.round(performance.now() - start);
         if (res.ok) {
-          const d = await res.json();
-          document.getElementById('statusText').textContent = `Gateway Live (${latency}ms)`;
+          document.getElementById('statusText').textContent = `Live (${latency}ms)`;
         }
       } catch (_) {}
     }
