@@ -4,33 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Senay Verifier — Ethiopian Bank & Mobile Money Receipt Verifier</title>
-  <meta name="description" content="Instant online receipt verification for Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.">
+  <meta name="description" content="Bank-grade instant receipt verification for Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.">
+  <link rel="icon" type="image/png" href="/logo-mark.png">
+  
+  <!-- Fonts: Bricolage Grotesque (display), Inter (body), JetBrains Mono (code/numbers) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    /* ─────────────────────────────────────────────────────────────────────────
+       SenayCreatives Design Tokens & Theme
+       ───────────────────────────────────────────────────────────────────────── */
     :root {
-      --bg: #0B0F19;
-      --card-bg: #111827;
-      --card-border: #1F2937;
-      --card-hover: #1E293B;
-      --primary: #6366F1;
-      --primary-hover: #4F46E5;
-      --primary-glow: rgba(99, 102, 241, 0.25);
-      --success: #10B981;
-      --success-glow: rgba(16, 185, 129, 0.2);
-      --error: #EF4444;
-      --warning: #F59E0B;
-      --text-main: #F9FAFB;
-      --text-muted: #9CA3AF;
-      --text-dim: #6B7280;
+      --font-display: 'Bricolage Grotesque', -apple-system, sans-serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Authentic SenayCreatives Palette */
+      --color-brand: #1F4DFF;        /* Electric Cobalt */
+      --color-brand-ink: #0A1F8A;    /* Deep Brand Hover */
+      --color-brand-glow: rgba(31, 77, 255, 0.28);
+      --color-ember: #FF5630;        /* Rare Warm Highlight */
+      --color-ember-glow: rgba(255, 86, 48, 0.22);
+
+      --color-paper: #090C12;        /* Dark Canvas */
+      --color-paper-dim: #121722;    /* Raised Surface */
+      --color-paper-raised: #182030; /* Elevated Interactive */
+      --color-paper-card: rgba(18, 23, 34, 0.78);
+      --color-line: rgba(255, 255, 255, 0.08);
+      --color-line-hover: rgba(255, 255, 255, 0.16);
+
+      --color-ink: #F8FAFC;          /* High-contrast Text */
+      --color-ink-soft: #94A3B8;     /* Secondary Text */
+      --color-muted: #64748B;        /* Tertiary / Captions */
+
+      /* Bank Identity Accents */
       --cbe: #8B5CF6;
       --telebirr: #0284C7;
       --dashen: #2563EB;
       --abyssinia: #D97706;
       --cbebirr: #059669;
       --mpesa: #DC2626;
-      --radius: 16px;
+
+      --color-success: #10B981;
+      --color-danger: #EF4444;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --radius-full: 9999px;
     }
 
     * {
@@ -39,33 +64,116 @@
       padding: 0;
     }
 
+    html, body {
+      max-width: 100%;
+      overflow-x: clip;
+    }
+
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
+      background-color: var(--color-paper);
+      color: var(--color-ink);
+      font-family: var(--font-sans);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       line-height: 1.5;
-      overflow-x: hidden;
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 45%);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      position: relative;
+    }
+
+    /* Accessibility visible focus */
+    :focus-visible {
+      outline: 2px solid var(--color-brand);
+      outline-offset: 2px;
+    }
+
+    ::selection {
+      background-color: var(--color-brand);
+      color: #fff;
     }
 
     /* Container */
     .container {
       width: 100%;
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
-    /* Navbar */
+    /* ─────────────────────────────────────────────────────────────────────────
+       Interactive Ambient Backdrop (Electric Cobalt & Ember glow + Parallax Spark)
+       ───────────────────────────────────────────────────────────────────────── */
+    .ambient-backdrop {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+      height: 900px;
+    }
+
+    .ambient-glow-brand {
+      position: absolute;
+      top: -120px;
+      right: 5%;
+      width: 620px;
+      height: 620px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(31, 77, 255, 0.16) 0%, transparent 70%);
+      filter: blur(80px);
+      transition: transform 0.4s var(--ease-out-expo);
+      will-change: transform;
+    }
+
+    .ambient-glow-ember {
+      position: absolute;
+      top: 180px;
+      left: -100px;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 86, 48, 0.09) 0%, transparent 70%);
+      filter: blur(90px);
+      transition: transform 0.4s var(--ease-out-expo);
+      will-change: transform;
+    }
+
+    .ambient-spark-watermark {
+      position: absolute;
+      top: 20px;
+      right: 3%;
+      width: 480px;
+      height: 480px;
+      color: rgba(31, 77, 255, 0.04);
+      transition: transform 0.6s var(--ease-out-expo);
+      will-change: transform;
+    }
+
+    /* CSS Rise animation */
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .rise {
+      animation: rise 0.6s var(--ease-out-expo) both;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Navigation Header
+       ───────────────────────────────────────────────────────────────────────── */
     header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
-      background: rgba(11, 15, 25, 0.75);
+      border-bottom: 1px solid var(--color-line);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(9, 12, 18, 0.82);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -78,7 +186,8 @@
       height: 72px;
     }
 
-    .brand {
+    /* Wordmark */
+    .wordmark {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -86,32 +195,73 @@
       color: inherit;
     }
 
-    .brand-logo {
+    .logo-badge {
       width: 40px;
       height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      border-radius: 50%;
+      border: 1px solid var(--color-line-hover);
+      background: var(--color-paper-dim);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .logo-badge img {
+      width: 72%;
+      height: 72%;
+      object-fit: contain;
+    }
+
+    .logo-badge svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-brand);
+    }
+
+    .wordmark:hover .logo-badge {
+      border-color: var(--color-brand);
+      transform: scale(1.04);
+    }
+
+    .wordmark-text {
+      font-family: var(--font-display);
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 4px 14px var(--primary-glow);
+      gap: 3px;
     }
 
-    .brand-title {
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
+    .wordmark-text span.brand-part {
+      color: #FFFFFF;
     }
 
-    .brand-title span {
-      color: var(--primary);
+    .wordmark-text span.creatives-part {
+      color: var(--color-ink-soft);
+      font-weight: 500;
+    }
+
+    .service-pill {
+      margin-left: 8px;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(31, 77, 255, 0.12);
+      border: 1px solid rgba(31, 77, 255, 0.28);
+      color: #7094FF;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .status-badge {
@@ -119,125 +269,187 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      border-radius: 9999px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.22);
       color: #34D399;
       font-size: 0.8rem;
       font-weight: 600;
+      transition: background 0.2s;
     }
 
     .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #10B981;
       box-shadow: 0 0 8px #10B981;
-      animation: pulse 2s infinite;
+      animation: pulse 2.2s infinite;
     }
 
     @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+      0% { transform: scale(0.95); opacity: 0.75; }
+      50% { transform: scale(1.25); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.75; }
     }
 
-    .btn-ghost {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: 600;
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink-soft);
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.84rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      text-decoration: none;
+      transition: all 0.2s var(--ease-out-expo);
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
 
-    .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-line-hover);
+      color: var(--color-ink);
     }
 
-    /* Hero Section */
+    .btn-nav-primary {
+      background: var(--color-brand);
+      border: 1px solid var(--color-brand);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--color-brand-glow);
+    }
+
+    .btn-nav-primary:hover {
+      background: var(--color-brand-ink);
+      border-color: var(--color-brand-ink);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Hero Section
+       ───────────────────────────────────────────────────────────────────────── */
     .hero {
       text-align: center;
-      padding: 56px 0 32px;
+      padding: 56px 0 36px;
+      position: relative;
+      z-index: 1;
     }
 
-    .hero-badge {
+    .hero-eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.25);
-      color: #A5B4FC;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(31, 77, 255, 0.08);
+      border: 1px solid rgba(31, 77, 255, 0.22);
+      color: #90B0FF;
+      font-family: var(--font-display);
       font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 16px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow svg {
+      width: 14px;
+      height: 14px;
+      color: var(--color-brand);
     }
 
     .hero h1 {
-      font-size: 2.75rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 14px;
+      line-height: 1.08;
+      max-width: 860px;
+      margin: 0 auto 18px;
     }
 
-    .hero h1 .gradient-text {
-      background: linear-gradient(135deg, #818CF8 0%, #C084FC 100%);
+    .hero h1 span.gradient-brand {
+      background: linear-gradient(135deg, #FFFFFF 30%, #A5B4FC 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .hero p {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      max-width: 620px;
+    .hero h1 span.gradient-highlight {
+      background: linear-gradient(135deg, #7094FF 0%, #B89CFF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p.subtitle {
+      font-size: 1.12rem;
+      color: var(--color-ink-soft);
+      max-width: 680px;
       margin: 0 auto;
+      line-height: 1.6;
     }
 
-    /* Main Verifier Card */
-    .verifier-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 32px;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    /* ─────────────────────────────────────────────────────────────────────────
+       Main Verifier Card
+       ───────────────────────────────────────────────────────────────────────── */
+    .verifier-wrapper {
       position: relative;
-      margin-bottom: 40px;
+      z-index: 10;
+      margin-top: 10px;
+      margin-bottom: 64px;
     }
 
-    /* Bank Selector Pills */
+    .verifier-card {
+      background: var(--color-paper-card);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 
+        0 24px 60px -15px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      transition: border-color 0.3s;
+    }
+
+    /* Bank Selector Tabs */
+    .bank-selector-wrap {
+      margin-bottom: 24px;
+    }
+
+    .bank-selector-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .bank-selector {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 24px;
-      scrollbar-width: thin;
+      padding-bottom: 6px;
+      scrollbar-width: none;
     }
 
     .bank-selector::-webkit-scrollbar {
-      height: 4px;
-    }
-    .bank-selector::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+      display: none;
     }
 
     .bank-pill {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--text-muted);
-      padding: 10px 18px;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink-soft);
+      padding: 9px 16px;
+      border-radius: var(--radius-full);
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
@@ -245,40 +457,75 @@
       align-items: center;
       gap: 8px;
       white-space: nowrap;
-      transition: all 0.2s ease;
+      transition: all 0.2s var(--ease-out-expo);
       user-select: none;
     }
 
     .bank-pill:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--color-line-hover);
+      color: var(--color-ink);
     }
 
     .bank-pill.active {
-      background: var(--primary);
-      border-color: var(--primary);
+      background: var(--color-brand);
+      border-color: var(--color-brand);
       color: #fff;
-      box-shadow: 0 4px 14px var(--primary-glow);
+      box-shadow: 0 4px 16px var(--color-brand-glow);
     }
 
-    .bank-pill[data-bank="cbe"].active { background: #7C3AED; border-color: #8B5CF6; }
-    .bank-pill[data-bank="telebirr"].active { background: #0284C7; border-color: #38BDF8; }
-    .bank-pill[data-bank="abyssinia"].active { background: #D97706; border-color: #FBBF24; }
-    .bank-pill[data-bank="dashen"].active { background: #1D4ED8; border-color: #60A5FA; }
-    .bank-pill[data-bank="cbebirr"].active { background: #059669; border-color: #34D399; }
-    .bank-pill[data-bank="mpesa"].active { background: #DC2626; border-color: #F87171; }
+    .bank-pill[data-bank="cbe"].active { background: #7C3AED; border-color: #8B5CF6; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35); }
+    .bank-pill[data-bank="telebirr"].active { background: #0284C7; border-color: #38BDF8; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35); }
+    .bank-pill[data-bank="abyssinia"].active { background: #D97706; border-color: #FBBF24; box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35); }
+    .bank-pill[data-bank="dashen"].active { background: #1D4ED8; border-color: #60A5FA; box-shadow: 0 4px 16px rgba(29, 78, 216, 0.35); }
+    .bank-pill[data-bank="cbebirr"].active { background: #059669; border-color: #34D399; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35); }
+    .bank-pill[data-bank="mpesa"].active { background: #DC2626; border-color: #F87171; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35); }
+
+    .bank-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-muted);
+      transition: background 0.2s;
+    }
+
+    .bank-pill[data-bank="cbe"] .bank-dot { background: var(--cbe); }
+    .bank-pill[data-bank="telebirr"] .bank-dot { background: var(--telebirr); }
+    .bank-pill[data-bank="dashen"] .bank-dot { background: var(--dashen); }
+    .bank-pill[data-bank="abyssinia"] .bank-dot { background: var(--abyssinia); }
+    .bank-pill[data-bank="cbebirr"] .bank-dot { background: var(--cbebirr); }
+    .bank-pill[data-bank="mpesa"] .bank-dot { background: var(--mpesa); }
+    .bank-pill.active .bank-dot { background: #fff; box-shadow: 0 0 6px #fff; }
 
     /* Form Fields */
     .form-group {
       margin-bottom: 20px;
     }
 
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-main);
+    .form-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 8px;
+    }
+
+    .form-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    .detected-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(31, 77, 255, 0.12);
+      border: 1px solid rgba(31, 77, 255, 0.28);
+      color: #90B0FF;
     }
 
     .form-input-wrap {
@@ -287,81 +534,77 @@
 
     .form-input {
       width: 100%;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 16px 18px;
-      font-size: 1rem;
-      color: var(--text-main);
-      font-family: inherit;
-      transition: all 0.2s ease;
+      background: rgba(10, 14, 22, 0.85);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-md);
+      padding: 16px 46px 16px 18px;
+      font-size: 1.05rem;
+      font-family: var(--font-sans);
+      color: var(--color-ink);
+      transition: all 0.2s var(--ease-out-expo);
     }
 
     .form-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-glow);
-      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--color-brand);
+      background: rgba(12, 17, 28, 0.95);
+      box-shadow: 0 0 0 3px var(--color-brand-glow);
     }
 
-    .form-input::placeholder {
-      color: var(--text-dim);
+    .clear-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--color-muted);
+      cursor: pointer;
+      display: none;
+      padding: 4px;
+      border-radius: 50%;
+      transition: color 0.2s;
+    }
+
+    .clear-btn:hover {
+      color: var(--color-ink);
     }
 
     .form-helper {
+      font-size: 0.8rem;
+      color: var(--color-muted);
       margin-top: 6px;
-      font-size: 0.78rem;
-      color: var(--text-dim);
     }
 
-    /* Grid for secondary inputs */
-    .grid-inputs {
+    /* Secondary Inputs */
+    .secondary-inputs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 16px;
-      margin-top: 16px;
+      margin-bottom: 20px;
     }
 
-    @media (max-width: 640px) {
-      .grid-inputs {
-        grid-template-columns: 1fr;
+    @media (min-width: 640px) {
+      .secondary-inputs {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    /* Action Row */
+    /* Action Controls & Sample Pills */
     .action-row {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
       gap: 16px;
       margin-top: 24px;
-      flex-wrap: wrap;
+      padding-top: 20px;
+      border-top: 1px solid var(--color-line);
     }
 
-    .btn-verify {
-      background: linear-gradient(135deg, #6366F1, #4F46E5);
-      border: none;
-      color: #fff;
-      padding: 16px 36px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.2s ease;
-      box-shadow: 0 6px 20px var(--primary-glow);
-    }
-
-    .btn-verify:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px var(--primary-glow);
-    }
-
-    .btn-verify:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    @media (min-width: 768px) {
+      .action-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     .sample-pill-group {
@@ -372,67 +615,115 @@
     }
 
     .sample-label {
-      font-size: 0.8rem;
-      color: var(--text-dim);
+      font-size: 0.78rem;
       font-weight: 600;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .btn-sample {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #A5B4FC;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink-soft);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
 
     .btn-sample:hover {
-      background: rgba(99, 102, 241, 0.15);
-      border-color: rgba(99, 102, 241, 0.3);
-      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-line-hover);
+      color: var(--color-ink);
     }
 
-    /* Results Card */
+    .btn-verify {
+      background: var(--color-brand);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px var(--color-brand-glow);
+      transition: all 0.2s var(--ease-out-expo);
+    }
+
+    .btn-verify:hover:not(:disabled) {
+      background: var(--color-brand-ink);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--color-brand-glow);
+    }
+
+    .btn-verify:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Receipt Verification Presentation Card
+       ───────────────────────────────────────────────────────────────────────── */
     .result-container {
       margin-top: 32px;
       display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .receipt-card {
-      background: #0F172A;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius);
-      padding: 32px;
+      background: linear-gradient(180deg, rgba(20, 26, 40, 0.95) 0%, rgba(13, 17, 26, 0.95) 100%);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-lg);
+      padding: 28px;
       position: relative;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6);
     }
+
+    .receipt-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-brand), #B89CFF, var(--color-brand));
+    }
+
+    .receipt-card.bank-cbe::before { background: linear-gradient(90deg, #8B5CF6, #C084FC); }
+    .receipt-card.bank-telebirr::before { background: linear-gradient(90deg, #0284C7, #38BDF8); }
+    .receipt-card.bank-dashen::before { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+    .receipt-card.bank-abyssinia::before { background: linear-gradient(90deg, #D97706, #FBBF24); }
+    .receipt-card.bank-cbebirr::before { background: linear-gradient(90deg, #059669, #34D399); }
+    .receipt-card.bank-mpesa::before { background: linear-gradient(90deg, #DC2626, #F87171); }
 
     .receipt-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
-      padding-bottom: 20px;
       margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-line);
     }
 
     .provider-tag {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-weight: 700;
+      font-family: var(--font-display);
       font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-ink);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     .verified-badge {
@@ -440,221 +731,341 @@
       align-items: center;
       gap: 6px;
       padding: 6px 14px;
-      border-radius: 9999px;
-      background: rgba(16, 185, 129, 0.15);
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10B981;
-      font-size: 0.85rem;
+      color: #34D399;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
       font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
+    /* Big Amount Presentation */
     .amount-display {
       text-align: center;
-      margin: 16px 0 28px;
+      padding: 16px 0 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px dashed var(--color-line);
     }
 
     .amount-label {
       font-size: 0.8rem;
-      color: var(--text-muted);
+      font-weight: 600;
+      color: var(--color-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
     }
 
     .amount-val {
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #34D399;
-      letter-spacing: -0.03em;
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
     }
 
-    /* Details Grid */
+    /* Key-Value Details Grid */
     .receipt-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      grid-template-columns: 1fr;
+      gap: 16px;
       margin-bottom: 24px;
-      background: rgba(255, 255, 255, 0.02);
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    @media (max-width: 640px) {
+    @media (min-width: 640px) {
       .receipt-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
     .detail-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
     }
 
     .detail-k {
-      font-size: 0.75rem;
-      color: var(--text-dim);
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--color-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      font-weight: 600;
+      margin-bottom: 4px;
     }
 
     .detail-v {
       font-size: 0.95rem;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--color-ink);
       word-break: break-all;
     }
 
-    .copyable {
+    .detail-v.copyable {
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
+      transition: color 0.2s;
     }
 
-    .copyable:hover {
-      color: #818CF8;
+    .detail-v.copyable:hover {
+      color: #90B0FF;
     }
 
-    /* Raw JSON Toggle */
-    .raw-section {
-      margin-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 16px;
+    /* Result View Tabs (Voucher vs JSON vs cURL) */
+    .result-tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--color-line);
+      margin-bottom: 18px;
     }
 
-    .raw-toggle {
+    .result-tab-btn {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 0.8rem;
+      color: var(--color-muted);
+      padding: 8px 14px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
     }
 
-    .raw-toggle:hover {
-      color: var(--text-main);
+    .result-tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--color-brand);
     }
 
-    .raw-pre {
-      margin-top: 12px;
-      background: #020617;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      color: #E2E8F0;
-      overflow-x: auto;
+    .tab-content-panel {
       display: none;
     }
 
-    /* Error Alert */
+    .tab-content-panel.active {
+      display: block;
+    }
+
+    .code-pre-box {
+      background: rgba(8, 11, 16, 0.95);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #CBD5E1;
+      overflow-x: auto;
+      max-height: 380px;
+      position: relative;
+    }
+
+    .code-copy-float {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink-soft);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .code-copy-float:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    /* Error Message Alert */
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #F87171;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-lg);
       padding: 20px;
-      border-radius: 12px;
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      margin-top: 24px;
+      gap: 14px;
+      color: #FCA5A5;
     }
 
     .alert-error h4 {
+      font-family: var(--font-display);
+      font-size: 0.98rem;
       font-weight: 700;
+      color: #F87171;
       margin-bottom: 4px;
-      color: #EF4444;
     }
 
     .alert-error p {
       font-size: 0.88rem;
-      color: #FCA5A5;
+      color: #FECACA;
+      line-height: 1.5;
     }
 
-    /* Features Section */
-    .features {
-      padding: 32px 0 64px;
+    /* ─────────────────────────────────────────────────────────────────────────
+       Supported Providers Matrix Section
+       ───────────────────────────────────────────────────────────────────────── */
+    .providers-section {
+      padding: 48px 0;
+      position: relative;
+      z-index: 1;
     }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-
-    @media (max-width: 768px) {
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 28px;
-      transition: all 0.2s ease;
-    }
-
-    .feature-card:hover {
-      border-color: rgba(99, 102, 241, 0.3);
-      background: var(--card-hover);
-    }
-
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin-bottom: 16px;
-    }
-
-    .feature-card h3 {
-      font-size: 1.1rem;
+    .section-eyebrow {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
       font-weight: 700;
+      color: var(--color-brand);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       margin-bottom: 8px;
     }
 
-    .feature-card p {
-      font-size: 0.88rem;
-      color: var(--text-muted);
+    .section-title {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
     }
 
-    /* Modal */
+    .providers-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .providers-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 992px) {
+      .providers-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .provider-card {
+      background: var(--color-paper-dim);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: all 0.3s var(--ease-out-expo);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .provider-card:hover {
+      border-color: var(--color-line-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .provider-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .provider-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .provider-live-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #34D399;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .provider-desc {
+      font-size: 0.88rem;
+      color: var(--color-ink-soft);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .provider-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .provider-channel-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--color-muted);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-card-test {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-line);
+      color: var(--color-ink);
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-card-test:hover {
+      background: var(--color-brand);
+      border-color: var(--color-brand);
+      color: #fff;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Modals
+       ───────────────────────────────────────────────────────────────────────── */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       z-index: 100;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
     }
 
     .modal-box {
-      background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius);
-      width: 100%;
+      background: var(--color-paper-dim);
+      border: 1px solid var(--color-line-hover);
+      border-radius: var(--radius-xl);
       max-width: 640px;
-      padding: 32px;
+      width: 100%;
       max-height: 85vh;
       overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+      padding: 32px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      position: relative;
     }
 
     .modal-header {
@@ -662,181 +1073,399 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-line);
     }
 
     .modal-title {
-      font-size: 1.35rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
       font-weight: 700;
+      color: #fff;
     }
 
     .modal-close {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 24px;
+      font-size: 1.5rem;
+      color: var(--color-muted);
       cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.2s;
     }
 
-    .code-block {
-      background: #0B0F19;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
-      color: #E2E8F0;
-      overflow-x: auto;
-      margin: 12px 0 20px;
+    .modal-close:hover {
+      color: #fff;
     }
 
+    /* ─────────────────────────────────────────────────────────────────────────
+       Footer
+       ───────────────────────────────────────────────────────────────────────── */
     footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 32px 0;
+      border-top: 1px solid var(--color-line);
+      padding: 40px 0;
       margin-top: auto;
+      background: rgba(9, 12, 18, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       text-align: center;
-      color: var(--text-dim);
-      font-size: 0.85rem;
     }
 
-    footer a {
-      color: var(--text-muted);
+    @media (min-width: 768px) {
+      .footer-inner {
+        flex-direction: row;
+        text-align: left;
+      }
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      color: var(--color-ink-soft);
+    }
+
+    .footer-brand a {
+      color: #FFFFFF;
       text-decoration: none;
+      font-weight: 600;
     }
 
-    footer a:hover {
-      color: var(--text-main);
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--color-muted);
+    }
+
+    .footer-links a {
+      color: var(--color-ink-soft);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--color-paper-raised);
+      border: 1px solid var(--color-line-hover);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      animation: rise 0.3s var(--ease-out-expo);
     }
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- Ambient Backdrop with Spring-drift Parallax -->
+  <div class="ambient-backdrop" aria-hidden="true" id="ambientBackdrop">
+    <div class="ambient-glow-brand" id="glowBrand"></div>
+    <div class="ambient-glow-ember" id="glowEmber"></div>
+    <svg class="ambient-spark-watermark" id="sparkWatermark" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z" />
+    </svg>
+  </div>
+
+  <!-- Header -->
   <header>
-    <div class="container nav-inner">
-      <a href="/" class="brand">
-        <div class="brand-logo">🇪🇹</div>
-        <div class="brand-title">Senay <span>Verifier</span></div>
-      </a>
-      <div class="nav-actions">
-        <div class="status-badge" id="systemStatus">
-          <div class="pulse-dot"></div>
-          <span id="statusText">System Operational</span>
+    <div class="container">
+      <div class="nav-inner">
+        <!-- Authentic SenayCreatives Wordmark -->
+        <a href="/" class="wordmark" aria-label="Senay Creatives Verifier Home">
+          <span class="logo-badge">
+            <img src="/logo-mark.png" alt="Senay Creatives" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <svg style="display:none;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
+          </span>
+          <div class="wordmark-text">
+            <span class="brand-part">Senay</span>
+            <span class="creatives-part">Creatives</span>
+            <span class="service-pill">Verifier</span>
+          </div>
+        </a>
+
+        <!-- Header Actions -->
+        <div class="nav-actions">
+          <div class="status-badge" id="systemHealthBadge" title="Live Microservice Availability">
+            <span class="pulse-dot"></span>
+            <span id="statusText">Gateway Live</span>
+          </div>
+          <button class="btn-nav" onclick="openDocsModal()" title="View API Documentation">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            API Docs
+          </button>
+          <a href="/admin" class="btn-nav btn-nav-primary" title="Open Verifier Console">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Console
+          </a>
         </div>
-        <button class="btn-ghost" onclick="openDocsModal()">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-          API Docs
-        </button>
-        <button class="btn-ghost" onclick="openKeyModal()">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          API Key
-        </button>
       </div>
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <main class="container">
     <section class="hero">
-      <div class="hero-badge">⚡ Standalone Microservice v3.1.0</div>
-      <h1>Verify Ethiopian Bank & Mobile Money Receipts <span class="gradient-text">Online</span></h1>
-      <p>Instant verification and automated receipt parsing for Commercial Bank of Ethiopia (CBE), Telebirr, Dashen, Bank of Abyssinia, CBE Birr & M-Pesa.</p>
+      <div class="hero-eyebrow rise" style="animation-delay: 0ms;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
+        Ethiopian Payment Infrastructure
+      </div>
+      <h1 class="rise" style="animation-delay: 60ms;">
+        <span class="gradient-brand">Instant Receipt Verification</span>
+        <br>
+        <span class="gradient-highlight">for Ethiopian Banks</span>
+      </h1>
+      <p class="subtitle rise" style="animation-delay: 120ms;">
+        Verify settlements in milliseconds across Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank, Bank of Abyssinia, CBE Birr, and Safaricom M-Pesa.
+      </p>
     </section>
 
-    <!-- Verifier Form Card -->
-    <section class="verifier-card">
-      <!-- Bank Tabs -->
-      <div class="bank-selector" id="bankSelector">
-        <div class="bank-pill active" data-bank="universal">⚡ Auto-Detect</div>
-        <div class="bank-pill" data-bank="cbe">🏦 CBE</div>
-        <div class="bank-pill" data-bank="telebirr">📱 Telebirr</div>
-        <div class="bank-pill" data-bank="abyssinia">🏛️ Abyssinia (BoA)</div>
-        <div class="bank-pill" data-bank="dashen">💳 Dashen</div>
-        <div class="bank-pill" data-bank="cbebirr">🪙 CBE Birr</div>
-        <div class="bank-pill" data-bank="mpesa">📲 M-Pesa</div>
-      </div>
+    <!-- Verifier Interactive Box -->
+    <section class="verifier-wrapper rise" style="animation-delay: 180ms;">
+      <div class="verifier-card">
 
-      <!-- Main Input -->
-      <form id="verifyForm" onsubmit="handleVerify(event)">
-        <div class="form-group">
-          <label class="form-label" id="refLabel">Transaction Reference or Receipt Link</label>
-          <div class="form-input-wrap">
-            <input 
-              type="text" 
-              id="refInput" 
-              class="form-input" 
-              placeholder="Paste reference, Receipt ID, or paste full receipt URL / SMS..."
-              required
-              autocomplete="off"
-            >
+        <!-- Bank Selector Pills -->
+        <div class="bank-selector-wrap">
+          <div class="bank-selector-label">
+            <span>Select Settlement Provider</span>
+            <span style="font-size: 0.72rem; color: #90B0FF;">Auto-Detect Active</span>
           </div>
-          <div class="form-helper" id="refHelper">Supports new CBE receipt token, legacy FT... references, Telebirr SMS, or M-Pesa codes.</div>
-        </div>
-
-        <!-- Conditional Secondary Inputs -->
-        <div class="grid-inputs" id="secondaryInputs" style="display: none;">
-          <div class="form-group" id="suffixGroup" style="display: none;">
-            <label class="form-label" id="suffixLabel">Account Suffix</label>
-            <input 
-              type="text" 
-              id="suffixInput" 
-              class="form-input" 
-              placeholder="e.g. 10001234 or 5-digit BoA suffix"
-              autocomplete="off"
-            >
-            <div class="form-helper" id="suffixHelper">Required for legacy CBE or Bank of Abyssinia.</div>
-          </div>
-          <div class="form-group" id="phoneGroup" style="display: none;">
-            <label class="form-label">Customer Phone Number</label>
-            <input 
-              type="text" 
-              id="phoneInput" 
-              class="form-input" 
-              placeholder="251911234567"
-              autocomplete="off"
-            >
-            <div class="form-helper">Required for CBE Birr mobile wallet verification.</div>
+          <div class="bank-selector" id="bankSelector">
+            <button type="button" class="bank-pill active" data-bank="universal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z"/></svg>
+              Auto-Detect
+            </button>
+            <button type="button" class="bank-pill" data-bank="cbe">
+              <span class="bank-dot"></span> CBE
+            </button>
+            <button type="button" class="bank-pill" data-bank="telebirr">
+              <span class="bank-dot"></span> Telebirr
+            </button>
+            <button type="button" class="bank-pill" data-bank="dashen">
+              <span class="bank-dot"></span> Dashen Bank
+            </button>
+            <button type="button" class="bank-pill" data-bank="abyssinia">
+              <span class="bank-dot"></span> Bank of Abyssinia
+            </button>
+            <button type="button" class="bank-pill" data-bank="cbebirr">
+              <span class="bank-dot"></span> CBE Birr
+            </button>
+            <button type="button" class="bank-pill" data-bank="mpesa">
+              <span class="bank-dot"></span> M-Pesa
+            </button>
           </div>
         </div>
 
-        <!-- Action Row -->
-        <div class="action-row">
-          <div class="sample-pill-group">
-            <span class="sample-label">Try Demo:</span>
-            <button type="button" class="btn-sample" onclick="loadSample('universal', 'TEST12345678')">Sample Auto</button>
-            <button type="button" class="btn-sample" onclick="loadSample('cbe', 'TEST_CBE_987654')">Sample CBE</button>
-            <button type="button" class="btn-sample" onclick="loadSample('telebirr', 'TEST_TB_543210')">Sample Telebirr</button>
-            <button type="button" class="btn-sample" onclick="loadSample('abyssinia', 'TEST_BOA_777', '12345')">Sample BoA</button>
+        <!-- Verification Form -->
+        <form id="verifyForm" onsubmit="handleVerify(event)">
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label" id="refLabel">Transaction Reference, Token, or SMS</label>
+              <div class="detected-badge" id="detectedBadge">
+                <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
+                <span id="detectedBankName">Detected</span>
+              </div>
+            </div>
+            <div class="form-input-wrap">
+              <input 
+                type="text" 
+                id="refInput" 
+                class="form-input" 
+                placeholder="Paste CBE token, FT reference, Telebirr SMS, or M-Pesa code..." 
+                autocomplete="off" 
+                spellcheck="false" 
+                required
+                oninput="onReferenceChange(this.value)"
+              >
+              <button type="button" class="clear-btn" id="clearBtn" onclick="clearInput()" title="Clear input">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="form-helper" id="refHelper">
+              Direct live check with bank portals. Test simulated keys start with <code>TEST</code>.
+            </div>
           </div>
-          <button type="submit" class="btn-verify" id="submitBtn">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span id="btnText">Verify Transaction</span>
-          </button>
-        </div>
-      </form>
 
-      <!-- Results Area -->
-      <div class="result-container" id="resultContainer">
-        <!-- Rendered dynamically -->
+          <!-- Secondary Conditional Inputs -->
+          <div class="secondary-inputs" id="secondaryInputs" style="display: none;">
+            <div class="form-group" id="suffixGroup" style="display: none;">
+              <label class="form-label" id="suffixLabel">Credited Account Suffix</label>
+              <input type="text" id="suffixInput" class="form-input" placeholder="e.g. 10001234 (last 8 digits)" autocomplete="off">
+              <div class="form-helper">Required only for legacy CBE FT-format receipts.</div>
+            </div>
+
+            <div class="form-group" id="phoneGroup" style="display: none;">
+              <label class="form-label" id="phoneLabel">Customer Phone Number</label>
+              <input type="text" id="phoneInput" class="form-input" placeholder="e.g. 0911223344 or 251911223344" autocomplete="off">
+              <div class="form-helper">Required for CBE Birr wallet validation.</div>
+            </div>
+          </div>
+
+          <!-- Action Row & Quick Test Samples -->
+          <div class="action-row">
+            <div class="sample-pill-group">
+              <span class="sample-label">Try Demo:</span>
+              <button type="button" class="btn-sample" onclick="loadSample('universal', 'TEST12345678')">Auto (Telebirr)</button>
+              <button type="button" class="btn-sample" onclick="loadSample('cbe', 'TESTCBE1234', '1234')">CBE Demo</button>
+              <button type="button" class="btn-sample" onclick="loadSample('dashen', 'TESTDASHEN1234')">Dashen Demo</button>
+              <button type="button" class="btn-sample" onclick="loadSample('abyssinia', 'TESTBOA1234', '12345')">BoA Demo</button>
+              <button type="button" class="btn-sample" onclick="loadSample('mpesa', 'TESTMPESA1234')">M-Pesa Demo</button>
+            </div>
+
+            <button type="submit" class="btn-verify" id="submitBtn">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span id="btnText">Verify Settlement</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Result Presentation Container -->
+        <div class="result-container" id="resultContainer"></div>
+
       </div>
     </section>
 
-    <!-- Feature Highlights -->
-    <section class="features">
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Zero-Database Speed</h3>
-          <p>Direct communication with upstream bank portals and scrapers with memory footprint under 25MB RAM.</p>
+    <!-- Supported Providers Matrix -->
+    <section class="providers-section">
+      <div class="section-eyebrow">Enterprise Multi-Tenant Coverage</div>
+      <h2 class="section-title">Supported Ethiopian Payment Gateways</h2>
+
+      <div class="providers-grid">
+        <!-- CBE -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">Commercial Bank of Ethiopia</span>
+              <span class="provider-live-pill">Direct Portal</span>
+            </div>
+            <p class="provider-desc">
+              Instant verification for both new CBE Mobile Banking receipt tokens and legacy FT transaction slips with credited account suffix match.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">Tokens</span>
+              <span class="provider-channel-tag">FT Slips</span>
+              <span class="provider-channel-tag">PDF Extract</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('cbe', 'TESTCBE1234', '1234')">Test CBE Verification</button>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🛡️</div>
-          <h3>Multi-Tenant Security</h3>
-          <p>Authenticate multiple client applications (MentalWeg, e-commerce, POS systems) using dedicated API keys.</p>
+
+        <!-- Telebirr -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">Ethio Telecom Telebirr</span>
+              <span class="provider-live-pill">Direct + Relay</span>
+            </div>
+            <p class="provider-desc">
+              Queries Ethio Telecom's receipt confirmation portal with automatic relay hedging and intelligent fallback circuits.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">App Slips</span>
+              <span class="provider-channel-tag">SMS Receipts</span>
+              <span class="provider-channel-tag">USSD Codes</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('telebirr', 'TEST12345678')">Test Telebirr Verification</button>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🧠</div>
-          <h3>Smart Auto-Detection</h3>
-          <p>The universal router inspects reference syntax, tokens, and formats to automatically route to the right bank.</p>
+
+        <!-- Dashen Bank -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">Dashen Bank</span>
+              <span class="provider-live-pill">Direct Portal</span>
+            </div>
+            <p class="provider-desc">
+              Verifies Dashen Bank and Amole digital banking receipts directly via the official Dashen transaction inquiry endpoints.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">Amole</span>
+              <span class="provider-channel-tag">Dashen Mobile</span>
+              <span class="provider-channel-tag">Core Ref</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('dashen', 'TESTDASHEN1234')">Test Dashen Verification</button>
+        </div>
+
+        <!-- Bank of Abyssinia -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">Bank of Abyssinia</span>
+              <span class="provider-live-pill">Direct Portal</span>
+            </div>
+            <p class="provider-desc">
+              Validates Apollo and BoA core banking transactions with exact 5-digit account suffix validation for zero fraud tolerance.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">Apollo</span>
+              <span class="provider-channel-tag">Core Banking</span>
+              <span class="provider-channel-tag">BoA Slip</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('abyssinia', 'TESTBOA1234', '12345')">Test BoA Verification</button>
+        </div>
+
+        <!-- CBE Birr -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">CBE Birr</span>
+              <span class="provider-live-pill">Direct Portal</span>
+            </div>
+            <p class="provider-desc">
+              Authenticates mobile wallet transfers using receipt number paired with customer phone number verification.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">CBE Wallet</span>
+              <span class="provider-channel-tag">Agent P2P</span>
+              <span class="provider-channel-tag">USSD Birr</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('cbebirr', 'TESTCBEBIRR1234', '', '0911223344')">Test CBE Birr</button>
+        </div>
+
+        <!-- Safaricom M-Pesa -->
+        <div class="provider-card">
+          <div>
+            <div class="provider-card-top">
+              <span class="provider-title">Safaricom M-Pesa</span>
+              <span class="provider-live-pill">Direct API</span>
+            </div>
+            <p class="provider-desc">
+              Direct receipt authentication for Safaricom Ethiopia M-Pesa transactions, merchant tills, and consumer transfers.
+            </p>
+            <div class="provider-tags">
+              <span class="provider-channel-tag">M-Pesa ET</span>
+              <span class="provider-channel-tag">Buy Goods</span>
+              <span class="provider-channel-tag">Paybill</span>
+            </div>
+          </div>
+          <button type="button" class="btn-card-test" onclick="loadSample('mpesa', 'TESTMPESA1234')">Test M-Pesa Verification</button>
         </div>
       </div>
     </section>
@@ -849,12 +1478,12 @@
         <h3 class="modal-title">REST API Integration</h3>
         <button class="modal-close" onclick="closeModal('docsModal')">&times;</button>
       </div>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-        Integrate payment verification directly into your backend with a single <code>POST /verify</code> call.
+      <p style="color: var(--color-ink-soft); font-size: 0.92rem; margin-bottom: 20px; line-height: 1.6;">
+        Senay Verifier exposes high-speed endpoints for client apps (e-commerce carts, Telegram bots, POS systems, ERPs). Zero database latency.
       </p>
 
-      <h4 style="font-size: 0.95rem; margin-top: 16px; color: #818CF8;">1. Smart Universal Endpoint (cURL)</h4>
-      <div class="code-block">curl -X POST https://verifier.senaycreatives.com/verify \
+      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">1. Smart Universal Endpoint (cURL)</h4>
+      <div class="code-pre-box" style="margin-bottom: 20px;">curl -X POST https://verifier.senaycreatives.com/verify \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_api_key_here" \
   -d '{
@@ -862,20 +1491,22 @@
     "suffix": "10001234"
   }'</div>
 
-      <h4 style="font-size: 0.95rem; margin-top: 16px; color: #818CF8;">2. Node.js (Fetch)</h4>
-      <div class="code-block">const res = await fetch('https://verifier.senaycreatives.com/verify', {
+      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">2. Node.js / TypeScript (Fetch)</h4>
+      <div class="code-pre-box" style="margin-bottom: 20px;">const res = await fetch('https://verifier.senaycreatives.com/verify', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
     'x-api-key': process.env.VERIFIER_API_KEY
   },
-  body: JSON.stringify({ reference: receiptId })
+  body: JSON.stringify({ reference: receiptReference })
 });
-const data = await res.json();
-console.log('Verified:', data.success, data.data.amount);</div>
+const result = await res.json();
+if (result.success) {
+  console.log('Settlement confirmed:', result.data.amount, 'ETB');
+}</div>
 
-      <h4 style="font-size: 0.95rem; margin-top: 16px; color: #818CF8;">3. Dedicated Provider Endpoints</h4>
-      <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 20px; line-height: 1.8;">
+      <h4 style="font-family: var(--font-display); font-size: 0.95rem; color: #90B0FF; margin-bottom: 8px;">3. Direct Dedicated Endpoints</h4>
+      <ul style="color: var(--color-ink-soft); font-size: 0.85rem; padding-left: 20px; line-height: 1.8;">
         <li><code>POST /verify-telebirr</code> — { reference }</li>
         <li><code>POST /verify-cbe</code> — { reference, accountSuffix? }</li>
         <li><code>POST /verify-dashen</code> — { reference }</li>
@@ -886,36 +1517,72 @@ console.log('Verified:', data.success, data.data.amount);</div>
     </div>
   </div>
 
-  <!-- API Key Modal -->
-  <div class="modal-backdrop" id="keyModal" onclick="closeModalOnBackdrop(event, 'keyModal')">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title">Custom API Key Settings</h3>
-        <button class="modal-close" onclick="closeModal('keyModal')">&times;</button>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-        Public verifications on this landing page are free and rate-limited. If you have an assigned project API key, you can enter it here to test full quota access.
-      </p>
-      <div class="form-group">
-        <label class="form-label">Client API Key</label>
-        <input type="password" id="customApiKeyInput" class="form-input" placeholder="e.g. mentalweg_live_key_...">
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button class="btn-ghost" onclick="clearApiKey()">Clear</button>
-        <button class="btn-verify" style="padding: 10px 20px;" onclick="saveApiKey()">Save Key</button>
-      </div>
-    </div>
-  </div>
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toastMsg">📋 Copied to clipboard!</div>
 
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>Senay Verifier Microservice &copy; 2026 Senay Creatives. Multi-tenant Ethiopian Payment Verification Engine.</p>
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <svg style="width: 16px; height: 16px; color: var(--color-brand);" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c.6 6 5.4 10.8 12 12-6.6 1.2-11.4 6-12 12-.6-6-5.4-10.8-12-12C6.6 10.8 11.4 6 12 0Z" />
+          </svg>
+          <span>Crafted by <a href="https://senaycreatives.com" target="_blank" rel="noopener">Senay Creatives</a> &bull; Payment Engineering</span>
+        </div>
+        <div class="footer-links">
+          <a href="/api" target="_blank">API Specification</a>
+          <span>&bull;</span>
+          <a href="/admin">Console</a>
+          <span>&bull;</span>
+          <a href="/health" target="_blank">Health Status</a>
+        </div>
+      </div>
     </div>
   </footer>
 
   <script>
+    // ─────────────────────────────────────────────────────────────────────────
+    // Interactive Ambient Parallax Backdrop (Spring-damped mouse tracking)
+    // ─────────────────────────────────────────────────────────────────────────
+    (function initBackdropMotion() {
+      const glowBrand = document.getElementById('glowBrand');
+      const glowEmber = document.getElementById('glowEmber');
+      const sparkWatermark = document.getElementById('sparkWatermark');
+
+      let targetX = 0, targetY = 0;
+      let currentX = 0, currentY = 0;
+
+      window.addEventListener('pointermove', (e) => {
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        targetX = nx;
+        targetY = ny;
+      }, { passive: true });
+
+      function animate() {
+        currentX += (targetX - currentX) * 0.05;
+        currentY += (targetY - currentY) * 0.05;
+
+        if (glowBrand) {
+          glowBrand.style.transform = `translate(${currentX * 36}px, ${currentY * 36}px)`;
+        }
+        if (glowEmber) {
+          glowEmber.style.transform = `translate(${-currentX * 28}px, ${-currentY * 28}px)`;
+        }
+        if (sparkWatermark) {
+          sparkWatermark.style.transform = `translate(${-currentX * 18}px, ${-currentY * 18}px) rotate(${currentX * 8}deg)`;
+        }
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    })();
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Bank Configuration & Form State
+    // ─────────────────────────────────────────────────────────────────────────
     let currentBank = 'universal';
+    let lastVerifiedData = null;
 
     const bankConfigs = {
       universal: {
@@ -924,29 +1591,29 @@ console.log('Verified:', data.success, data.data.amount);</div>
         helper: 'Auto-detects bank from reference syntax. Supports test keys starting with TEST.',
         showSuffix: true,
         suffixLabel: 'Account Suffix (Optional)',
-        suffixPlaceholder: 'Required only for legacy CBE or BoA',
+        suffixPlaceholder: 'Required only for legacy CBE FT-slips or BoA',
         showPhone: false,
       },
       cbe: {
-        label: 'CBE Receipt ID or Legacy Reference',
+        label: 'CBE Receipt Token or Legacy FT Reference',
         placeholder: 'e.g. 96f8a3d1-... or legacy FT240101ABCD',
-        helper: 'New mobile banking links do not need account suffix. Legacy FT references require the 8-digit suffix.',
+        helper: 'New CBE mobile banking tokens do not need an account suffix. Legacy FT references require the credited account suffix.',
         showSuffix: true,
-        suffixLabel: 'Account Suffix',
-        suffixPlaceholder: '8-digit credited account suffix (e.g. 10001234)',
+        suffixLabel: 'Credited Account Suffix',
+        suffixPlaceholder: 'e.g. 10001234 (last 8 digits)',
         showPhone: false,
       },
       telebirr: {
         label: 'Telebirr Transaction Number',
         placeholder: 'e.g. TB2601019999 or paste full Telebirr SMS receipt...',
-        helper: 'Queries Ethio Telecom receipt portal directly.',
+        helper: 'Queries Ethio Telecom live receipt confirmation service.',
         showSuffix: false,
         showPhone: false,
       },
       abyssinia: {
         label: 'Bank of Abyssinia Reference No.',
         placeholder: 'e.g. BoA transaction reference code...',
-        helper: 'Queries Bank of Abyssinia portal.',
+        helper: 'Queries Bank of Abyssinia portal. Requires 5-digit account suffix.',
         showSuffix: true,
         suffixLabel: 'Account Suffix (5 digits)',
         suffixPlaceholder: 'Exactly 5 digits (e.g. 12345)',
@@ -975,7 +1642,7 @@ console.log('Verified:', data.success, data.data.amount);</div>
       }
     };
 
-    // Bank tab switching
+    // Bank tab click handler
     document.getElementById('bankSelector').addEventListener('click', (e) => {
       const pill = e.target.closest('.bank-pill');
       if (!pill) return;
@@ -1004,8 +1671,53 @@ console.log('Verified:', data.success, data.data.amount);</div>
       }
 
       phoneGroup.style.display = cfg.showPhone ? 'block' : 'none';
-
       secondaryInputs.style.display = (cfg.showSuffix || cfg.showPhone) ? 'grid' : 'none';
+    }
+
+    // Live Auto-Detection logic as user types
+    function onReferenceChange(val) {
+      const trimmed = val.trim();
+      const clearBtn = document.getElementById('clearBtn');
+      clearBtn.style.display = trimmed ? 'block' : 'none';
+
+      const badge = document.getElementById('detectedBadge');
+      const nameSpan = document.getElementById('detectedBankName');
+
+      if (!trimmed || currentBank !== 'universal') {
+        badge.style.display = 'none';
+        return;
+      }
+
+      // Syntax pattern check
+      const upper = trimmed.toUpperCase();
+      let detected = null;
+
+      if (upper.startsWith('FT') || upper.includes('COMMERCIAL BANK') || /^[0-9a-f]{8}-[0-9a-f]{4}/i.test(trimmed)) {
+        detected = 'CBE';
+      } else if (upper.startsWith('TB') || upper.startsWith('R') || upper.includes('TELEBIRR') || /^\d{10,14}$/.test(trimmed)) {
+        detected = 'Telebirr';
+      } else if (upper.startsWith('DB') || upper.startsWith('DASHEN') || upper.includes('DASHEN')) {
+        detected = 'Dashen Bank';
+      } else if (upper.startsWith('BOA') || upper.startsWith('ABYSSINIA') || upper.includes('ABYSSINIA')) {
+        detected = 'Bank of Abyssinia';
+      } else if (upper.startsWith('CB') || upper.includes('CBE BIRR') || upper.includes('CBEBIRR')) {
+        detected = 'CBE Birr';
+      } else if (upper.startsWith('MP') || upper.startsWith('NL') || upper.startsWith('WA') || upper.includes('MPESA') || upper.includes('SAFARICOM')) {
+        detected = 'M-Pesa';
+      }
+
+      if (detected) {
+        nameSpan.textContent = `Auto-Detected: ${detected}`;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function clearInput() {
+      document.getElementById('refInput').value = '';
+      document.getElementById('refInput').focus();
+      onReferenceChange('');
     }
 
     // Quick sample loader
@@ -1014,6 +1726,8 @@ console.log('Verified:', data.success, data.data.amount);</div>
       if (pill) pill.click();
 
       document.getElementById('refInput').value = ref;
+      onReferenceChange(ref);
+
       if (suffix) document.getElementById('suffixInput').value = suffix;
       if (phone) document.getElementById('phoneInput').value = phone;
 
@@ -1037,20 +1751,22 @@ console.log('Verified:', data.success, data.data.amount);</div>
       btnText.textContent = 'Verifying with Bank...';
       resultContainer.style.display = 'block';
       resultContainer.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
+        <div style="text-align: center; padding: 48px 24px;">
           <div class="pulse-dot" style="margin: 0 auto 16px; width: 14px; height: 14px;"></div>
-          <p style="color: var(--text-muted); font-size: 0.95rem;">Contacting ${currentBank.toUpperCase()} upstream verification service...</p>
+          <p style="font-family: var(--font-display); font-size: 1.1rem; color: #fff; font-weight: 700; margin-bottom: 6px;">
+            Connecting to ${currentBank.toUpperCase()} Bank Gateway...
+          </p>
+          <p style="color: var(--color-ink-soft); font-size: 0.88rem;">Executing zero-database real-time settlement audit</p>
         </div>
       `;
 
-      const headers = { 'Content-Type': 'application/json' };
-      const customKey = localStorage.getItem('verifier_custom_key');
-      if (customKey) headers['x-api-key'] = customKey;
+      // Scroll smoothly to result container
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       try {
         const res = await fetch('/api/public-verify', {
           method: 'POST',
-          headers,
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             reference,
             bank: currentBank,
@@ -1060,81 +1776,110 @@ console.log('Verified:', data.success, data.data.amount);</div>
         });
 
         const data = await res.json();
+        lastVerifiedData = data;
+
         if (!res.ok || !data.success) {
-          showError(data.error || 'Verification failed. Please check reference details.');
+          showError(data.error || 'Verification failed. The bank could not match this reference.');
         } else {
           showSuccess(data);
         }
       } catch (err) {
-        showError('Network error connecting to verification gateway: ' + err.message);
+        showError('Network connectivity error connecting to verification gateway: ' + err.message);
       } finally {
         submitBtn.disabled = false;
-        btnText.textContent = 'Verify Transaction';
+        btnText.textContent = 'Verify Settlement';
       }
     }
 
     function showSuccess(data) {
       const r = data.receipt || {};
       const container = document.getElementById('resultContainer');
-      const dateStr = r.paymentDate ? new Date(r.paymentDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Verified';
+      const dateStr = r.paymentDate ? new Date(r.paymentDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Verified Live';
+      const providerKey = (data.provider || currentBank).toLowerCase();
 
       container.innerHTML = `
-        <div class="receipt-card">
+        <div class="receipt-card bank-${providerKey}">
+          <!-- Header -->
           <div class="receipt-header">
             <div class="provider-tag">
-              <span>🏦</span> ${data.provider || currentBank}
+              <span class="bank-dot"></span>
+              <span>${data.provider || currentBank}</span>
             </div>
             <div class="verified-badge">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-              ${r.status || 'VERIFIED'}
+              ${r.status || 'SETTLED & VERIFIED'}
             </div>
           </div>
 
+          <!-- Big Amount Display -->
           <div class="amount-display">
-            <div class="amount-label">Verified Settlement Amount</div>
-            <div class="amount-val">${r.amountFormatted || (r.amount ? r.amount + ' ETB' : 'Confirmed')}</div>
+            <div class="amount-label">Verified Settlement Value</div>
+            <div class="amount-val">${r.amountFormatted || (r.amount ? r.amount + ' ETB' : 'Verified')}</div>
           </div>
 
-          <div class="receipt-grid">
-            <div class="detail-item">
-              <div class="detail-k">Transaction Reference</div>
-              <div class="detail-v copyable" onclick="copyText('${r.reference}')">
-                <span>${r.reference}</span>
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <!-- Tabs: Receipt Voucher | Raw JSON | Integration Snippets -->
+          <div class="result-tabs">
+            <button type="button" class="result-tab-btn active" onclick="switchResultTab(event, 'tabVoucher')">Receipt Details</button>
+            <button type="button" class="result-tab-btn" onclick="switchResultTab(event, 'tabJson')">Raw Bank JSON</button>
+            <button type="button" class="result-tab-btn" onclick="switchResultTab(event, 'tabCode')">API Integration</button>
+          </div>
+
+          <!-- Panel 1: Voucher Details Grid -->
+          <div class="tab-content-panel active" id="tabVoucher">
+            <div class="receipt-grid">
+              <div class="detail-item">
+                <div class="detail-k">Transaction Reference</div>
+                <div class="detail-v copyable" onclick="copyText('${r.reference}')" title="Click to copy">
+                  <span style="font-family: var(--font-mono);">${r.reference}</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
               </div>
-            </div>
 
-            <div class="detail-item">
-              <div class="detail-k">Payment Date & Time</div>
-              <div class="detail-v">${dateStr}</div>
-            </div>
+              <div class="detail-item">
+                <div class="detail-k">Settlement Timestamp</div>
+                <div class="detail-v">${dateStr}</div>
+              </div>
 
-            <div class="detail-item">
-              <div class="detail-k">Payer / Customer</div>
-              <div class="detail-v">${r.payerName || 'Not Disclosed'}</div>
-              ${r.payerAccount && r.payerAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--text-dim); font-family: monospace;">${r.payerAccount}</div>` : ''}
-            </div>
+              <div class="detail-item">
+                <div class="detail-k">Payer / Remitter</div>
+                <div class="detail-v">${r.payerName || 'Payer Confirmed'}</div>
+                ${r.payerAccount && r.payerAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.payerAccount}</div>` : ''}
+              </div>
 
-            <div class="detail-item">
-              <div class="detail-k">Receiver / Beneficiary</div>
-              <div class="detail-v">${r.receiverName || 'Merchant'}</div>
-              ${r.receiverAccount && r.receiverAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--text-dim); font-family: monospace;">${r.receiverAccount}</div>` : ''}
-            </div>
+              <div class="detail-item">
+                <div class="detail-k">Beneficiary / Merchant</div>
+                <div class="detail-v">${r.receiverName || 'Merchant Account'}</div>
+                ${r.receiverAccount && r.receiverAccount !== 'N/A' ? `<div style="font-size: 0.78rem; color: var(--color-muted); font-family: var(--font-mono);">${r.receiverAccount}</div>` : ''}
+              </div>
 
-            ${r.reason ? `
-            <div class="detail-item" style="grid-column: 1 / -1;">
-              <div class="detail-k">Reason / Narration</div>
-              <div class="detail-v" style="font-size: 0.88rem; color: #CBD5E1;">${r.reason}</div>
+              ${r.reason ? `
+              <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-k">Narration / Payment Purpose</div>
+                <div class="detail-v" style="font-size: 0.88rem; color: #E2E8F0;">${r.reason}</div>
+              </div>
+              ` : ''}
             </div>
-            ` : ''}
           </div>
 
-          <div class="raw-section">
-            <button class="raw-toggle" onclick="toggleRaw()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-              <span>View Raw Bank Response (JSON)</span>
-            </button>
-            <pre class="raw-pre" id="rawPre">${JSON.stringify(data.raw || data, null, 2)}</pre>
+          <!-- Panel 2: Raw JSON -->
+          <div class="tab-content-panel" id="tabJson">
+            <div class="code-pre-box">
+              <button type="button" class="code-copy-float" onclick="copyJson()">Copy JSON</button>
+              <pre id="jsonPreText">${JSON.stringify(data.raw || data, null, 2)}</pre>
+            </div>
+          </div>
+
+          <!-- Panel 3: Developer Integration -->
+          <div class="tab-content-panel" id="tabCode">
+            <div class="code-pre-box">
+              <button type="button" class="code-copy-float" onclick="copyCodeSnippet()">Copy cURL</button>
+              <pre id="curlSnippetPre">curl -X POST https://verifier.senaycreatives.com/verify \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: your_api_key" \\
+  -d '{
+    "reference": "${r.reference}"
+  }'</pre>
+            </div>
           </div>
         </div>
       `;
@@ -1144,59 +1889,66 @@ console.log('Verified:', data.success, data.data.amount);</div>
       const container = document.getElementById('resultContainer');
       container.innerHTML = `
         <div class="alert-error">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           <div>
-            <h4>Receipt Verification Failed</h4>
+            <h4>Settlement Verification Failed</h4>
             <p>${msg}</p>
           </div>
         </div>
       `;
     }
 
-    function toggleRaw() {
-      const el = document.getElementById('rawPre');
-      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    function switchResultTab(e, tabId) {
+      document.querySelectorAll('.result-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.remove('active'));
+
+      e.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
     }
 
     function copyText(str) {
       navigator.clipboard.writeText(str);
-      alert('Copied to clipboard: ' + str);
+      showToast('Copied: ' + str);
     }
 
-    // Modals
-    function openDocsModal() { document.getElementById('docsModal').style.display = 'flex'; }
-    function openKeyModal() { 
-      document.getElementById('customApiKeyInput').value = localStorage.getItem('verifier_custom_key') || '';
-      document.getElementById('keyModal').style.display = 'flex'; 
+    function copyJson() {
+      if (lastVerifiedData) {
+        navigator.clipboard.writeText(JSON.stringify(lastVerifiedData.raw || lastVerifiedData, null, 2));
+        showToast('Raw JSON copied to clipboard');
+      }
     }
+
+    function copyCodeSnippet() {
+      const pre = document.getElementById('curlSnippetPre');
+      if (pre) {
+        navigator.clipboard.writeText(pre.textContent);
+        showToast('cURL snippet copied to clipboard');
+      }
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toastMsg');
+      el.textContent = '📋 ' + msg;
+      el.style.display = 'block';
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 2500);
+    }
+
+    // Modal helpers
+    function openDocsModal() { document.getElementById('docsModal').style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function closeModalOnBackdrop(e, id) { if (e.target.id === id) closeModal(id); }
 
-    function saveApiKey() {
-      const val = document.getElementById('customApiKeyInput').value.trim();
-      if (val) {
-        localStorage.setItem('verifier_custom_key', val);
-        alert('Custom API key saved for this browser session.');
-      } else {
-        localStorage.removeItem('verifier_custom_key');
-      }
-      closeModal('keyModal');
-    }
-
-    function clearApiKey() {
-      localStorage.removeItem('verifier_custom_key');
-      document.getElementById('customApiKeyInput').value = '';
-      alert('Custom API key cleared.');
-      closeModal('keyModal');
-    }
-
-    // Ping health on mount
+    // Live health monitor ping
     async function checkHealth() {
       try {
+        const start = performance.now();
         const res = await fetch('/health');
+        const latency = Math.round(performance.now() - start);
         if (res.ok) {
           const d = await res.json();
-          document.getElementById('statusText').textContent = `Systems Operational (${d.uptimeSeconds}s)`;
+          document.getElementById('statusText').textContent = `Gateway Live (${latency}ms)`;
         }
       } catch (_) {}
     }

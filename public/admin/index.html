@@ -4,25 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Senay Verifier Console — Admin & API Usage</title>
+  <link rel="icon" type="image/png" href="/logo-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0B0F19;
-      --card-bg: #111827;
-      --card-border: #1F2937;
-      --card-hover: #1E293B;
-      --primary: #6366F1;
-      --primary-hover: #4F46E5;
-      --primary-glow: rgba(99, 102, 241, 0.25);
+      --font-display: 'Bricolage Grotesque', -apple-system, sans-serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg: #090C12;
+      --card-bg: #121722;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: #182030;
+      --primary: #1F4DFF;
+      --primary-hover: #0A1F8A;
+      --primary-glow: rgba(31, 77, 255, 0.28);
       --success: #10B981;
       --success-glow: rgba(16, 185, 129, 0.2);
       --error: #EF4444;
-      --warning: #F59E0B;
-      --text-main: #F9FAFB;
-      --text-muted: #9CA3AF;
-      --text-dim: #6B7280;
+      --warning: #FF5630;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
       --cbe: #8B5CF6;
       --telebirr: #0284C7;
       --dashen: #2563EB;
@@ -39,7 +44,7 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: var(--font-sans);
       background-color: var(--bg);
       color: var(--text-main);
       min-height: 100vh;
@@ -47,8 +52,13 @@
       flex-direction: column;
       line-height: 1.5;
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+        radial-gradient(circle at 15% 15%, rgba(31, 77, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(255, 86, 48, 0.06) 0%, transparent 45%);
+    }
+
+    h1, h2, h3, h4, .dashboard-title, .login-title, .stat-value, .tab-btn {
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
     }
 
     .container {
@@ -818,9 +828,13 @@
   <header>
     <div class="container nav-inner">
       <a href="/" class="brand">
-        <div class="brand-logo">⚡</div>
-        <div class="brand-title">Senay Verifier</div>
-        <span class="brand-badge">Console</span>
+        <span class="logo-badge" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: #121722; display: grid; place-items: center; overflow: hidden;">
+          <img src="/logo-mark.png" alt="Senay Creatives" style="width: 72%; height: 72%; object-fit: contain;">
+        </span>
+        <div class="brand-title" style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700;">
+          Senay <span style="color: var(--text-muted); font-weight: 500;">Creatives</span>
+        </div>
+        <span class="brand-badge" style="font-family: var(--font-display); background: rgba(31,77,255,0.12); color: #7094FF; border-color: rgba(31,77,255,0.28);">Console</span>
       </a>
 
       <div class="nav-actions">
