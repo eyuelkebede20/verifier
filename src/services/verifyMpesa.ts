@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { sharedHttpsAgent } from '../utils/httpClient';
 import pdf from 'pdf-parse';
 import https from 'https';
 import logger from '../utils/logger';
@@ -33,12 +34,13 @@ export async function verifyMpesa(
     async function fetchFromUrl(url: string, source: string): Promise<any> {
         logger.info(`🔎 Fetching receipt data from ${source}: ${url}`);
         const response = await axios.get(url, {
+            httpsAgent: sharedHttpsAgent,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 'Accept': 'application/json, text/plain, */*',
                 'Referer': 'https://m-pesabusiness.safaricom.et/'
             },
-            timeout: 60000
+            timeout: 12000
         });
         return response.data;
     }

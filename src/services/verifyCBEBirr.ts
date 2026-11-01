@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { sharedHttpsAgent } from '../utils/httpClient';
 import pdfParse from 'pdf-parse';
 import { VerifyResult } from './verifyCBE';
 import logger from '../utils/logger';
@@ -35,11 +36,12 @@ export async function verifyCBEBirr(
 
     // Fetch the PDF
     const response = await axios.get(url, {
+      httpsAgent: sharedHttpsAgent,
       responseType: 'arraybuffer',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },
-      timeout: 30000
+      timeout: 12000
     });
 
     logger.info(`[CBEBirr] PDF response status: ${response.status}`);

@@ -1715,6 +1715,151 @@
       margin-top: 12px;
     }
 
+    /* OCR Diagnostic Error Card */
+    .ocr-diagnostic-card {
+      margin-top: 16px;
+      background: rgba(22, 16, 20, 0.95);
+      border: 1px solid rgba(255, 86, 48, 0.35);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      animation: modalFadeIn 0.25s ease-out;
+      box-shadow: 0 4px 20px rgba(255, 86, 48, 0.08);
+    }
+    .diagnostic-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .diagnostic-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 86, 48, 0.15);
+      border: 1px solid rgba(255, 86, 48, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .diagnostic-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #FFA48D;
+      margin-bottom: 2px;
+    }
+    .diagnostic-subtitle {
+      font-size: 0.76rem;
+      color: var(--color-ink-soft);
+      line-height: 1.4;
+    }
+    .diagnostic-meta-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--color-ink-soft);
+      white-space: nowrap;
+    }
+    .diagnostic-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .diagnostic-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+    .step-status {
+      font-size: 0.85rem;
+      line-height: 1.2;
+    }
+    .step-details strong {
+      color: #F8FAFC;
+      margin-right: 4px;
+    }
+    .step-details span {
+      color: #CBD5E1;
+      font-size: 0.77rem;
+    }
+    .diagnostic-checklist {
+      background: rgba(255, 86, 48, 0.06);
+      border-left: 3px solid #FF5630;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+    .checklist-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #FF8B70;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .diagnostic-checklist ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 0.75rem;
+      color: var(--color-ink-soft);
+      line-height: 1.5;
+    }
+    .diagnostic-checklist li strong {
+      color: #E2E8F0;
+    }
+    .btn-toggle-raw-ocr {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--color-ink-soft);
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-toggle-raw-ocr:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .diagnostic-raw-pre {
+      display: none;
+      margin-top: 8px;
+      padding: 10px;
+      background: #05080E;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: #94A3B8;
+      max-height: 140px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .diagnostic-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
     /* Verifier Card Drag-Over visual indicator */
     .verifier-card.drag-over {
       outline: 2px dashed var(--color-brand);
@@ -3009,7 +3154,11 @@
       previewImg.src = dataUrl;
       previewWrap.style.display = 'block';
 
-      processReceiptCanvas(canvas, dataUrl);
+      const img = new Image();
+      img.onload = () => {
+        processReceiptImage(img);
+      };
+      img.src = dataUrl;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -3023,7 +3172,8 @@
 
     function closeOcrModal() {
       document.getElementById('ocrModal').style.display = 'none';
-      document.getElementById('ocrProgress').style.display = 'none';
+      const progressEl = document.getElementById('ocrProgress');
+      if (progressEl) progressEl.style.display = 'none';
     }
 
     function handleImageFile(file) {
@@ -3041,8 +3191,10 @@
       const statusEl = document.getElementById('ocrStatus');
       const percentEl = document.getElementById('ocrPercent');
       const detectedCard = document.getElementById('ocrDetectedCard');
+      const diagnosticBox = document.getElementById('ocrDiagnosticBox');
 
       detectedCard.style.display = 'none';
+      if (diagnosticBox) diagnosticBox.style.display = 'none';
       progressEl.style.display = 'block';
       progressBar.style.width = '15%';
       percentEl.textContent = '15%';
@@ -3054,45 +3206,45 @@
         img.onload = () => {
           previewImg.src = img.src;
           previewWrap.style.display = 'block';
-
-          const canvas = document.createElement('canvas');
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-
-          processReceiptCanvas(canvas, img.src);
+          processReceiptImage(img);
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    async function processReceiptCanvas(canvas, imageSrc) {
+    async function processReceiptImage(img) {
       const progressBar = document.getElementById('ocrProgressBar');
       const statusEl = document.getElementById('ocrStatus');
       const percentEl = document.getElementById('ocrPercent');
-      const ctx = canvas.getContext('2d');
+      const detectedCard = document.getElementById('ocrDetectedCard');
+      const diagnosticBox = document.getElementById('ocrDiagnosticBox');
 
-      // Phase 1: Check for QR Code
-      statusEl.textContent = 'Scanning image for QR code...';
+      detectedCard.style.display = 'none';
+      if (diagnosticBox) diagnosticBox.style.display = 'none';
+
+      // Phase 1: Robust Multi-Scale, Multi-Crop QR Detection
+      statusEl.textContent = 'Scanning image for QR code (multi-scale)...';
       progressBar.style.width = '30%';
       percentEl.textContent = '30%';
 
-      const qrData = await detectQrCode(canvas, ctx);
-      if (qrData) {
+      const qrResult = await detectQrCodeMultiPass(img);
+      if (qrResult && qrResult.data) {
         progressBar.style.width = '100%';
         percentEl.textContent = '100%';
-        statusEl.textContent = '✓ QR Code found & decoded!';
+        statusEl.textContent = `✓ QR Code found & decoded (${qrResult.method})!`;
         showToast('Receipt QR Code detected!');
-        showExtractedResult(qrData, 'QR Code Decoded');
+        showExtractedResult(qrResult.data, `QR Code (${qrResult.method})`);
         return;
       }
 
-      // Phase 2: Run Browser OCR
+      // Phase 2: Run Browser OCR on receipt text
       statusEl.textContent = 'No QR found. Reading printed text with OCR...';
-      progressBar.style.width = '45%';
-      percentEl.textContent = '45%';
+      progressBar.style.width = '50%';
+      percentEl.textContent = '50%';
+
+      let rawOcrText = '';
+      let ocrError = null;
 
       try {
         if (typeof Tesseract === 'undefined') {
@@ -3100,15 +3252,26 @@
           await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
         }
 
+        // Scale image for optimal OCR performance if large (max 1800px)
+        const ocrCanvas = document.createElement('canvas');
+        const origW = img.naturalWidth || img.width;
+        const origH = img.naturalHeight || img.height;
+        const maxDim = 1800;
+        const scale = Math.min(1, maxDim / Math.max(origW, origH));
+        ocrCanvas.width = Math.round(origW * scale);
+        ocrCanvas.height = Math.round(origH * scale);
+        const ocrCtx = ocrCanvas.getContext('2d');
+        ocrCtx.drawImage(img, 0, 0, ocrCanvas.width, ocrCanvas.height);
+
         const result = await Tesseract.recognize(
-          canvas,
+          ocrCanvas,
           'eng',
           {
             logger: m => {
               if (m.status === 'recognizing text') {
                 const p = Math.round(m.progress * 100);
-                progressBar.style.width = (45 + Math.round(p * 0.5)) + '%';
-                percentEl.textContent = (45 + Math.round(p * 0.5)) + '%';
+                progressBar.style.width = (50 + Math.round(p * 0.5)) + '%';
+                percentEl.textContent = (50 + Math.round(p * 0.5)) + '%';
                 statusEl.textContent = `Reading printed text (${p}%)...`;
               }
             }
@@ -3117,48 +3280,162 @@
 
         progressBar.style.width = '100%';
         percentEl.textContent = '100%';
-        const text = result.data.text || '';
-
-        if (!text.trim()) {
-          statusEl.textContent = 'Could not detect legible text in this receipt. Please ensure clear lighting.';
-          showToast('No text detected in receipt photo');
-          return;
-        }
-
-        statusEl.textContent = '✓ Text recognition complete!';
-        showToast('Receipt text extracted via OCR!');
-        showExtractedResult(text, 'OCR Text Recognition');
+        rawOcrText = result.data.text || '';
       } catch (err) {
         console.error('OCR Error:', err);
-        statusEl.textContent = 'OCR recognition failed: ' + (err.message || 'unknown error');
-        showToast('OCR failed: ' + (err.message || 'error'));
+        ocrError = err;
+      }
+
+      // Phase 3: Evaluate Results & Check if a Valid Reference was Found
+      const extracted = extractReceiptDetails(rawOcrText);
+
+      if (extracted && extracted.reference) {
+        statusEl.textContent = '✓ Text recognition complete!';
+        showToast('Receipt text extracted via OCR!');
+        showExtractedResult(rawOcrText, 'OCR Text Recognition');
+      } else {
+        progressBar.style.width = '100%';
+        percentEl.textContent = '100%';
+        statusEl.textContent = '⚠️ Scan analysis incomplete — see diagnostic report below';
+        showDiagnosticReport(img, rawOcrText, ocrError);
       }
     }
 
-    async function detectQrCode(canvas, ctx) {
-      // Try BarcodeDetector
-      if (barcodeDetector) {
+    // Comprehensive Multi-Scale, Multi-Crop, Binarized QR Decoder
+    async function detectQrCodeMultiPass(sourceImg) {
+      const origW = sourceImg.naturalWidth || sourceImg.width;
+      const origH = sourceImg.naturalHeight || sourceImg.height;
+
+      // 1. Try Native BarcodeDetector on original source
+      if ('BarcodeDetector' in window) {
         try {
-          const codes = await barcodeDetector.detect(canvas);
-          if (codes && codes.length > 0 && codes[0].rawValue) {
-            return codes[0].rawValue;
+          const bd = new BarcodeDetector({ formats: ['qr_code'] });
+          const codes = await bd.detect(sourceImg);
+          if (codes && codes.length > 0 && codes[0].rawValue && codes[0].rawValue.trim()) {
+            return { data: codes[0].rawValue.trim(), method: 'Native Barcode' };
           }
         } catch (_) {}
       }
 
-      // Try jsQR
-      if (typeof jsQR !== 'undefined') {
-        if (!ctx) ctx = canvas.getContext('2d');
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imgData.data, imgData.width, imgData.height, {
-          inversionAttempts: 'attemptBoth',
-        });
-        if (code && code.data) {
-          return code.data;
+      // 2. jsQR with standardized multi-scale passes
+      // High-resolution phone photos choke jsQR unless scaled to optimal scan dimensions
+      const testScales = [1000, 1500, 750, 500];
+
+      for (const maxDim of testScales) {
+        let w = origW;
+        let h = origH;
+        if (Math.max(origW, origH) > maxDim) {
+          const ratio = maxDim / Math.max(origW, origH);
+          w = Math.round(origW * ratio);
+          h = Math.round(origH * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(sourceImg, 0, 0, w, h);
+
+        if (typeof jsQR !== 'undefined') {
+          const imgData = ctx.getImageData(0, 0, w, h);
+          let code = jsQR(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data && code.data.trim()) {
+            return { data: code.data.trim(), method: `jsQR (${w}×${h})` };
+          }
+
+          // Try binarized high-contrast pass
+          const binarized = createBinarizedImageData(ctx, w, h);
+          code = jsQR(binarized.data, w, h, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data && code.data.trim()) {
+            return { data: code.data.trim(), method: `jsQR (high contrast ${w}×${h})` };
+          }
+        }
+
+        if ('BarcodeDetector' in window) {
+          try {
+            const bd = new BarcodeDetector({ formats: ['qr_code'] });
+            const codes = await bd.detect(canvas);
+            if (codes && codes.length > 0 && codes[0].rawValue && codes[0].rawValue.trim()) {
+              return { data: codes[0].rawValue.trim(), method: `BarcodeDetector (${w}×${h})` };
+            }
+          } catch (_) {}
+        }
+      }
+
+      // 3. Cropped Regions (top 55%, center 70%, top-right 45%, bottom 55%)
+      // Ethiopian bank slips (CBE, Telebirr, Dashen) typically position QR codes in header or center
+      const cropBoxes = [
+        { x: 0, y: 0, w: origW, h: Math.round(origH * 0.55), label: 'top slip' },
+        { x: Math.round(origW * 0.15), y: Math.round(origH * 0.15), w: Math.round(origW * 0.7), h: Math.round(origH * 0.7), label: 'center' },
+        { x: Math.round(origW * 0.35), y: 0, w: Math.round(origW * 0.65), h: Math.round(origH * 0.5), label: 'top right' },
+        { x: 0, y: Math.round(origH * 0.45), w: origW, h: Math.round(origH * 0.55), label: 'bottom slip' }
+      ];
+
+      for (const crop of cropBoxes) {
+        const canvas = document.createElement('canvas');
+        const maxDim = 800;
+        const ratio = Math.min(1, maxDim / Math.max(crop.w, crop.h));
+        canvas.width = Math.round(crop.w * ratio);
+        canvas.height = Math.round(crop.h * ratio);
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(sourceImg, crop.x, crop.y, crop.w, crop.h, 0, 0, canvas.width, canvas.height);
+
+        if (typeof jsQR !== 'undefined') {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          let code = jsQR(imgData.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data && code.data.trim()) {
+            return { data: code.data.trim(), method: `jsQR (crop ${crop.label})` };
+          }
+
+          const binarized = createBinarizedImageData(ctx, canvas.width, canvas.height);
+          code = jsQR(binarized.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data && code.data.trim()) {
+            return { data: code.data.trim(), method: `jsQR (binarized crop ${crop.label})` };
+          }
+        }
+
+        if ('BarcodeDetector' in window) {
+          try {
+            const bd = new BarcodeDetector({ formats: ['qr_code'] });
+            const codes = await bd.detect(canvas);
+            if (codes && codes.length > 0 && codes[0].rawValue && codes[0].rawValue.trim()) {
+              return { data: codes[0].rawValue.trim(), method: `BarcodeDetector (crop ${crop.label})` };
+            }
+          } catch (_) {}
         }
       }
 
       return null;
+    }
+
+    // Adaptive thresholding & contrast enhancement for QR module detection
+    function createBinarizedImageData(ctx, w, h, invert = false) {
+      const src = ctx.getImageData(0, 0, w, h);
+      const d = src.data;
+      let totalLum = 0;
+      const count = w * h;
+      for (let i = 0; i < d.length; i += 4) {
+        totalLum += (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114);
+      }
+      const avgLum = totalLum / count;
+      const threshold = Math.max(50, Math.min(205, avgLum));
+
+      const out = ctx.createImageData(w, h);
+      const outD = out.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const lum = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
+        const isWhite = invert ? (lum <= threshold) : (lum > threshold);
+        const v = isWhite ? 255 : 0;
+        outD[i] = v;
+        outD[i+1] = v;
+        outD[i+2] = v;
+        outD[i+3] = 255;
+      }
+      return out;
+    }
+
+    // Legacy detectQrCode single-canvas wrapper
+    async function detectQrCode(canvas, ctx) {
+      return (await detectQrCodeMultiPass(canvas))?.data || null;
     }
 
     function showExtractedResult(rawText, sourceLabel) {
@@ -3166,13 +3443,21 @@
       currentExtractedData = extracted;
 
       const detectedCard = document.getElementById('ocrDetectedCard');
+      const diagnosticBox = document.getElementById('ocrDiagnosticBox');
       const sourceText = document.getElementById('ocrSourceText');
       const detectedBank = document.getElementById('ocrDetectedBank');
       const detectedRef = document.getElementById('ocrDetectedRef');
 
+      if (!extracted || !extracted.reference) {
+        const previewImg = document.getElementById('ocrPreviewImg');
+        showDiagnosticReport(previewImg, rawText, null);
+        return;
+      }
+
+      if (diagnosticBox) diagnosticBox.style.display = 'none';
       sourceText.textContent = sourceLabel;
       detectedBank.textContent = 'Bank: ' + (extracted.bankTitle || 'Auto-Detected');
-      detectedRef.textContent = extracted.reference || 'No Reference Found';
+      detectedRef.textContent = extracted.reference;
 
       // Suffix
       const suffixWrap = document.getElementById('ocrFieldSuffixWrap');
@@ -3205,6 +3490,80 @@
       }
 
       detectedCard.style.display = 'block';
+    }
+
+    function showDiagnosticReport(img, rawOcrText, ocrError) {
+      const diagnosticBox = document.getElementById('ocrDiagnosticBox');
+      const detectedCard = document.getElementById('ocrDetectedCard');
+      if (!diagnosticBox) return;
+
+      if (detectedCard) detectedCard.style.display = 'none';
+
+      const w = img ? (img.naturalWidth || img.width || 0) : 0;
+      const h = img ? (img.naturalHeight || img.height || 0) : 0;
+      const text = rawOcrText || '';
+      const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const charCount = text.length;
+
+      const dimsEl = document.getElementById('diagnosticImgDims');
+      if (dimsEl) {
+        dimsEl.textContent = w && h ? `${w} × ${h} px` : 'Analyzed Frame';
+      }
+
+      // QR Step
+      const stepQrStatus = document.getElementById('stepQrStatus');
+      const qrReason = document.getElementById('diagnosticQrReason');
+      stepQrStatus.textContent = '❌';
+      qrReason.textContent = `Tested multi-scale passes (1000px, 1500px, 750px), contrast binarization, and quadrant crops. No standard QR finder patterns (1:1:3:1:1) could be aligned.`;
+
+      // OCR Step
+      const stepOcrStatus = document.getElementById('stepOcrStatus');
+      const ocrReason = document.getElementById('diagnosticOcrReason');
+
+      if (ocrError) {
+        stepOcrStatus.textContent = '❌';
+        ocrReason.textContent = `OCR engine error: ${ocrError.message || 'Worker initialization failed'}. Please enter reference manually or paste SMS.`;
+      } else if (wordCount === 0) {
+        stepOcrStatus.textContent = '❌';
+        ocrReason.textContent = `No readable characters detected in image. The photo may be blurry, have low contrast, or the receipt is too distant.`;
+      } else {
+        stepOcrStatus.textContent = '⚠️';
+        ocrReason.textContent = `Read ${wordCount} words (${charCount} characters), but no recognizable CBE FT, Telebirr, Dashen, or UUID reference code was found.`;
+      }
+
+      // Raw OCR Drawer
+      const rawWrap = document.getElementById('diagnosticRawTextWrap');
+      const rawPre = document.getElementById('diagnosticRawPre');
+      const countLabel = document.getElementById('rawOcrCountLabel');
+
+      if (text.trim()) {
+        rawPre.textContent = text.trim();
+        countLabel.textContent = `🔍 View raw text detected by OCR (${wordCount} words, ${charCount} chars)`;
+        rawWrap.style.display = 'block';
+      } else {
+        rawWrap.style.display = 'none';
+      }
+
+      diagnosticBox.style.display = 'block';
+    }
+
+    function toggleRawOcrDrawer() {
+      const pre = document.getElementById('diagnosticRawPre');
+      const arrow = document.getElementById('rawOcrArrow');
+      const isOpen = pre.style.display === 'block';
+      pre.style.display = isOpen ? 'none' : 'block';
+      arrow.textContent = isOpen ? '↓' : '↑';
+    }
+
+    function handleManualFallbackClick() {
+      closeOcrModal();
+      document.getElementById('refInput').focus();
+      showToast('Please enter reference manually');
+    }
+
+    function switchCameraFromDiagnostic() {
+      closeOcrModal();
+      openQrModal();
     }
 
     function applyExtractedAndVerify() {
@@ -3266,6 +3625,19 @@
       }, 350);
     }
 
+    // Common non-reference dictionary words to ignore during fallback matching
+    const DICT_BLOCKLIST = new Set([
+      'COMMERCIAL', 'BANKING', 'ETHIOPIA', 'TRANSACTION', 'COMPLETED', 'SETTLEMENT',
+      'BENEFICIARY', 'CUSTOMER', 'RECEIVER', 'PAYMENT', 'SUCCESSFUL', 'TRANSFER',
+      'TELEBIRR', 'ETHIOTELECOM', 'ACCOUNT', 'SERVICE', 'DESCRIPTION', 'REASON',
+      'AUTHORIZED', 'CREDITED', 'DEBITED', 'DEPOSIT', 'SAVINGS', 'CHECKING',
+      'STATEMENT', 'VALIDATION', 'SECURITY', 'INTERNET', 'SEPTEMBER', 'NOVEMBER',
+      'DECEMBER', 'JANUARY', 'FEBRUARY', 'YEKATIT', 'HIDAR', 'TAHSAS', 'TIRR',
+      'AIRTIME', 'COMMISSION', 'MERCHANT', 'SUPERMARKET', 'HOTEL', 'RESTAURANT',
+      'GROCERY', 'PHARMACY', 'STATIONERY', 'BOUTIQUE', 'RECEIPT', 'VOUCHER',
+      'INVOICE', 'CONFIRMATION', 'REFERENCE', 'AUTHENTICATION'
+    ]);
+
     // Comprehensive Ethiopian Receipt & QR Data Extractor
     function extractReceiptDetails(text) {
       const raw = text || '';
@@ -3295,39 +3667,67 @@
         }
       }
 
-      // 2. Check for CBE FT Slip
-      const ftMatch = raw.match(/\b(FT[0-9A-Z]{8,14})\b/i);
+      // 2. Standalone CBE UUID token
+      if (!reference) {
+        const uuidMatch = raw.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+        if (uuidMatch) {
+          reference = uuidMatch[1];
+          bankPill = 'cbe';
+          bankTitle = 'CBE Mobile Token';
+        }
+      }
+
+      // 3. Check for CBE FT Slip (with OCR character tolerance for F1/FI/F7 -> FT)
+      const ftMatch = raw.match(/\b(F[T|I|1|7][0-9A-Z]{8,14})\b/i);
       if (ftMatch && !reference) {
-        reference = ftMatch[1].toUpperCase();
+        let code = ftMatch[1].toUpperCase();
+        if (/^F[I17]/.test(code)) code = 'FT' + code.slice(2);
+        reference = code;
         bankPill = 'cbe';
         bankTitle = 'Commercial Bank of Ethiopia';
       }
 
-      // 3. Check for Telebirr
-      const tbMatch = raw.match(/\b(TB[0-9A-Z]{8,14})\b/i) || raw.match(/(?:trans\s*no|receipt\s*no|transaction\s*id)[:\s]+([A-Z0-9]{8,16})/i);
+      // 4. Check for Telebirr
+      const tbMatch = raw.match(/\b(T[B|8|3][0-9A-Z]{8,14})\b/i) 
+        || raw.match(/\b(R[0-9A-Z]{9,15})\b/i)
+        || raw.match(/(?:trans\s*(?:no|id)|receipt\s*no|transaction\s*id|ደረሰኝ\s*ቁጥር)[:\s\.]+([A-Z0-9]{8,18})/i);
       if (tbMatch && !reference) {
-        reference = (tbMatch[1] || tbMatch[0]).toUpperCase();
+        let code = (tbMatch[1] || tbMatch[0]).toUpperCase();
+        if (/^T[83]/.test(code)) code = 'TB' + code.slice(2);
+        reference = code;
         bankPill = 'telebirr';
         bankTitle = 'Telebirr';
       }
 
-      // 4. Check for Dashen DB
-      const dbMatch = raw.match(/\b(DB[0-9A-Z]{8,14})\b/i);
+      // 5. Standalone 10-14 numeric transaction ID (Telebirr/CBE)
+      if (!reference) {
+        const numRefMatch = raw.match(/\b(\d{10,14})\b/);
+        if (numRefMatch && !/(?:1000\d{8,10})/.test(numRefMatch[1])) {
+          reference = numRefMatch[1];
+          bankPill = 'telebirr';
+          bankTitle = 'Telebirr';
+        }
+      }
+
+      // 6. Check for Dashen DB (with tolerance for D8 -> DB)
+      const dbMatch = raw.match(/\b(D[B|8][0-9A-Z]{8,14})\b/i);
       if (dbMatch && !reference) {
-        reference = dbMatch[1].toUpperCase();
+        let code = dbMatch[1].toUpperCase();
+        if (/^D8/.test(code)) code = 'DB' + code.slice(2);
+        reference = code;
         bankPill = 'dashen';
         bankTitle = 'Dashen Bank';
       }
 
-      // 5. Check for Bank of Abyssinia
-      const boaMatch = raw.match(/\b(BOA[0-9A-Z]{8,14})\b/i);
+      // 7. Check for Bank of Abyssinia
+      const boaMatch = raw.match(/\b(BOA[0-9A-Z]{8,14})\b/i) || raw.match(/\b(APOLLO[0-9A-Z]{6,12})\b/i);
       if (boaMatch && !reference) {
         reference = boaMatch[1].toUpperCase();
         bankPill = 'abyssinia';
         bankTitle = 'Bank of Abyssinia';
       }
 
-      // 6. Check for CBE Birr
+      // 8. Check for CBE Birr
       const cbeBirrMatch = raw.match(/\b(CB[0-9A-Z]{8,14})\b/i);
       if (cbeBirrMatch && !reference) {
         reference = cbeBirrMatch[1].toUpperCase();
@@ -3335,18 +3735,25 @@
         bankTitle = 'CBE Birr';
       }
 
-      // 7. Check for M-Pesa
+      // 9. Check for M-Pesa
       const mpMatch = raw.match(/\b([A-Z]{2}[0-9A-Z]{8,10})\b/);
-      if (mpMatch && !reference && /(?:mpesa|safaricom)/i.test(raw)) {
+      if (mpMatch && !reference && !DICT_BLOCKLIST.has(mpMatch[1].toUpperCase()) && /(?:mpesa|safaricom)/i.test(raw)) {
         reference = mpMatch[1].toUpperCase();
         bankPill = 'mpesa';
         bankTitle = 'Safaricom M-Pesa';
       }
 
-      // Fallback reference: first clean 8-36 alphanumeric token
+      // 10. Fallback reference: alphanumeric 8-36 token that contains digits or hyphens (excluding dictionary words)
       if (!reference) {
-        const fallbackMatch = raw.match(/[A-Z0-9-]{8,36}/i);
-        if (fallbackMatch) reference = fallbackMatch[0];
+        const candidateMatches = raw.match(/\b[A-Z0-9-]{8,36}\b/gi) || [];
+        for (const cand of candidateMatches) {
+          const upper = cand.toUpperCase();
+          if (DICT_BLOCKLIST.has(upper)) continue;
+          if (/\d/.test(upper) || upper.includes('-')) {
+            reference = upper;
+            break;
+          }
+        }
       }
 
       // Credited Account (1000...)
@@ -3558,6 +3965,76 @@
             </button>
             <button type="button" class="btn-ctrl" onclick="applyExtractedToFormOnly()">
               <span>Apply to Form</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Diagnostic Error Box (Shown when detection fails) -->
+        <div id="ocrDiagnosticBox" class="ocr-diagnostic-card" style="display: none;">
+          <div class="diagnostic-header">
+            <div class="diagnostic-icon">
+              <svg width="20" height="20" fill="none" stroke="#FF5630" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <h4 class="diagnostic-title">Scan Analysis Incomplete</h4>
+                <span class="diagnostic-meta-badge" id="diagnosticImgDims">0 × 0 px</span>
+              </div>
+              <div class="diagnostic-subtitle" id="diagnosticSubtitle">
+                Neither a QR code nor an Ethiopian bank transaction ID pattern could be confirmed in this image.
+              </div>
+            </div>
+          </div>
+
+          <div class="diagnostic-breakdown">
+            <div class="diagnostic-step">
+              <div class="step-status" id="stepQrStatus">❌</div>
+              <div class="step-details">
+                <strong>QR Code Scanner:</strong>
+                <span id="diagnosticQrReason">Tested 8 multi-scale passes and crops. No valid QR matrix detected.</span>
+              </div>
+            </div>
+
+            <div class="diagnostic-step">
+              <div class="step-status" id="stepOcrStatus">⚠️</div>
+              <div class="step-details">
+                <strong>Printed Text OCR:</strong>
+                <span id="diagnosticOcrReason">Read characters, but no recognizable CBE FT, Telebirr, Dashen, or UUID reference code was found.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagnostic-checklist">
+            <div class="checklist-title">Why this usually happens:</div>
+            <ul>
+              <li><strong>Too distant or cropped:</strong> The QR code or transaction number is too small in the frame or partially cut off.</li>
+              <li><strong>Screen glare or dark mode:</strong> Glare across phone screens or low contrast can obscure QR module finders.</li>
+              <li><strong>Blurry photo:</strong> Camera focus was lost or motion blur smoothed out printed numbers.</li>
+            </ul>
+          </div>
+
+          <!-- Collapsible Raw OCR Text Drawer -->
+          <div id="diagnosticRawTextWrap" style="display: none; margin-top: 12px;">
+            <button type="button" class="btn-toggle-raw-ocr" onclick="toggleRawOcrDrawer()">
+              <span id="rawOcrCountLabel">🔍 View raw characters read by OCR</span>
+              <span id="rawOcrArrow">↓</span>
+            </button>
+            <pre id="diagnosticRawPre" class="diagnostic-raw-pre"></pre>
+          </div>
+
+          <!-- Actionable Fallbacks -->
+          <div class="diagnostic-actions">
+            <button type="button" class="btn-ctrl btn-ctrl-primary" onclick="handleManualFallbackClick()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Type Reference Manually</span>
+            </button>
+            <button type="button" class="btn-ctrl" onclick="document.getElementById('ocrFileInput').click()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>Upload Another Photo / Crop Closer</span>
+            </button>
+            <button type="button" class="btn-ctrl" onclick="switchCameraFromDiagnostic()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span>Open Camera Scanner</span>
             </button>
           </div>
         </div>

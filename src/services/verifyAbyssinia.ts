@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import logger from '../utils/logger';
 import { VerifyResult } from './verifyCBE';
+import { sharedHttpsAgent } from '../utils/httpClient';
 
 export interface AbyssiniaReceipt {
     sourceAccountName: string;
@@ -36,7 +37,8 @@ export async function verifyAbyssinia(reference: string, suffix: string): Promis
         
         // Fetch JSON data from the API
         const response = await axios.get(apiUrl, {
-            timeout: 30000,
+            httpsAgent: sharedHttpsAgent,
+            timeout: 10000,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Accept': 'application/json, text/plain, */*',

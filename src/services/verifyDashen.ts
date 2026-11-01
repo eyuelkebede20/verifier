@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import pdf from 'pdf-parse';
-import https from 'https';
+import { sharedHttpsAgent } from '../utils/httpClient';
 import logger from '../utils/logger';
 
 export interface DashenVerifyResult {
@@ -37,21 +37,21 @@ export async function verifyDashen(
     transactionReference: string
 ): Promise<DashenVerifyResult> {
     const url = `https://receipt.dashensuperapp.com/receipt/${transactionReference}`;
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
-    const maxRetries = 5;
-    const retryDelay = 2000; // 2 seconds
+    const maxRetries = 3;
+
+
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             logger.info(`🔎 Fetching Dashen receipt (Attempt ${attempt}/${maxRetries}): ${url}`);
             const response: AxiosResponse<ArrayBuffer> = await axios.get(url, {
-                httpsAgent,
+                httpsAgent: sharedHttpsAgent,
                 responseType: 'arraybuffer',
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                     'Accept': 'application/pdf'
                 },
-                timeout: 60000
+                timeout: 12000
             });
 
             logger.info('✅ Dashen receipt fetch success, parsing PDF');
@@ -59,6 +59,13 @@ export async function verifyDashen(
         } catch (error: any) {
             const isLastAttempt = attempt === maxRetries;
             const status = error.response?.status;
+            if (status === 404 || status === 400 || status === 401 || status === 403) {
+                logger.warn(`⚠️ Dashen receipt not found or invalid (HTTP ${status}): ${transactionReference}`);
+                return {
+                    success: false,
+                    error: `Dashen receipt not found or invalid transaction reference.`
+                };
+            }
             
             logger.warn(`⚠️ Dashen receipt fetch failed (Attempt ${attempt}/${maxRetries}): ${error.message}`);
 
@@ -72,8 +79,8 @@ export async function verifyDashen(
             }
 
             // Wait before retrying
-            logger.info(`⏳ Waiting ${retryDelay}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            const backoffMs = Math.min(600, 250 * Math.pow(2, attempt - 1));
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
         }
     }
 

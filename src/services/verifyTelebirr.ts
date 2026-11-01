@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { sharedHttpsAgent } from '../utils/httpClient';
 import * as cheerio from "cheerio";
 import logger from '../utils/logger';
 import type {
@@ -333,7 +334,11 @@ async function fetchFromPrimarySource(reference: string, baseUrl: string): Promi
 
     try {
         logger.info('Attempting to fetch Telebirr receipt from primary source.');
-        const response = await axios.get(url, { timeout: 30000 }); // 30 second timeout to be safe
+        const primaryTimeout = Number(process.env.TELEBIRR_PRIMARY_TIMEOUT_MS) || 3500;
+        const response = await axios.get(url, {
+            httpsAgent: sharedHttpsAgent,
+            timeout: primaryTimeout,
+        });
         logger.debug(`Received response with status: ${response.status}`);
 
         const extractedData = scrapeTelebirrReceipt(response.data);
@@ -408,6 +413,7 @@ async function fetchFromProxySource(
             relay: relayLabel
         });
         const response = await axios.get(url, {
+            httpsAgent: sharedHttpsAgent,
             timeout: options.timeoutMs ?? 30000,
             signal: options.signal,
             headers: {

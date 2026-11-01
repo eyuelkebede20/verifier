@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import pdf from 'pdf-parse';
-import https from 'https';
+import { sharedHttpsAgent } from '../utils/httpClient';
 import logger from '../utils/logger';
 import { extractLegacyCbeUrlData, extractNewCbeToken } from '../utils/cbeReference';
 
@@ -58,12 +58,12 @@ export async function verifyCBELegacy(
 ): Promise<VerifyResult> {
     const fullId = `${reference}${accountSuffix}`;
     const url = `https://apps.cbe.com.et:100/?id=${fullId}`;
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
 
     try {
         logger.info(`🔎 Attempting direct fetch: ${url}`);
         const response: AxiosResponse<ArrayBuffer> = await axios.get(url, {
-            httpsAgent,
+            httpsAgent: sharedHttpsAgent,
             responseType: 'arraybuffer',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
@@ -113,7 +113,7 @@ export async function verifyCBELegacy(
             }
 
             const pdfRes = await axios.get(detectedPdfUrl, {
-                httpsAgent,
+                httpsAgent: sharedHttpsAgent,
                 responseType: 'arraybuffer'
             });
 
@@ -130,16 +130,16 @@ export async function verifyCBELegacy(
 }
 
 export async function verifyCBENew(token: string): Promise<VerifyResult> {
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
     const url = `https://mb.cbe.com.et/api/v1/transactions/public/transaction-detail/${token}`;
-    const maxRetries = 4;
-    const retryDelayMs = 1800;
+    const maxRetries = 3;
+
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             logger.info(`🔎 Attempting new CBE JSON fetch (${attempt}/${maxRetries}): ${url}`);
             const response = await axios.get<CBETransactionResponse>(url, {
-                httpsAgent,
+                httpsAgent: sharedHttpsAgent,
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
                     'Origin': 'https://mbreciept.cbe.com.et',
@@ -180,7 +180,7 @@ export async function verifyCBENew(token: string): Promise<VerifyResult> {
                 };
             }
 
-            await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+            await new Promise(resolve => setTimeout(resolve, Math.min(600, 200 * Math.pow(2, attempt - 1))));
         }
     }
 
