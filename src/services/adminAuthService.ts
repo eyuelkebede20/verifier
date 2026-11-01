@@ -60,6 +60,15 @@ export function verifyMasterKey(inputKey: string): boolean {
     }
   }
 
+  // 4. Check against VERIFIER_API_KEY or STATIC_API_KEY if specific ADMIN_KEY is not defined
+  const fallbackEnvKey = (process.env.VERIFIER_API_KEY || process.env.STATIC_API_KEY || '').trim();
+  if (fallbackEnvKey) {
+    const expectedHash = crypto.createHash('sha256').update(fallbackEnvKey).digest();
+    if (crypto.timingSafeEqual(inputHash, expectedHash)) {
+      return true;
+    }
+  }
+
   // 3. In non-production, allow fallback dev key if no keys set in .env
   if (!masterKey && !envKeyHash && process.env.NODE_ENV !== 'production') {
     const devHash = crypto.createHash('sha256').update(DEFAULT_DEV_ADMIN_KEY).digest();
