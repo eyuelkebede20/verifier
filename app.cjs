@@ -72,7 +72,7 @@ try {
   }
   require(targetEntry);
 } catch (err) {
-  const errorLog = path.join(__dirname, 'startup-error.log');
+  const errorLog = path.join(logsDir, 'startup-error.log');
   fs.writeFileSync(errorLog, '[ ' + new Date().toISOString() + ' ] Server startup failed:\n' + (err.stack || err) + '\n', 'utf8');
   console.error('[Fatal Startup Error]', err);
   process.exit(1);
