@@ -323,25 +323,51 @@ function parseTelebirrJson(jsonData: any): TelebirrReceipt | null {
     }
 }
 
+interface PrimaryFetchOptions {
+    timeoutMs?: number;
+    signal?: AbortSignal;
+}
+
 /**
  * Fetches and processes Telebirr receipt data from the primary source (HTML)
  * @param reference The Telebirr reference number
  * @param baseUrl The base URL to fetch the receipt from
+ * @param options Optional timeout and abort signal
  * @returns The scraped receipt data or null if failed
  */
-async function fetchFromPrimarySource(reference: string, baseUrl: string): Promise<TelebirrReceipt | null> {
+async function fetchFromPrimarySource(
+    reference: string,
+    baseUrl: string,
+    options: PrimaryFetchOptions = {}
+): Promise<TelebirrReceipt | null> {
     const url = `${baseUrl}${reference}`;
 
     try {
         logger.info('Attempting to fetch Telebirr receipt from primary source.');
-        const primaryTimeout = Number(process.env.TELEBIRR_PRIMARY_TIMEOUT_MS) || 3500;
+        const primaryTimeout = options.timeoutMs ?? (Number(process.env.TELEBIRR_PRIMARY_TIMEOUT_MS) || 3200);
         const response = await axios.get(url, {
             httpsAgent: sharedHttpsAgent,
             timeout: primaryTimeout,
+            signal: options.signal,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9,am;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Upgrade-Insecure-Requests': '1',
+            }
         });
         logger.debug(`Received response with status: ${response.status}`);
 
-        const extractedData = scrapeTelebirrReceipt(response.data);
+        const rawHtml = response.data;
+        if (typeof rawHtml === 'string' && (rawHtml.includes('This request is not correct') || rawHtml.includes('Request Not Found'))) {
+            logger.info(`Telebirr receipt not found ('This request is not correct') for: ${reference}`);
+            return null;
+        }
+
+        const extractedData = scrapeTelebirrReceipt(rawHtml);
 
         logger.info('Successfully extracted Telebirr data from primary source.', {
             transactionStatus: extractedData.transactionStatus
@@ -945,36 +971,103 @@ export async function probeTelebirrProxyPool(
 }
 
 export async function verifyTelebirr(reference: string): Promise<TelebirrReceipt | null> {
+    const cleanRef = reference.trim();
+    if (!cleanRef) return null;
+
     const primaryUrl = "https://transactioninfo.ethiotelecom.et/receipt/";
     const proxyDescriptors = getTelebirrProxyDescriptors(process.env);
     const skipPrimary = process.env.SKIP_PRIMARY_VERIFICATION === "true";
 
-    if (!skipPrimary) {
+    if (skipPrimary) {
+        logger.info(`Skipping primary verifier (SKIP_PRIMARY_VERIFICATION=true).`);
+        if (proxyDescriptors.length === 0) {
+            logger.error("CRITICAL: Primary check skipped, but no FALLBACK_PROXIES defined in .env!");
+            return null;
+        }
+        return verifyWithTelebirrProxyPool(
+            cleanRef,
+            proxyDescriptors,
+            process.env
+        );
+    }
+
+    if (proxyDescriptors.length === 0) {
         logger.info('Attempting primary Telebirr verification.');
-        const primaryResult = await fetchFromPrimarySource(reference, primaryUrl);
+        const primaryResult = await fetchFromPrimarySource(cleanRef, primaryUrl);
 
         if (primaryResult && isValidReceipt(primaryResult)) {
             return primaryResult;
         }
-        logger.warn(`Primary verification failed. Moving to fallback proxy pool...`);
-    } else {
-        logger.info(`Skipping primary verifier (SKIP_PRIMARY_VERIFICATION=true).`);
-    }
-
-    if (proxyDescriptors.length === 0 && skipPrimary) {
-        logger.error("CRITICAL: Primary check skipped, but no FALLBACK_PROXIES defined in .env!");
+        logger.warn(`Primary verification failed and no fallback relays configured.`);
         return null;
     }
 
-    if (proxyDescriptors.length > 0) {
-        const fallbackResult = await verifyWithTelebirrProxyPool(
-            reference,
-            proxyDescriptors,
-            process.env
-        );
-        if (fallbackResult) {
-            return fallbackResult;
+    // Both Primary and Fallback Proxies are configured:
+    // Launch primary first; if it does not complete within the hedge window,
+    // fire the fallback relay pool in parallel so clients never wait on slow Ethio Telecom upstreams.
+    const hedgeDelayMs = positiveInteger(process.env.TELEBIRR_PRIMARY_HEDGE_MS, 800);
+    const primaryController = new AbortController();
+    let primaryDone = false;
+
+    const primaryPromise = (async (): Promise<TelebirrReceipt | null> => {
+        try {
+            logger.info('Attempting primary Telebirr verification.');
+            const res = await fetchFromPrimarySource(cleanRef, primaryUrl, { signal: primaryController.signal });
+            primaryDone = true;
+            return (res && isValidReceipt(res)) ? res : null;
+        } catch {
+            primaryDone = true;
+            return null;
         }
+    })();
+
+    let hedgeTimer: NodeJS.Timeout | undefined;
+    const hedgeWait = new Promise<'hedge'>(resolve => {
+        hedgeTimer = setTimeout(() => resolve('hedge'), hedgeDelayMs);
+    });
+
+    const initial = await Promise.race([primaryPromise, hedgeWait]);
+    if (hedgeTimer) clearTimeout(hedgeTimer);
+
+    if (initial && initial !== 'hedge') {
+        logger.info('Primary Telebirr verification succeeded before hedge delay.');
+        return initial;
+    }
+
+    // If primary returned null quickly (e.g. invalid receipt / 404):
+    if (primaryDone) {
+        logger.info('Primary verification returned no receipt; falling back to relay pool.');
+        return verifyWithTelebirrProxyPool(cleanRef, proxyDescriptors, process.env);
+    }
+
+    // Primary is still in flight (slow upstream) - start fallback proxy pool concurrently!
+    logger.info(`Primary verification still in flight after ${hedgeDelayMs}ms; launching hedged fallback relays.`);
+    const poolPromise = verifyWithTelebirrProxyPool(cleanRef, proxyDescriptors, process.env).catch(() => null);
+
+    const winner = await Promise.race([
+        primaryPromise.then(res => res ? { source: 'primary' as const, res } : null),
+        poolPromise.then(res => res ? { source: 'relay' as const, res } : null),
+    ]);
+
+    if (winner?.res) {
+        if (winner.source === 'relay') {
+            primaryController.abort();
+            logger.info('Hedged fallback relay returned receipt first.');
+        } else {
+            logger.info('Primary verification completed first.');
+        }
+        return winner.res;
+    }
+
+    // Wait for the remaining candidate
+    const poolFinal = await poolPromise;
+    if (poolFinal && isValidReceipt(poolFinal)) {
+        return poolFinal;
+    }
+
+    const primaryFinal = await primaryPromise;
+    if (primaryFinal && isValidReceipt(primaryFinal)) {
+        return primaryFinal;
     }
 
     logger.error('All Telebirr verification methods failed.');

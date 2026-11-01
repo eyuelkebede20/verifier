@@ -17,6 +17,7 @@ import { rateLimiter } from './middleware/rateLimiter';
 import adminRoutes from './routes/adminRoutes';
 import usageTrackerService from './services/usageTrackerService';
 import logger from './utils/logger';
+import receiptCache from './utils/receiptCache';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -202,6 +203,17 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
 
   try {
     const selectedBank = (bank || 'universal').toLowerCase();
+    const cacheKeySuffix = resolvedSuffix || resolvedPhone;
+    const cached = receiptCache.get<any>(selectedBank, trimmedRef, cacheKeySuffix);
+    if (cached) {
+      logger.info(`⚡ Public verify cache HIT for [${selectedBank}] ${trimmedRef}`);
+      res.json({
+        ...cached,
+        details: { ...((cached.details as any) || {}), cached: true },
+      });
+      return;
+    }
+
     let resultData: any = null;
     let detectedProvider = selectedBank;
 
@@ -293,7 +305,7 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
     const refId = resultData?.receiptNo || resultData?.reference || resultData?.id || trimmedRef;
     const status = resultData?.transactionStatus || resultData?.status || 'COMPLETED';
 
-    res.json({
+    const responsePayload = {
       success: true,
       provider: detectedProvider,
       receipt: {
@@ -309,7 +321,10 @@ app.post('/api/public-verify', async (req: Request, res: Response): Promise<void
         reason,
       },
       raw: resultData,
-    });
+    };
+
+    receiptCache.set(selectedBank, trimmedRef, responsePayload, cacheKeySuffix);
+    res.json(responsePayload);
   } catch (err: any) {
     logger.warn(`Public verification failed: ${err.message}`);
     res.status(422).json({

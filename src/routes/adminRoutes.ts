@@ -6,6 +6,7 @@ import {
 } from '../services/adminAuthService';
 import apiKeyService from '../services/apiKeyService';
 import usageTrackerService from '../services/usageTrackerService';
+import receiptCache from '../utils/receiptCache';
 import logger from '../utils/logger';
 
 const router = Router();
@@ -146,6 +147,7 @@ router.get('/usage', requireAdminAuth, (_req: Request, res: Response): void => {
   res.json({
     success: true,
     stats,
+    cache: receiptCache.getStats(),
   });
 });
 
