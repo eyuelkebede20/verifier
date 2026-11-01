@@ -12,9 +12,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Client-Side Modules: ZXing/Html5Qrcode QR Scanner & Tesseract.js Browser OCR -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- Client-Side Modules: jsQR, BarcodeDetector, and Tesseract.js Browser OCR -->
+  <script src="/jsqr.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script>
+    if (typeof Tesseract === 'undefined') {
+      document.write('<script src="/tesseract.min.js"><\/script>');
+    }
+  </script>
   
   <style>
     /* ─────────────────────────────────────────────────────────────────────────
@@ -1449,6 +1454,273 @@
       background: linear-gradient(90deg, #1F4DFF, #60A5FA);
       transition: width 0.2s ease;
     }
+
+    /* Quick Scanner Capture Ribbon */
+    .quick-scanner-banner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 640px) {
+      .quick-scanner-banner {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+    .scanner-banner-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      color: var(--color-ink);
+      font-family: inherit;
+    }
+    .scanner-banner-card:hover {
+      background: rgba(31, 77, 255, 0.08);
+      border-color: rgba(31, 77, 255, 0.35);
+      transform: translateY(-2px);
+    }
+    .banner-card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .banner-card-icon.camera-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .banner-card-icon.gallery-icon {
+      background: rgba(31, 77, 255, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(31, 77, 255, 0.25);
+    }
+    .banner-card-icon.paste-icon {
+      background: rgba(255, 86, 48, 0.15);
+      color: #FF7A59;
+      border: 1px solid rgba(255, 86, 48, 0.25);
+    }
+    .banner-card-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .banner-card-text strong {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .banner-card-text span {
+      font-size: 0.72rem;
+      color: var(--color-ink-soft);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Camera Viewfinder Styling */
+    .scanner-video-wrap {
+      position: relative;
+      width: 100%;
+      height: 270px;
+      background: #000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+    .scanner-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .scanner-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 190px;
+      height: 190px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-color: var(--color-brand);
+      border-style: solid;
+    }
+    .reticle-corner.tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-top-left-radius: 6px; }
+    .reticle-corner.tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-top-right-radius: 6px; }
+    .reticle-corner.bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-bottom-left-radius: 6px; }
+    .reticle-corner.br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-bottom-right-radius: 6px; }
+
+    .scanner-laser {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #1F4DFF, #60A5FA, transparent);
+      box-shadow: 0 0 10px #1F4DFF, 0 0 20px #60A5FA;
+      animation: laserSweep 2s ease-in-out infinite alternate;
+      display: none;
+    }
+    .scanner-reticle.active .scanner-laser {
+      display: block;
+    }
+    @keyframes laserSweep {
+      0% { top: 10px; opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { top: 180px; opacity: 0.3; }
+    }
+
+    .scanner-status-pill {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 15, 25, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #E2E8F0;
+      font-size: 0.73rem;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 90%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    /* Scanner Controls Toolbar */
+    .scanner-ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-ctrl {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--color-line);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-ctrl:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-ctrl-primary {
+      background: var(--color-brand);
+      border-color: var(--color-brand);
+      box-shadow: 0 4px 14px var(--color-brand-glow);
+    }
+    .btn-ctrl-primary:hover {
+      background: var(--color-brand-ink);
+    }
+
+    /* OCR Extracted Data Card */
+    .ocr-detected-card {
+      margin-top: 16px;
+      background: rgba(18, 23, 34, 0.95);
+      border: 1px solid rgba(31, 77, 255, 0.35);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    .ocr-detected-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .ocr-source-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: rgba(31, 77, 255, 0.2);
+      color: #90B0FF;
+      border: 1px solid rgba(31, 77, 255, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .ocr-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 480px) {
+      .ocr-grid { grid-template-columns: 1fr; }
+    }
+    .ocr-field {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .ocr-field-lbl {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-muted);
+      margin-bottom: 2px;
+    }
+    .ocr-field-val {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #F8FAFC;
+      word-break: break-all;
+    }
+    .ocr-actions-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* Verifier Card Drag-Over visual indicator */
+    .verifier-card.drag-over {
+      outline: 2px dashed var(--color-brand);
+      outline-offset: -4px;
+      background: rgba(31, 77, 255, 0.08);
+    }
   </style>
 </head>
 <body>
@@ -1566,6 +1838,39 @@
           </div>
         </div>
 
+        <!-- Quick Capture Action Strip -->
+        <div class="quick-scanner-banner">
+          <button type="button" class="scanner-banner-card" onclick="openQrModal()">
+            <div class="banner-card-icon camera-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            </div>
+            <div class="banner-card-text">
+              <strong>Live Camera Scan</strong>
+              <span>Aim at QR code or paper slip</span>
+            </div>
+          </button>
+
+          <button type="button" class="scanner-banner-card" onclick="openOcrModal(); document.getElementById('ocrFileInput').click();">
+            <div class="banner-card-icon gallery-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="banner-card-text">
+              <strong>Gallery & Photo OCR</strong>
+              <span>Upload receipt screenshot</span>
+            </div>
+          </button>
+
+          <button type="button" class="scanner-banner-card" onclick="pasteFromClipboard()">
+            <div class="banner-card-icon paste-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div class="banner-card-text">
+              <strong>Paste SMS / Clipboard</strong>
+              <span>Auto-extracts transaction ID</span>
+            </div>
+          </button>
+        </div>
+
         <!-- Verification Form -->
         <form id="verifyForm" onsubmit="handleVerify(event)">
           <div class="form-group">
@@ -1573,6 +1878,14 @@
               <label class="form-label" id="refLabel">Transaction Reference, Token, or SMS</label>
               
               <div class="label-actions">
+                <button type="button" class="btn-action-tool tool-btn-scan" onclick="openQrModal()" title="Scan QR code using live camera">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                  <span>Scan QR</span>
+                </button>
+                <button type="button" class="btn-action-tool tool-btn-gallery" onclick="openOcrModal(); document.getElementById('ocrFileInput').click();" title="Read receipt photo or screenshot via browser OCR">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>OCR Photo</span>
+                </button>
                 <button type="button" class="btn-action-tool" onclick="pasteFromClipboard()" title="Paste SMS or reference copied from your phone">
                   <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                   <span>Paste SMS</span>
@@ -1581,16 +1894,6 @@
                   <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                   <span>Sanitize</span>
                 </button>
-                <button type="button" class="btn-action-tool tool-btn-scan" onclick="openQrModal()" title="Scan QR code using camera or image">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm11 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zM3 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm11 1h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>
-                  <span>Scan QR</span>
-                </button>
-                <button type="button" class="btn-action-tool tool-btn-gallery" onclick="openOcrModal()" title="Read receipt photo or screenshot via browser OCR">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
-                  <span>OCR Photo</span>
-                </button>
-                <input type="file" id="galleryFileInput" accept="image/*" style="display: none;" onchange="runOcrFromFile(this.files[0])">
-                <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="runOcrFromFile(this.files[0])">
                 <div class="detected-badge" id="detectedBadge">
                   <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
                   <span id="detectedBankName">Detected</span>
@@ -2544,183 +2847,718 @@
         }
       } catch (_) {}
     }
-    // ─── Browser QR Scanner (ZXing / Html5Qrcode) ───
-    let qrScannerInstance = null;
+    // ─────────────────────────────────────────────────────────────────────────
+    // Camera Viewfinder & Real-Time QR Scanner
+    // ─────────────────────────────────────────────────────────────────────────
+    let cameraStream = null;
+    let cameraAnimFrame = null;
+    let isScanningCamera = false;
+    let currentFacingMode = 'environment';
+    let isTorchOn = false;
+    let barcodeDetector = null;
+
+    if ('BarcodeDetector' in window) {
+      try {
+        barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+      } catch (_) {}
+    }
 
     function openQrModal() {
       document.getElementById('qrModal').style.display = 'flex';
+      startCameraStream();
     }
 
     function closeQrModal() {
-      if (qrScannerInstance) {
-        qrScannerInstance.stop().then(() => {
-          qrScannerInstance.clear();
-          qrScannerInstance = null;
-        }).catch(() => {
-          qrScannerInstance = null;
-        });
-      }
+      stopCameraStream();
       document.getElementById('qrModal').style.display = 'none';
     }
 
-    async function startQrCamera() {
-      if (typeof Html5Qrcode === 'undefined') {
-        showToast('QR engine loading, please try in 2 seconds...');
+    async function startCameraStream() {
+      stopCameraStream();
+      const video = document.getElementById('cameraVideo');
+      const statusText = document.getElementById('cameraStatusText');
+      const reticle = document.getElementById('scannerReticle');
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusText.textContent = 'Camera stream not supported. Tap Snap to use native camera.';
         return;
       }
-      const qrReaderEl = document.getElementById('qrReader');
-      qrReaderEl.innerHTML = '';
+
+      statusText.textContent = 'Requesting camera permissions...';
       try {
-        qrScannerInstance = new Html5Qrcode('qrReader');
-        await qrScannerInstance.start(
-          { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 240, height: 240 } },
-          (decodedText) => {
-            closeQrModal();
-            processPastedText(decodedText);
-            showToast('QR Code Decoded!');
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: currentFacingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
           },
-          () => {}
-        );
+          audio: false
+        });
+
+        video.srcObject = cameraStream;
+        await video.play();
+
+        statusText.textContent = 'Scanning for QR code or printed text...';
+        reticle.classList.add('active');
+        isScanningCamera = true;
+        scanCameraLoop();
       } catch (err) {
-        showToast('Camera error: ' + (err.message || 'permission denied'));
+        console.warn('getUserMedia error:', err);
+        statusText.textContent = 'Camera access blocked. Tap below for native camera.';
+        const fallback = document.getElementById('cameraFallbackInput');
+        if (fallback) fallback.click();
       }
     }
 
-    async function scanQrFromFile(file) {
-      if (!file) return;
-      if (typeof Html5Qrcode === 'undefined') {
-        showToast('QR engine loading, please try in 2 seconds...');
+    function stopCameraStream() {
+      isScanningCamera = false;
+      if (cameraAnimFrame) {
+        cancelAnimationFrame(cameraAnimFrame);
+        cameraAnimFrame = null;
+      }
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => {
+          try { track.stop(); } catch (_) {}
+        });
+        cameraStream = null;
+      }
+      const video = document.getElementById('cameraVideo');
+      if (video) video.srcObject = null;
+      const reticle = document.getElementById('scannerReticle');
+      if (reticle) reticle.classList.remove('active');
+      isTorchOn = false;
+    }
+
+    function flipCamera() {
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+      startCameraStream();
+    }
+
+    async function toggleTorch() {
+      if (!cameraStream) return;
+      const track = cameraStream.getVideoTracks()[0];
+      if (!track) return;
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (!capabilities.torch) {
+        showToast('Flashlight not supported on this device');
         return;
       }
+      isTorchOn = !isTorchOn;
       try {
-        const scanner = new Html5Qrcode('qrReaderHidden');
-        const decodedText = await scanner.scanFile(file, true);
-        scanner.clear();
-        closeQrModal();
-        processPastedText(decodedText);
-        showToast('QR Image Decoded!');
-      } catch (err) {
-        showToast('No QR code detected in image.');
+        await track.applyConstraints({
+          advanced: [{ torch: isTorchOn }]
+        });
+        showToast(isTorchOn ? 'Flashlight On' : 'Flashlight Off');
+      } catch (_) {
+        showToast('Flashlight control unavailable');
       }
     }
 
-    // ─── Browser OCR (Tesseract.js) ───
+    function switchToGallery() {
+      closeQrModal();
+      openOcrModal();
+      document.getElementById('ocrFileInput').click();
+    }
+
+    // Continuous video frame scanner for QR codes
+    async function scanCameraLoop() {
+      if (!isScanningCamera) return;
+
+      const video = document.getElementById('cameraVideo');
+      if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const qrData = await detectQrCode(canvas, ctx);
+        if (qrData) {
+          if (navigator.vibrate) navigator.vibrate(100);
+          stopCameraStream();
+          closeQrModal();
+          showToast('✓ Receipt QR Code Decoded!');
+          processDetectedPayload(qrData, 'QR Camera');
+          return;
+        }
+      }
+
+      cameraAnimFrame = requestAnimationFrame(scanCameraLoop);
+    }
+
+    // Snap current video frame and run OCR
+    function snapCameraForOcr() {
+      const video = document.getElementById('cameraVideo');
+      if (!video || video.readyState < 2) {
+        showToast('Camera not ready to snap');
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      stopCameraStream();
+      closeQrModal();
+      openOcrModal();
+
+      const previewWrap = document.getElementById('ocrPreviewWrap');
+      const previewImg = document.getElementById('ocrPreviewImg');
+      previewImg.src = dataUrl;
+      previewWrap.style.display = 'block';
+
+      processReceiptCanvas(canvas, dataUrl);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Image, Gallery & Dual QR + OCR Engine
+    // ─────────────────────────────────────────────────────────────────────────
+    let currentExtractedData = null;
+
     function openOcrModal() {
       document.getElementById('ocrModal').style.display = 'flex';
     }
 
     function closeOcrModal() {
       document.getElementById('ocrModal').style.display = 'none';
-      const progressEl = document.getElementById('ocrProgress');
-      if (progressEl) progressEl.style.display = 'none';
+      document.getElementById('ocrProgress').style.display = 'none';
     }
 
-    async function runOcrFromFile(file) {
+    function handleImageFile(file) {
       if (!file) return;
-      if (typeof Tesseract === 'undefined') {
-        showToast('OCR engine loading, please try in 2 seconds...');
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file');
         return;
       }
-      const statusEl = document.getElementById('ocrStatus');
+
+      openOcrModal();
+      const previewWrap = document.getElementById('ocrPreviewWrap');
+      const previewImg = document.getElementById('ocrPreviewImg');
       const progressEl = document.getElementById('ocrProgress');
       const progressBar = document.getElementById('ocrProgressBar');
-      if (progressEl) progressEl.style.display = 'block';
-      if (statusEl) statusEl.textContent = 'Initializing OCR engine...';
-      if (progressBar) progressBar.style.width = '12%';
+      const statusEl = document.getElementById('ocrStatus');
+      const percentEl = document.getElementById('ocrPercent');
+      const detectedCard = document.getElementById('ocrDetectedCard');
+
+      detectedCard.style.display = 'none';
+      progressEl.style.display = 'block';
+      progressBar.style.width = '15%';
+      percentEl.textContent = '15%';
+      statusEl.textContent = 'Loading receipt photo...';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          previewImg.src = img.src;
+          previewWrap.style.display = 'block';
+
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          processReceiptCanvas(canvas, img.src);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function processReceiptCanvas(canvas, imageSrc) {
+      const progressBar = document.getElementById('ocrProgressBar');
+      const statusEl = document.getElementById('ocrStatus');
+      const percentEl = document.getElementById('ocrPercent');
+      const ctx = canvas.getContext('2d');
+
+      // Phase 1: Check for QR Code
+      statusEl.textContent = 'Scanning image for QR code...';
+      progressBar.style.width = '30%';
+      percentEl.textContent = '30%';
+
+      const qrData = await detectQrCode(canvas, ctx);
+      if (qrData) {
+        progressBar.style.width = '100%';
+        percentEl.textContent = '100%';
+        statusEl.textContent = '✓ QR Code found & decoded!';
+        showToast('Receipt QR Code detected!');
+        showExtractedResult(qrData, 'QR Code Decoded');
+        return;
+      }
+
+      // Phase 2: Run Browser OCR
+      statusEl.textContent = 'No QR found. Reading printed text with OCR...';
+      progressBar.style.width = '45%';
+      percentEl.textContent = '45%';
 
       try {
+        if (typeof Tesseract === 'undefined') {
+          statusEl.textContent = 'Loading OCR neural engine...';
+          await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+        }
+
         const result = await Tesseract.recognize(
-          file,
+          canvas,
           'eng',
           {
             logger: m => {
               if (m.status === 'recognizing text') {
                 const p = Math.round(m.progress * 100);
-                if (progressBar) progressBar.style.width = p + '%';
-                if (statusEl) statusEl.textContent = `Reading receipt text (${p}%)...`;
-              } else if (statusEl) {
-                statusEl.textContent = m.status;
+                progressBar.style.width = (45 + Math.round(p * 0.5)) + '%';
+                percentEl.textContent = (45 + Math.round(p * 0.5)) + '%';
+                statusEl.textContent = `Reading printed text (${p}%)...`;
               }
             }
           }
         );
 
+        progressBar.style.width = '100%';
+        percentEl.textContent = '100%';
         const text = result.data.text || '';
+
         if (!text.trim()) {
-          if (statusEl) statusEl.textContent = 'No text detected in receipt photo.';
-          showToast('Could not read text from photo.');
+          statusEl.textContent = 'Could not detect legible text in this receipt. Please ensure clear lighting.';
+          showToast('No text detected in receipt photo');
           return;
         }
 
-        closeOcrModal();
-        processPastedText(text);
+        statusEl.textContent = '✓ Text recognition complete!';
         showToast('Receipt text extracted via OCR!');
+        showExtractedResult(text, 'OCR Text Recognition');
       } catch (err) {
-        if (statusEl) statusEl.textContent = 'OCR error: ' + (err.message || err);
-        showToast('OCR failed: ' + (err.message || 'unknown error'));
+        console.error('OCR Error:', err);
+        statusEl.textContent = 'OCR recognition failed: ' + (err.message || 'unknown error');
+        showToast('OCR failed: ' + (err.message || 'error'));
       }
     }
 
+    async function detectQrCode(canvas, ctx) {
+      // Try BarcodeDetector
+      if (barcodeDetector) {
+        try {
+          const codes = await barcodeDetector.detect(canvas);
+          if (codes && codes.length > 0 && codes[0].rawValue) {
+            return codes[0].rawValue;
+          }
+        } catch (_) {}
+      }
+
+      // Try jsQR
+      if (typeof jsQR !== 'undefined') {
+        if (!ctx) ctx = canvas.getContext('2d');
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imgData.data, imgData.width, imgData.height, {
+          inversionAttempts: 'attemptBoth',
+        });
+        if (code && code.data) {
+          return code.data;
+        }
+      }
+
+      return null;
+    }
+
+    function showExtractedResult(rawText, sourceLabel) {
+      const extracted = extractReceiptDetails(rawText);
+      currentExtractedData = extracted;
+
+      const detectedCard = document.getElementById('ocrDetectedCard');
+      const sourceText = document.getElementById('ocrSourceText');
+      const detectedBank = document.getElementById('ocrDetectedBank');
+      const detectedRef = document.getElementById('ocrDetectedRef');
+
+      sourceText.textContent = sourceLabel;
+      detectedBank.textContent = 'Bank: ' + (extracted.bankTitle || 'Auto-Detected');
+      detectedRef.textContent = extracted.reference || 'No Reference Found';
+
+      // Suffix
+      const suffixWrap = document.getElementById('ocrFieldSuffixWrap');
+      const suffixVal = document.getElementById('ocrDetectedSuffix');
+      if (extracted.suffix) {
+        suffixVal.textContent = extracted.suffix;
+        suffixWrap.style.display = 'block';
+      } else {
+        suffixWrap.style.display = 'none';
+      }
+
+      // Phone
+      const phoneWrap = document.getElementById('ocrFieldPhoneWrap');
+      const phoneVal = document.getElementById('ocrDetectedPhone');
+      if (extracted.phone) {
+        phoneVal.textContent = extracted.phone;
+        phoneWrap.style.display = 'block';
+      } else {
+        phoneWrap.style.display = 'none';
+      }
+
+      // Amount
+      const amtWrap = document.getElementById('ocrFieldAmountWrap');
+      const amtVal = document.getElementById('ocrDetectedAmount');
+      if (extracted.amount) {
+        amtVal.textContent = extracted.amount + ' ETB';
+        amtWrap.style.display = 'block';
+      } else {
+        amtWrap.style.display = 'none';
+      }
+
+      detectedCard.style.display = 'block';
+    }
+
+    function applyExtractedAndVerify() {
+      if (!currentExtractedData || !currentExtractedData.reference) {
+        showToast('No valid reference to verify');
+        return;
+      }
+      applyExtractedToFormOnly();
+      closeOcrModal();
+      setTimeout(() => {
+        document.getElementById('verifyForm').dispatchEvent(new Event('submit'));
+      }, 300);
+    }
+
+    function applyExtractedToFormOnly() {
+      if (!currentExtractedData) return;
+      const d = currentExtractedData;
+
+      if (d.bankPill) {
+        selectBank(d.bankPill);
+      }
+      if (d.reference) {
+        document.getElementById('refInput').value = d.reference;
+        onReferenceChange(d.reference);
+      }
+      if (d.suffix && document.getElementById('suffixInput')) {
+        document.getElementById('suffixInput').value = d.suffix;
+      }
+      if (d.phone && document.getElementById('phoneInput')) {
+        document.getElementById('phoneInput').value = d.phone;
+      }
+      closeOcrModal();
+      showToast('Applied to form!');
+      document.getElementById('refInput').focus();
+    }
+
+    function processDetectedPayload(payload, source) {
+      const extracted = extractReceiptDetails(payload);
+      currentExtractedData = extracted;
+
+      if (extracted.bankPill) {
+        selectBank(extracted.bankPill);
+      }
+      if (extracted.reference) {
+        document.getElementById('refInput').value = extracted.reference;
+        onReferenceChange(extracted.reference);
+      }
+      if (extracted.suffix && document.getElementById('suffixInput')) {
+        document.getElementById('suffixInput').value = extracted.suffix;
+      }
+      if (extracted.phone && document.getElementById('phoneInput')) {
+        document.getElementById('phoneInput').value = extracted.phone;
+      }
+
+      setTimeout(() => {
+        if (extracted.reference) {
+          document.getElementById('verifyForm').dispatchEvent(new Event('submit'));
+        }
+      }, 350);
+    }
+
+    // Comprehensive Ethiopian Receipt & QR Data Extractor
+    function extractReceiptDetails(text) {
+      const raw = text || '';
+      let bankPill = null;
+      let bankTitle = null;
+      let reference = null;
+      let suffix = null;
+      let phone = null;
+      let amount = null;
+
+      // 1. Check for URL patterns (common in CBE and Telebirr QR codes)
+      const urlMatch = raw.match(/https?:\/\/[^\s"'<>]+/i);
+      if (urlMatch) {
+        const urlStr = urlMatch[0];
+        try {
+          const u = new URL(urlStr);
+          const qRef = u.searchParams.get('id') || u.searchParams.get('ref') || u.searchParams.get('token') || u.searchParams.get('txn') || u.searchParams.get('receiptNo');
+          if (qRef) reference = qRef;
+        } catch (_) {}
+
+        // CBE Mobile Banking Token in URL
+        const cbeUuid = urlStr.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+        if (cbeUuid) {
+          reference = cbeUuid[1];
+          bankPill = 'cbe';
+          bankTitle = 'CBE Mobile Token';
+        }
+      }
+
+      // 2. Check for CBE FT Slip
+      const ftMatch = raw.match(/\b(FT[0-9A-Z]{8,14})\b/i);
+      if (ftMatch && !reference) {
+        reference = ftMatch[1].toUpperCase();
+        bankPill = 'cbe';
+        bankTitle = 'Commercial Bank of Ethiopia';
+      }
+
+      // 3. Check for Telebirr
+      const tbMatch = raw.match(/\b(TB[0-9A-Z]{8,14})\b/i) || raw.match(/(?:trans\s*no|receipt\s*no|transaction\s*id)[:\s]+([A-Z0-9]{8,16})/i);
+      if (tbMatch && !reference) {
+        reference = (tbMatch[1] || tbMatch[0]).toUpperCase();
+        bankPill = 'telebirr';
+        bankTitle = 'Telebirr';
+      }
+
+      // 4. Check for Dashen DB
+      const dbMatch = raw.match(/\b(DB[0-9A-Z]{8,14})\b/i);
+      if (dbMatch && !reference) {
+        reference = dbMatch[1].toUpperCase();
+        bankPill = 'dashen';
+        bankTitle = 'Dashen Bank';
+      }
+
+      // 5. Check for Bank of Abyssinia
+      const boaMatch = raw.match(/\b(BOA[0-9A-Z]{8,14})\b/i);
+      if (boaMatch && !reference) {
+        reference = boaMatch[1].toUpperCase();
+        bankPill = 'abyssinia';
+        bankTitle = 'Bank of Abyssinia';
+      }
+
+      // 6. Check for CBE Birr
+      const cbeBirrMatch = raw.match(/\b(CB[0-9A-Z]{8,14})\b/i);
+      if (cbeBirrMatch && !reference) {
+        reference = cbeBirrMatch[1].toUpperCase();
+        bankPill = 'cbebirr';
+        bankTitle = 'CBE Birr';
+      }
+
+      // 7. Check for M-Pesa
+      const mpMatch = raw.match(/\b([A-Z]{2}[0-9A-Z]{8,10})\b/);
+      if (mpMatch && !reference && /(?:mpesa|safaricom)/i.test(raw)) {
+        reference = mpMatch[1].toUpperCase();
+        bankPill = 'mpesa';
+        bankTitle = 'Safaricom M-Pesa';
+      }
+
+      // Fallback reference: first clean 8-36 alphanumeric token
+      if (!reference) {
+        const fallbackMatch = raw.match(/[A-Z0-9-]{8,36}/i);
+        if (fallbackMatch) reference = fallbackMatch[0];
+      }
+
+      // Credited Account (1000...)
+      const accMatch = raw.match(/1000\d{8,10}/);
+      if (accMatch) suffix = accMatch[0].slice(-8);
+
+      // Customer Phone Number
+      const phoneMatch = raw.match(/\b(09\d{8}|07\d{8}|\+2519\d{8}|\+2517\d{8})\b/);
+      if (phoneMatch) phone = phoneMatch[1];
+
+      // Settlement Amount
+      const amtMatch = raw.match(/(?:ETB|Birr|ብር|Amount|መጠን)[:\s]*([\d,]+(?:\.\d{1,2})?)/i) || raw.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:ETB|Birr|ብር)/i);
+      if (amtMatch) amount = amtMatch[1];
+
+      return { reference, bankPill, bankTitle, suffix, phone, amount };
+    }
+
+    // Helper: Dynamic Script Loader with promise
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    // Drag and Drop Image handler on Verifier Card
+    const cardEl = document.querySelector('.verifier-card');
+    if (cardEl) {
+      ['dragenter', 'dragover'].forEach(name => {
+        cardEl.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          cardEl.classList.add('drag-over');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        cardEl.addEventListener(name, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          cardEl.classList.remove('drag-over');
+        });
+      });
+      cardEl.addEventListener('drop', (e) => {
+        const files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0) {
+          handleImageFile(files[0]);
+        }
+      });
+    }
+
+    // Global Paste Listener for Images (Ctrl+V)
+    window.addEventListener('paste', (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            showToast('Receipt image pasted from clipboard!');
+            handleImageFile(file);
+            return;
+          }
+        }
+      }
+    });
+
     checkHealth();
   </script>
-  <!-- QR Scanner Modal -->
+
+  <!-- Live Camera & QR Viewfinder Modal -->
   <div id="qrModal" class="scanner-modal" onclick="if(event.target===this) closeQrModal()">
     <div class="scanner-card">
       <div class="scanner-header">
         <div style="font-weight: 700; font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 8px;">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-          <span>Scan Bank Receipt QR</span>
+          <span>Live Receipt Camera Scanner</span>
         </div>
         <button type="button" class="scanner-close-btn" onclick="closeQrModal()">✕ Close</button>
       </div>
       <div class="scanner-body">
-        <p style="font-size: 0.8rem; color: var(--color-ink-soft); margin-bottom: 14px;">
-          Point your device camera at the receipt QR code or select an image from your gallery.
+        <p style="font-size: 0.8rem; color: var(--color-ink-soft); margin-bottom: 12px; line-height: 1.4;">
+          Point camera at receipt QR code or tap <strong>Snap & Read</strong> to capture printed slip text with OCR.
         </p>
-        <div id="qrReader" style="width: 100%; border-radius: 10px; overflow: hidden; background: #000; min-height: 220px; display: flex; align-items: center; justify-content: center;">
-          <span style="font-size: 0.78rem; color: #64748B;">Camera preview will appear here</span>
+
+        <!-- Live Camera Viewport -->
+        <div class="scanner-video-wrap" id="cameraWrap">
+          <video id="cameraVideo" class="scanner-video" autoplay playsinline muted></video>
+          <div class="scanner-reticle" id="scannerReticle">
+            <span class="reticle-corner tl"></span>
+            <span class="reticle-corner tr"></span>
+            <span class="reticle-corner bl"></span>
+            <span class="reticle-corner br"></span>
+            <div class="scanner-laser" id="scannerLaser"></div>
+          </div>
+          <div class="scanner-status-pill" id="cameraStatusPill">
+            <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
+            <span id="cameraStatusText">Starting camera feed...</span>
+          </div>
         </div>
-        <div id="qrReaderHidden" style="display: none;"></div>
-        <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn-action-tool" onclick="startQrCamera()" style="padding: 8px 14px; font-size: 0.8rem; background: var(--color-brand); color: #fff;">
-            🎥 Start Camera
+
+        <!-- Controls row -->
+        <div class="scanner-ctrl-row">
+          <button type="button" class="btn-ctrl btn-ctrl-primary" onclick="snapCameraForOcr()" title="Freeze and read text on non-QR paper slips">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Snap & OCR</span>
           </button>
-          <label class="btn-action-tool" style="padding: 8px 14px; font-size: 0.8rem; cursor: pointer;">
-            📁 Pick QR Image
-            <input type="file" accept="image/*" style="display: none;" onchange="scanQrFromFile(this.files[0])">
-          </label>
+          <button type="button" class="btn-ctrl" onclick="flipCamera()" title="Switch between back and front camera">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>Flip</span>
+          </button>
+          <button type="button" class="btn-ctrl" id="torchToggleBtn" onclick="toggleTorch()" title="Toggle phone flashlight">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>Flash</span>
+          </button>
+          <button type="button" class="btn-ctrl" onclick="switchToGallery()" title="Select photo from device gallery">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Gallery</span>
+          </button>
         </div>
+
+        <!-- Hidden Fallback Native Camera Trigger -->
+        <input type="file" id="cameraFallbackInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageFile(this.files[0])">
       </div>
     </div>
   </div>
 
-  <!-- OCR Scanner Modal -->
+  <!-- OCR & Gallery Image Processing Modal -->
   <div id="ocrModal" class="scanner-modal" onclick="if(event.target===this) closeOcrModal()">
-    <div class="scanner-card">
+    <div class="scanner-card" style="max-width: 500px;">
       <div class="scanner-header">
         <div style="font-weight: 700; font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 8px;">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span>Browser-Based Receipt OCR</span>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>Receipt Image & Gallery OCR</span>
         </div>
         <button type="button" class="scanner-close-btn" onclick="closeOcrModal()">✕ Close</button>
       </div>
       <div class="scanner-body">
-        <p style="font-size: 0.8rem; color: var(--color-ink-soft); margin-bottom: 14px;">
-          Take a photo or choose an image of a bank slip, mobile screen, or paper receipt. OCR runs 100% locally in your browser.
+        <p style="font-size: 0.8rem; color: var(--color-ink-soft); margin-bottom: 12px; line-height: 1.4;">
+          Upload a receipt screenshot or bank slip photo. We scan for QR codes first, then run browser OCR on printed text.
         </p>
-        <label class="ocr-dropzone" style="display: block;">
-          <input type="file" accept="image/*" capture="environment" style="display: none;" onchange="runOcrFromFile(this.files[0])">
-          <svg width="32" height="32" fill="none" stroke="#60A5FA" stroke-width="1.8" viewBox="0 0 24 24" style="margin: 0 auto 8px;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">Snap Receipt with Camera or Browse Files</div>
-          <div style="font-size: 0.74rem; color: var(--color-ink-muted); margin-top: 4px;">PNG, JPG, HEIC, or mobile screenshots</div>
+
+        <!-- Dropzone Box -->
+        <label class="ocr-dropzone" id="ocrDropzone">
+          <input type="file" id="ocrFileInput" accept="image/*" style="display: none;" onchange="handleImageFile(this.files[0])">
+          <svg width="34" height="34" fill="none" stroke="#60A5FA" stroke-width="1.8" viewBox="0 0 24 24" style="margin: 0 auto 8px;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <div style="font-size: 0.88rem; font-weight: 700; color: #fff;">Tap to Browse Gallery or Drag & Drop Image</div>
+          <div style="font-size: 0.74rem; color: var(--color-ink-soft); margin-top: 4px;">Supports CBE, Telebirr, Dashen, BoA, CBE Birr, M-Pesa screenshots</div>
         </label>
+
+        <!-- Image Preview & Progress -->
+        <div id="ocrPreviewWrap" style="display: none; margin-top: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 0.76rem; color: var(--color-ink-soft); font-weight: 600;">Selected Receipt Image</span>
+            <button type="button" onclick="document.getElementById('ocrFileInput').click()" style="background: none; border: none; color: #90B0FF; font-size: 0.75rem; text-decoration: underline; cursor: pointer;">Change Photo</button>
+          </div>
+          <div style="max-height: 160px; overflow: hidden; border-radius: 8px; border: 1px solid var(--color-line); display: flex; align-items: center; justify-content: center; background: #000;">
+            <img id="ocrPreviewImg" src="" alt="Receipt Preview" style="max-width: 100%; max-height: 160px; object-fit: contain;">
+          </div>
+        </div>
+
+        <!-- Progress bar -->
         <div id="ocrProgress" class="ocr-progress-container">
           <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 6px;">
-            <span id="ocrStatus">Initializing OCR engine...</span>
+            <span id="ocrStatus">Analyzing receipt image...</span>
+            <span id="ocrPercent" style="font-family: var(--font-mono); color: #60A5FA;">0%</span>
           </div>
           <div class="ocr-progress-bar-bg">
             <div id="ocrProgressBar" class="ocr-progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Extracted Data Confirmation Box -->
+        <div id="ocrDetectedCard" class="ocr-detected-card" style="display: none;">
+          <div class="ocr-detected-header">
+            <span class="ocr-source-badge" id="ocrDetectedSource">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <span id="ocrSourceText">QR Code Decoded</span>
+            </span>
+            <span style="font-size: 0.75rem; color: var(--color-ink-soft);" id="ocrDetectedBank">Detected: CBE</span>
+          </div>
+
+          <div class="ocr-grid">
+            <div class="ocr-field" style="grid-column: 1 / -1;">
+              <div class="ocr-field-lbl">Transaction Reference / Token</div>
+              <div class="ocr-field-val" id="ocrDetectedRef" style="color: #60A5FA; font-size: 0.95rem;">-</div>
+            </div>
+            <div class="ocr-field" id="ocrFieldSuffixWrap" style="display: none;">
+              <div class="ocr-field-lbl">Account Suffix</div>
+              <div class="ocr-field-val" id="ocrDetectedSuffix">-</div>
+            </div>
+            <div class="ocr-field" id="ocrFieldPhoneWrap" style="display: none;">
+              <div class="ocr-field-lbl">Customer Phone</div>
+              <div class="ocr-field-val" id="ocrDetectedPhone">-</div>
+            </div>
+            <div class="ocr-field" id="ocrFieldAmountWrap" style="display: none;">
+              <div class="ocr-field-lbl">Receipt Amount</div>
+              <div class="ocr-field-val" id="ocrDetectedAmount">-</div>
+            </div>
+          </div>
+
+          <div class="ocr-actions-row">
+            <button type="button" class="btn-ctrl btn-ctrl-primary" style="flex: 1; justify-content: center;" onclick="applyExtractedAndVerify()">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Verify Receipt Now</span>
+            </button>
+            <button type="button" class="btn-ctrl" onclick="applyExtractedToFormOnly()">
+              <span>Apply to Form</span>
+            </button>
           </div>
         </div>
       </div>
