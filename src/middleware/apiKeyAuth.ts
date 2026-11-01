@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import apiKeyService from '../services/apiKeyService';
 import logger from '../utils/logger';
 
-// Helper to get allowed API keys from environment
+// Helper to get allowed API keys from environment (legacy fallback)
 function getAllowedKeys(): Set<string> {
   const keys = new Set<string>();
 
@@ -24,15 +25,22 @@ function getAllowedKeys(): Set<string> {
     keys.add(process.env.ADMIN_SECRET.trim());
   }
 
+  if (process.env.ADMIN_KEY?.trim()) {
+    keys.add(process.env.ADMIN_KEY.trim());
+  }
+
   return keys;
 }
 
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
-  // 1. Allow public health, root, verify UI, static assets, and public web verify endpoints
+  // 1. Allow public health, root, admin UI & APIs, static assets, and public web verify endpoints
   if (
     req.path === '/' ||
     req.path === '/health' ||
     req.path === '/api/public-verify' ||
+    req.path === '/admin' ||
+    req.path.startsWith('/admin/') ||
+    req.path.startsWith('/api/admin') ||
     (req.path.startsWith('/verify') && req.method === 'GET') ||
     req.path.startsWith('/static') ||
     req.path.endsWith('.html') ||
@@ -45,21 +53,6 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): voi
     return next();
   }
 
-  const allowedKeys = getAllowedKeys();
-
-  // If no keys configured at all in .env, allow with warning in development
-  if (allowedKeys.size === 0) {
-    if (process.env.NODE_ENV !== 'production') {
-      logger.warn(`[AUTH] No API_KEYS set in environment. Allowing request in ${process.env.NODE_ENV || 'dev'} mode.`);
-      return next();
-    }
-    res.status(500).json({
-      success: false,
-      error: 'Server configuration error: No API keys configured in environment.',
-    });
-    return;
-  }
-
   // 2. Extract API key from headers or query
   const rawAuthHeader = req.headers.authorization;
   const bearerKey = rawAuthHeader?.startsWith('Bearer ') ? rawAuthHeader.slice(7).trim() : null;
@@ -69,6 +62,14 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): voi
   const candidateKey = headerKey || bearerKey || queryKey;
 
   if (!candidateKey) {
+    // If no keys configured at all and in development mode, allow with warning
+    const allowedKeys = getAllowedKeys();
+    if (allowedKeys.size === 0 && process.env.NODE_ENV !== 'production') {
+      logger.warn(`[AUTH] No API_KEYS set in environment. Allowing request in ${process.env.NODE_ENV || 'dev'} mode.`);
+      (req as any).appContext = { appName: 'Development Unauthenticated Client' };
+      return next();
+    }
+
     logger.warn(`[AUTH] Unauthorized request to ${req.method} ${req.path} - missing API key`);
     res.status(401).json({
       success: false,
@@ -77,16 +78,30 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): voi
     return;
   }
 
-  // 3. Validate against allowed keys
-  if (!allowedKeys.has(candidateKey)) {
-    logger.warn(`[AUTH] Invalid API key attempt: ${candidateKey.slice(0, 6)}...`);
-    res.status(403).json({
-      success: false,
-      error: 'Forbidden: Invalid API key',
-    });
-    return;
+  // 3. Validate against apiKeyService (dynamic app keys + environment keys)
+  const validation = apiKeyService.validateKey(candidateKey);
+  if (validation.valid) {
+    (req as any).apiKey = candidateKey;
+    (req as any).appContext = {
+      appName: validation.appName || 'Client Application',
+      keyId: validation.keyId,
+    };
+    return next();
   }
 
-  (req as any).apiKey = candidateKey;
-  next();
+  // 4. Secondary fallback: check static allowed keys
+  const allowedKeys = getAllowedKeys();
+  if (allowedKeys.has(candidateKey)) {
+    (req as any).apiKey = candidateKey;
+    (req as any).appContext = {
+      appName: 'Master / Env Key',
+    };
+    return next();
+  }
+
+  logger.warn(`[AUTH] Invalid API key attempt: ${candidateKey.slice(0, 6)}...`);
+  res.status(403).json({
+    success: false,
+    error: 'Forbidden: Invalid API key',
+  });
 };

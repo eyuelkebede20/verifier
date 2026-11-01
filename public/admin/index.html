@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Senay Verifier Console — Admin & API Usage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --card-bg: #111827;
+      --card-border: #1F2937;
+      --card-hover: #1E293B;
+      --primary: #6366F1;
+      --primary-hover: #4F46E5;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --success: #10B981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --error: #EF4444;
+      --warning: #F59E0B;
+      --text-main: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+      --cbe: #8B5CF6;
+      --telebirr: #0284C7;
+      --dashen: #2563EB;
+      --abyssinia: #D97706;
+      --cbebirr: #059669;
+      --mpesa: #DC2626;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar */
+    header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      background: rgba(11, 15, 25, 0.85);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366F1, #8B5CF6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 10px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.12);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    /* Live pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Main Container Views */
+    main {
+      flex: 1;
+      padding: 32px 0 64px 0;
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+
+    /* Login View */
+    .login-wrapper {
+      max-width: 460px;
+      margin: 60px auto 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    .login-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #A5B4FC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 18px auto;
+    }
+
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .login-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      line-height: 1.45;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .input-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 42px 12px 14px;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .toggle-visibility-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-visibility-btn:hover {
+      color: var(--text-main);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+
+    .login-alert {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #F87171;
+    }
+
+    .login-tip {
+      margin-top: 24px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 16px;
+    }
+
+    .login-tip code {
+      font-family: 'JetBrains Mono', monospace;
+      color: #A5B4FC;
+      background: rgba(99, 102, 241, 0.1);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    /* Dashboard Header & Tabs */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .dashboard-title-group h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .dashboard-title-group p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Metric Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .stat-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-sub .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+    }
+
+    .badge-info {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+    }
+
+    /* Cards Content */
+    .content-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .app-name-col {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-desc {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .key-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px;
+    }
+
+    .copy-icon-btn:hover {
+      color: #fff;
+    }
+
+    /* Status Badges */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .pill-active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+    }
+
+    .pill-revoked {
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+    }
+
+    .pill-env {
+      background: rgba(99, 102, 241, 0.15);
+      color: #A5B4FC;
+    }
+
+    /* Provider Badges */
+    .prov-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    .prov-cbe { background: rgba(139, 92, 246, 0.18); color: #C4B5FD; }
+    .prov-telebirr { background: rgba(2, 132, 199, 0.18); color: #7DD3FC; }
+    .prov-dashen { background: rgba(37, 99, 235, 0.18); color: #93C5FD; }
+    .prov-abyssinia { background: rgba(217, 119, 6, 0.18); color: #FCD34D; }
+    .prov-cbebirr { background: rgba(5, 150, 105, 0.18); color: #6EE7B7; }
+    .prov-mpesa { background: rgba(220, 38, 38, 0.18); color: #FCA5A5; }
+    .prov-universal { background: rgba(99, 102, 241, 0.18); color: #A5B4FC; }
+
+    /* Analytics Provider Cards Grid */
+    .providers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .provider-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .provider-count {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .provider-bar-wrapper {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .provider-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 520px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      transform: scale(0.96);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #fff;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .new-key-banner {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .new-key-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: #6EE7B7;
+      word-break: break-all;
+      margin: 12px 0 6px 0;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1F2937;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .tab-bar {
+        width: 100%;
+        overflow-x: auto;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-title">Senay Verifier</div>
+        <span class="brand-badge">Console</span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span>API Active</span>
+        </div>
+        <a href="/" class="btn btn-secondary btn-sm" target="_blank">Landing Page ↗</a>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm view-hidden" onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- VIEW 1: Admin Master Key Login -->
+    <div id="loginView" class="login-wrapper">
+      <div class="login-icon-box">🔐</div>
+      <h2 class="login-title">Admin Master Access</h2>
+      <p class="login-desc">Enter or paste the admin key configured in your server's <code>.env</code> file to manage API keys and inspect live usage.</p>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label class="input-label" for="adminKeyInput">Master Admin Key / Hash</label>
+          <div class="input-box">
+            <input 
+              type="password" 
+              id="adminKeyInput" 
+              class="input-field" 
+              placeholder="Paste master admin key here..." 
+              required
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-visibility-btn" onclick="togglePasswordVisibility('adminKeyInput', this)">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" id="submitLoginBtn" class="btn btn-primary login-btn">Unlock Console</button>
+      </form>
+
+      <div id="loginAlert" class="login-alert alert-error"></div>
+
+      <div class="login-tip">
+        <strong>Tip:</strong> Configured via <code>ADMIN_KEY</code> or <code>ADMIN_SECRET</code> in <code>.env</code>.
+      </div>
+    </div>
+
+    <!-- VIEW 2: Dashboard (Authenticated) -->
+    <div id="dashboardView" class="view-hidden">
+
+      <div class="dashboard-header">
+        <div class="dashboard-title-group">
+          <h1>API Console & Usage Monitor</h1>
+          <p>Multi-tenant application keys, rate limits, and real-time bank verification metrics.</p>
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('keys', this)">🔑 App Keys</button>
+          <button class="tab-btn" onclick="switchTab('analytics', this)">📊 Usage Analytics</button>
+          <button class="tab-btn" onclick="switchTab('logs', this)">⚡ Live Logs</button>
+        </div>
+      </div>
+
+      <!-- Top Metrics Summary Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>Total Verifications</span>
+            <span class="badge badge-info" id="todayRequestsBadge">Today: 0</span>
+          </div>
+          <div class="stat-value" id="metricTotal">0</div>
+          <div class="stat-sub">Across all registered apps & direct APIs</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>Success Rate</span>
+            <span class="badge badge-success" id="successRateBadge">100%</span>
+          </div>
+          <div class="stat-value" id="metricSuccessRate">100%</div>
+          <div class="stat-sub">Valid receipts verified upstream</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>Active Consumer Apps</span>
+          </div>
+          <div class="stat-value" id="metricActiveApps">0</div>
+          <div class="stat-sub">Authorized to make verification requests</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>Average Latency</span>
+          </div>
+          <div class="stat-value" id="metricAvgDuration">0 ms</div>
+          <div class="stat-sub">End-to-end receipt extraction & audit</div>
+        </div>
+      </div>
+
+      <!-- TAB 1: App Keys Management -->
+      <div id="tab-keys" class="tab-content">
+        <div class="content-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Application API Keys</h2>
+              <p class="panel-subtitle">Create distinct credentials for each of your mobile apps, online shops, or Telegram bots.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openNewKeyModal()">+ Generate New App Key</button>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>App Name & Description</th>
+                  <th>API Key Prefix</th>
+                  <th>Rate Limit</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="keysTableBody">
+                <tr><td colspan="6" class="empty-state">Loading application keys...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Usage Analytics -->
+      <div id="tab-analytics" class="tab-content view-hidden">
+        
+        <!-- Bank Breakdown -->
+        <div class="content-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Verifications by Financial Provider</h2>
+              <p class="panel-subtitle">Distribution across Ethiopian commercial banks and mobile wallets.</p>
+            </div>
+          </div>
+
+          <div class="providers-grid" id="providersGrid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Usage by App -->
+        <div class="content-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Application Usage Breakdown</h2>
+              <p class="panel-subtitle">Traffic volume, success rates, and last active timestamp per application.</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Total Requests</th>
+                  <th>Successful</th>
+                  <th>Failed / Errors</th>
+                  <th>Success Rate</th>
+                  <th>Last Used</th>
+                </tr>
+              </thead>
+              <tbody id="appUsageTableBody">
+                <tr><td colspan="6" class="empty-state">No app traffic recorded yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 3: Live Verification Logs -->
+      <div id="tab-logs" class="tab-content view-hidden">
+        <div class="content-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Live Verification Audit Trail</h2>
+              <p class="panel-subtitle">Recent receipt verification requests received by the microservice.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="autoRefreshCheck" checked onchange="toggleAutoRefresh(this)"> Auto-refresh (5s)
+              </label>
+              <button class="btn btn-secondary btn-sm" onclick="fetchUsageData()">Refresh</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>App / Consumer</th>
+                  <th>Provider</th>
+                  <th>Reference</th>
+                  <th>Status</th>
+                  <th>Latency</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody">
+                <tr><td colspan="6" class="empty-state">No verification events logged yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: Generate New App Key -->
+  <div id="newKeyModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Generate App API Key</h3>
+        <button class="close-btn" onclick="closeNewKeyModal()">&times;</button>
+      </div>
+
+      <form id="createKeyForm" onsubmit="handleCreateKey(event)">
+        <div class="input-group">
+          <label class="input-label" for="newAppName">Application Name *</label>
+          <input type="text" id="newAppName" class="input-field" placeholder="e.g. MentalWeg Store, Client Portal" required />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="newAppDesc">Description / Purpose (Optional)</label>
+          <input type="text" id="newAppDesc" class="input-field" placeholder="e.g. Primary e-commerce checkout integration" />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="newAppRateLimit">Rate Limit (Requests / Minute)</label>
+          <input type="number" id="newAppRateLimit" class="input-field" value="120" min="1" max="10000" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeNewKeyModal()">Cancel</button>
+          <button type="submit" id="submitCreateKeyBtn" class="btn btn-primary">Generate API Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Key Created Success Modal -->
+  <div id="keyCreatedModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">API Key Created 🎉</h3>
+        <button class="close-btn" onclick="closeKeyCreatedModal()">&times;</button>
+      </div>
+
+      <div class="new-key-banner">
+        <strong style="color: #34D399; font-size: 0.95rem;">Please copy your API key now</strong>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+          For security reasons, this key will never be displayed in full again. If you lose it, you will need to generate a new one.
+        </p>
+
+        <div class="new-key-box">
+          <span id="createdRawKeyText">...</span>
+          <button class="copy-icon-btn" onclick="copyCreatedKey()" title="Copy API Key">📋</button>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-bottom: 0;">
+        <label class="input-label">How to use in your app:</label>
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #E0E7FF; line-height: 1.5;">
+          headers: {<br>
+          &nbsp;&nbsp;'x-api-key': '<span id="createdKeySnippet">...</span>'<br>
+          }
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeKeyCreatedModal()">I Have Saved My Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastIcon">📋</span>
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'senay_admin_token';
+    let autoRefreshTimer = null;
+    let createdKeyCache = '';
+
+    // Provider labels and colors
+    const PROVIDER_CONFIG = {
+      telebirr: { name: 'Telebirr', color: '#0284C7', class: 'prov-telebirr' },
+      cbe: { name: 'CBE (Commercial Bank)', color: '#8B5CF6', class: 'prov-cbe' },
+      dashen: { name: 'Dashen Bank', color: '#2563EB', class: 'prov-dashen' },
+      abyssinia: { name: 'Bank of Abyssinia', color: '#D97706', class: 'prov-abyssinia' },
+      cbebirr: { name: 'CBE Birr', color: '#059669', class: 'prov-cbebirr' },
+      mpesa: { name: 'Safaricom M-Pesa', color: '#DC2626', class: 'prov-mpesa' },
+      universal: { name: 'Universal Router', color: '#6366F1', class: 'prov-universal' },
+    };
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem(STORAGE_KEY);
+      if (token) {
+        verifySession(token);
+      } else {
+        showLogin();
+      }
+    });
+
+    function showLogin() {
+      document.getElementById('loginView').classList.remove('view-hidden');
+      document.getElementById('dashboardView').classList.add('view-hidden');
+      document.getElementById('logoutBtn').classList.add('view-hidden');
+      stopAutoRefresh();
+    }
+
+    function showDashboard() {
+      document.getElementById('loginView').classList.add('view-hidden');
+      document.getElementById('dashboardView').classList.remove('view-hidden');
+      document.getElementById('logoutBtn').classList.remove('view-hidden');
+      loadAllDashboardData();
+      startAutoRefresh();
+    }
+
+    function togglePasswordVisibility(id, btn) {
+      const input = document.getElementById(id);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🔒';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const keyInput = document.getElementById('adminKeyInput');
+      const submitBtn = document.getElementById('submitLoginBtn');
+      const alertBox = document.getElementById('loginAlert');
+
+      const key = keyInput.value.trim();
+      if (!key) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
+      alertBox.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success && data.token) {
+          localStorage.setItem(STORAGE_KEY, data.token);
+          keyInput.value = '';
+          showToast('🔑 Successfully authenticated as Admin');
+          showDashboard();
+        } else {
+          alertBox.textContent = data.error || 'Authentication failed. Please verify your admin key.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'Network or server error while connecting to verifier.';
+        alertBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Unlock Console';
+      }
+    }
+
+    async function verifySession(token) {
+      try {
+        const res = await fetch('/api/admin/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (res.ok) {
+          showDashboard();
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+          showLogin();
+        }
+      } catch (err) {
+        localStorage.removeItem(STORAGE_KEY);
+        showLogin();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_KEY);
+      showToast('👋 Signed out of admin console');
+      showLogin();
+    }
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem(STORAGE_KEY);
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      };
+    }
+
+    // Tab Navigation
+    function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('view-hidden'));
+
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.remove('view-hidden');
+    }
+
+    // Load Data
+    async function loadAllDashboardData() {
+      await Promise.all([fetchKeys(), fetchUsageData()]);
+    }
+
+    async function fetchKeys() {
+      try {
+        const res = await fetch('/api/admin/keys', { headers: getAuthHeaders() });
+        if (res.status === 401) return logout();
+        const data = await res.json();
+
+        if (data.success && Array.isArray(data.keys)) {
+          renderKeysTable(data.keys);
+          document.getElementById('metricActiveApps').textContent = 
+            data.keys.filter(k => k.status === 'active').length;
+        }
+      } catch (err) {
+        console.error('Failed to fetch keys:', err);
+      }
+    }
+
+    function renderKeysTable(keys) {
+      const tbody = document.getElementById('keysTableBody');
+      if (!keys.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No API keys found. Click "+ Generate New App Key" above.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = keys.map(k => {
+        const isEnv = k.isEnvKey;
+        const statusBadge = k.status === 'active' 
+          ? '<span class="pill pill-active">● Active</span>'
+          : '<span class="pill pill-revoked">● Revoked</span>';
+        
+        const envPill = isEnv ? '<span class="pill pill-env" style="margin-left:6px">.ENV</span>' : '';
+        const createdDate = new Date(k.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+        return `
+          <tr>
+            <td>
+              <div class="app-name-col">
+                <div><span>${escapeHtml(k.name)}</span>${envPill}</div>
+                <span class="app-desc">${escapeHtml(k.description || 'No description')}</span>
+              </div>
+            </td>
+            <td>
+              <div class="key-code">
+                <span>${escapeHtml(k.keyPrefix)}</span>
+              </div>
+            </td>
+            <td>
+              <span style="font-family:'JetBrains Mono',monospace;">${k.rateLimit} req/min</span>
+            </td>
+            <td>${statusBadge}</td>
+            <td><span style="color:var(--text-muted); font-size:0.8rem;">${createdDate}</span></td>
+            <td style="text-align: right;">
+              <div style="display:inline-flex; gap:6px;">
+                ${!isEnv ? `
+                  <button class="btn btn-secondary btn-sm" onclick="toggleKeyStatus('${k.id}')" title="Toggle Active / Revoked">
+                    ${k.status === 'active' ? 'Revoke' : 'Activate'}
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteKey('${k.id}')" title="Delete Key">
+                    🗑️
+                  </button>
+                ` : `<span style="font-size:0.75rem; color:var(--text-dim); padding:4px 8px;">Managed in .env</span>`}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function fetchUsageData() {
+      try {
+        const res = await fetch('/api/admin/usage', { headers: getAuthHeaders() });
+        if (res.status === 401) return logout();
+        const data = await res.json();
+
+        if (data.success && data.stats) {
+          renderUsageMetrics(data.stats);
+        }
+      } catch (err) {
+        console.error('Failed to fetch usage data:', err);
+      }
+    }
+
+    function renderUsageMetrics(stats) {
+      const summary = stats.summary || {};
+
+      // Top metric cards
+      document.getElementById('metricTotal').textContent = (summary.totalRequests || 0).toLocaleString();
+      document.getElementById('todayRequestsBadge').textContent = `Today: ${(summary.todayRequests || 0).toLocaleString()}`;
+
+      const successRate = summary.successRate ?? 100;
+      document.getElementById('metricSuccessRate').textContent = `${successRate}%`;
+      document.getElementById('successRateBadge').textContent = `${successRate}%`;
+
+      document.getElementById('metricAvgDuration').textContent = `${summary.avgDurationMs || 0} ms`;
+
+      // Provider breakdown cards
+      const providersGrid = document.getElementById('providersGrid');
+      const byProv = stats.byProvider || {};
+      
+      const providerKeys = ['telebirr', 'cbe', 'dashen', 'abyssinia', 'cbebirr', 'mpesa', 'universal'];
+      providersGrid.innerHTML = providerKeys.map(key => {
+        const pConf = PROVIDER_CONFIG[key] || { name: key.toUpperCase(), color: '#6366F1' };
+        const provData = byProv[key] || { total: 0, success: 0, failed: 0 };
+        const rate = provData.total > 0 ? Math.round((provData.success / provData.total) * 100) : 100;
+        const total = provData.total || 0;
+
+        return `
+          <div class="provider-box">
+            <div class="provider-header">
+              <span class="prov-badge ${pConf.class || 'prov-universal'}">${pConf.name}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">${rate}% success</span>
+            </div>
+            <div class="provider-count">${total.toLocaleString()}</div>
+            <div class="provider-bar-wrapper">
+              <div class="provider-bar" style="width: ${rate}%; background: ${pConf.color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // App Usage Breakdown Table
+      const appTableBody = document.getElementById('appUsageTableBody');
+      const byApp = stats.byApp || [];
+      if (!byApp.length) {
+        appTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No app traffic recorded yet. Once apps call the API, their stats will appear here.</td></tr>';
+      } else {
+        appTableBody.innerHTML = byApp.map(a => {
+          const rate = a.total > 0 ? Math.round((a.success / a.total) * 100) : 100;
+          const lastActive = a.lastUsedAt ? new Date(a.lastUsedAt).toLocaleString() : 'N/A';
+          return `
+            <tr>
+              <td><strong style="color:var(--text-main);">${escapeHtml(a.appName)}</strong></td>
+              <td><span style="font-family:'JetBrains Mono';">${a.total.toLocaleString()}</span></td>
+              <td><span style="color:#34D399; font-family:'JetBrains Mono';">${a.success.toLocaleString()}</span></td>
+              <td><span style="color:#F87171; font-family:'JetBrains Mono';">${a.failed.toLocaleString()}</span></td>
+              <td><span class="badge ${rate >= 90 ? 'badge-success' : 'badge-info'}">${rate}%</span></td>
+              <td><span style="font-size:0.8rem; color:var(--text-muted);">${lastActive}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Live Logs Table
+      const logsTableBody = document.getElementById('logsTableBody');
+      const recentLogs = stats.recentLogs || [];
+      if (!recentLogs.length) {
+        logsTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No verification requests logged yet.</td></tr>';
+      } else {
+        logsTableBody.innerHTML = recentLogs.map(l => {
+          const pConf = PROVIDER_CONFIG[l.provider] || { name: l.provider.toUpperCase(), class: 'prov-universal' };
+          const statusBadge = l.success 
+            ? '<span class="pill pill-active">COMPLETED</span>'
+            : `<span class="pill pill-revoked">${l.statusCode >= 500 ? 'ERROR' : 'FAILED'}</span>`;
+          
+          const timeStr = new Date(l.timestamp).toLocaleTimeString();
+
+          return `
+            <tr>
+              <td><span style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-muted);">${timeStr}</span></td>
+              <td><strong>${escapeHtml(l.appName)}</strong></td>
+              <td><span class="prov-badge ${pConf.class}">${pConf.name}</span></td>
+              <td>
+                <span class="key-code" style="cursor:pointer;" onclick="copyText('${escapeHtml(l.reference)}')">
+                  ${escapeHtml(l.reference)} 📋
+                </span>
+              </td>
+              <td>${statusBadge}</td>
+              <td><span style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-muted);">${l.durationMs}ms</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Modal Operations
+    function openNewKeyModal() {
+      document.getElementById('newAppName').value = '';
+      document.getElementById('newAppDesc').value = '';
+      document.getElementById('newAppRateLimit').value = '120';
+      document.getElementById('newKeyModal').classList.add('open');
+    }
+
+    function closeNewKeyModal() {
+      document.getElementById('newKeyModal').classList.remove('open');
+    }
+
+    async function handleCreateKey(e) {
+      e.preventDefault();
+      const name = document.getElementById('newAppName').value.trim();
+      const description = document.getElementById('newAppDesc').value.trim();
+      const rateLimit = Number(document.getElementById('newAppRateLimit').value) || 120;
+      const submitBtn = document.getElementById('submitCreateKeyBtn');
+
+      if (!name) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating...';
+
+      try {
+        const res = await fetch('/api/admin/keys', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ name, description, rateLimit }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success && data.rawKey) {
+          closeNewKeyModal();
+          createdKeyCache = data.rawKey;
+          document.getElementById('createdRawKeyText').textContent = data.rawKey;
+          document.getElementById('createdKeySnippet').textContent = data.rawKey;
+          document.getElementById('keyCreatedModal').classList.add('open');
+          await fetchKeys();
+          showToast('🎉 New API Key generated successfully');
+        } else {
+          alert(data.error || 'Failed to create key.');
+        }
+      } catch (err) {
+        alert('Network or server error while generating API key.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate API Key';
+      }
+    }
+
+    function closeKeyCreatedModal() {
+      document.getElementById('keyCreatedModal').classList.remove('open');
+    }
+
+    function copyCreatedKey() {
+      if (createdKeyCache) {
+        copyText(createdKeyCache);
+      }
+    }
+
+    async function toggleKeyStatus(id) {
+      try {
+        const res = await fetch(`/api/admin/keys/${id}/toggle`, {
+          method: 'PATCH',
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`Key status changed to ${data.key.status}`);
+          fetchKeys();
+        } else {
+          alert(data.error || 'Failed to update key status.');
+        }
+      } catch (err) {
+        alert('Network error while toggling key status.');
+      }
+    }
+
+    async function deleteKey(id) {
+      if (!confirm('Are you sure you want to permanently delete this API key? Apps using this key will immediately lose access.')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/admin/keys/${id}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('🗑️ API key permanently deleted');
+          fetchKeys();
+        } else {
+          alert(data.error || 'Failed to delete key.');
+        }
+      } catch (err) {
+        alert('Network error while deleting key.');
+      }
+    }
+
+    // Auto-refresh controls
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      autoRefreshTimer = setInterval(() => {
+        fetchUsageData();
+      }, 5000);
+    }
+
+    function stopAutoRefresh() {
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+      }
+    }
+
+    function toggleAutoRefresh(checkbox) {
+      if (checkbox.checked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    }
+
+    // Utility Helpers
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Copied to clipboard!');
+      }).catch(() => {
+        showToast('Failed to copy');
+      });
+    }
+
+    function showToast(message, icon = '📋') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMessage').textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

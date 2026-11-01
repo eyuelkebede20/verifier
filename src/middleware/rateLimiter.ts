@@ -16,6 +16,17 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 export const rateLimiter = (req: Request, res: Response, next: NextFunction): void => {
+  // Allow health, root, admin console, and static assets to bypass verification rate limiter
+  if (
+    req.path === '/' ||
+    req.path === '/health' ||
+    req.path === '/admin' ||
+    req.path.startsWith('/admin/') ||
+    req.path.startsWith('/api/admin')
+  ) {
+    return next();
+  }
+
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const apiKey = (req as any).apiKey || '';
   const clientKey = apiKey ? `key:${apiKey}` : `ip:${ip}`;

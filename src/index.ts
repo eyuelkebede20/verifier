@@ -14,6 +14,8 @@ import { verifyCBEBirr } from './services/verifyCBEBirr';
 import { verifyMpesa } from './services/verifyMpesa';
 import { apiKeyAuth } from './middleware/apiKeyAuth';
 import { rateLimiter } from './middleware/rateLimiter';
+import adminRoutes from './routes/adminRoutes';
+import usageTrackerService from './services/usageTrackerService';
 import logger from './utils/logger';
 
 const app = express();
@@ -51,35 +53,41 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+const getApiSpec = () => ({
+  name: 'Senay Payment Verification API',
+  version: '3.1.0-standalone',
+  description: 'Central Ethiopian bank & mobile money receipt verification microservice',
+  endpoints: [
+    { method: 'POST', path: '/verify', description: 'Smart universal verifier (auto-detects provider)' },
+    { method: 'POST', path: '/verify-telebirr', description: 'Ethio Telecom Telebirr receipt verification' },
+    { method: 'POST', path: '/verify-cbe', description: 'Commercial Bank of Ethiopia (CBE) verification' },
+    { method: 'POST', path: '/verify-dashen', description: 'Dashen Bank transaction verification' },
+    { method: 'POST', path: '/verify-abyssinia', description: 'Bank of Abyssinia transaction verification' },
+    { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification' },
+    { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification' },
+    { method: 'POST', path: '/api/public-verify', description: 'Web receipt verification for landing page UI' },
+    { method: 'GET', path: '/health', description: 'Health check' },
+    { method: 'GET', path: '/api', description: 'API specification & endpoints' },
+  ],
+});
+
+app.get('/api', (_req: Request, res: Response) => {
+  res.json(getApiSpec());
+});
+
 // 2. Root / Landing Page (HTML for browsers, JSON for API clients)
 app.get('/', (req: Request, res: Response) => {
-  const isHtmlExpected =
-    (req.accepts('html') && !req.accepts('json')) ||
-    (req.headers.accept?.includes('text/html') && !req.xhr && !req.headers['x-api-key']);
+  const acceptsJson = req.headers.accept?.includes('application/json');
+  const acceptsHtml = req.headers.accept?.includes('text/html') || (!acceptsJson && req.accepts('html'));
 
-  if (isHtmlExpected) {
+  if (acceptsHtml && !acceptsJson && !req.xhr && !req.headers['x-api-key']) {
     const indexPath = path.join(publicDir, 'index.html');
     if (fs.existsSync(indexPath)) {
       return res.sendFile(indexPath);
     }
   }
 
-  res.json({
-    name: 'Senay Payment Verification API',
-    version: '3.1.0-standalone',
-    description: 'Central Ethiopian bank & mobile money receipt verification microservice',
-    endpoints: [
-      { method: 'POST', path: '/verify', description: 'Smart universal verifier (auto-detects provider)' },
-      { method: 'POST', path: '/verify-telebirr', description: 'Ethio Telecom Telebirr receipt verification' },
-      { method: 'POST', path: '/verify-cbe', description: 'Commercial Bank of Ethiopia (CBE) verification' },
-      { method: 'POST', path: '/verify-dashen', description: 'Dashen Bank transaction verification' },
-      { method: 'POST', path: '/verify-abyssinia', description: 'Bank of Abyssinia transaction verification' },
-      { method: 'POST', path: '/verify-cbebirr', description: 'CBE Birr mobile wallet verification' },
-      { method: 'POST', path: '/verify-mpesa', description: 'Safaricom M-Pesa receipt verification' },
-      { method: 'POST', path: '/api/public-verify', description: 'Web receipt verification for landing page UI' },
-      { method: 'GET', path: '/health', description: 'Health check' },
-    ],
-  });
+  res.json(getApiSpec());
 });
 
 // Friendly redirect for /verify and /verify/:bank routes to Landing Page
@@ -91,9 +99,21 @@ app.get(['/verify', '/verify/:bank'], (_req: Request, res: Response) => {
   res.redirect('/');
 });
 
+// Admin Dashboard UI Route
+app.get(['/admin', '/admin/*'], (_req: Request, res: Response) => {
+  const adminPath = path.join(publicDir, 'admin', 'index.html');
+  if (fs.existsSync(adminPath)) {
+    return res.sendFile(adminPath);
+  }
+  res.redirect('/');
+});
+
 // 3. Authentication & Rate Limiting for all verification endpoints
 app.use(apiKeyAuth);
 app.use(rateLimiter);
+
+// Admin Routes (Key management & usage stats)
+app.use('/api/admin', adminRoutes);
 
 // 4. Public Web Verification (for Landing Page checker UI)
 app.post('/api/public-verify', async (req: Request, res: Response): Promise<void> => {
