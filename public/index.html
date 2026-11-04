@@ -1866,6 +1866,211 @@
       outline-offset: -4px;
       background: rgba(31, 77, 255, 0.08);
     }
+
+    /* ─────────────────────────────────────────────────────────────────────────
+       Verification Routing Mode Toggle (UK Server vs Local Device Direct)
+       ───────────────────────────────────────────────────────────────────────── */
+    .routing-mode-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(13, 19, 33, 0.72);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.25s ease;
+    }
+
+    .routing-mode-bar:hover {
+      border-color: var(--color-line-bright);
+    }
+
+    .routing-mode-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .routing-mode-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .routing-mode-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+    }
+
+    .routing-mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 700;
+      transition: all 0.3s var(--ease-out-expo);
+    }
+
+    .routing-mode-pill.mode-uk {
+      background: rgba(31, 77, 255, 0.14);
+      border: 1px solid rgba(31, 77, 255, 0.35);
+      color: #90B0FF;
+    }
+
+    .routing-mode-pill.mode-local {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34D399;
+    }
+
+    .routing-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+
+    .routing-mode-pill.mode-uk .routing-pulse-dot {
+      background: #3B82F6;
+      box-shadow: 0 0 8px #3B82F6;
+    }
+
+    .routing-mode-pill.mode-local .routing-pulse-dot {
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .routing-mode-desc {
+      font-size: 0.78rem;
+      color: var(--color-ink-soft);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Modern Accessible Switch Toggle */
+    .routing-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .toggle-state-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-ink);
+      min-width: 95px;
+      text-align: right;
+      transition: color 0.2s ease;
+    }
+
+    .switch-toggle {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .switch-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #1E293B;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 34px;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .switch-toggle input:checked + .switch-slider {
+      background: linear-gradient(135deg, #1D4ED8, #2563EB);
+      border-color: #3B82F6;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .switch-toggle input:checked + .switch-slider:before {
+      transform: translateX(24px);
+      background-color: #FFFFFF;
+    }
+
+    .switch-toggle input:not(:checked) + .switch-slider {
+      background: linear-gradient(135deg, #065F46, #059669);
+      border-color: #10B981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Route pill badge in receipt card */
+    .route-source-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #CBD5E1;
+      margin-left: 6px;
+    }
+
+    .btn-paste-large:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+    }
+    .btn-paste-large:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .routing-mode-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .routing-toggle-wrap {
+        justify-content: space-between;
+        width: 100%;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .toggle-state-text {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2016,6 +2221,30 @@
           </button>
         </div>
 
+        <!-- Verification Route Mode Strip (UK Server Cloud vs. Local Device Direct) -->
+        <div class="routing-mode-bar" id="routingModeBar">
+          <div class="routing-mode-left">
+            <div class="routing-mode-status-row">
+              <span class="routing-mode-label">Verification Route:</span>
+              <span class="routing-mode-pill mode-uk" id="routingModeBadge">
+                <span class="routing-pulse-dot"></span>
+                <span id="routingModeBadgeText">🌐 UK Cloud Server (Default)</span>
+              </span>
+            </div>
+            <p class="routing-mode-desc" id="routingModeDesc">
+              Queries bank API via high-speed UK cloud server. Turn toggle OFF for Ethiopian local device routing (bypasses Telebirr geoblocks).
+            </p>
+          </div>
+
+          <div class="routing-toggle-wrap">
+            <span class="toggle-state-text" id="toggleStateText">UK Server ON</span>
+            <label class="switch-toggle" for="ukServerToggle" title="Toggle between UK Cloud Server and Local Phone/Ethiopia Mode">
+              <input type="checkbox" id="ukServerToggle" checked onchange="setRoutingMode(this.checked)">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+
         <!-- Verification Form -->
         <form id="verifyForm" onsubmit="handleVerify(event)">
           <div class="form-group">
@@ -2094,6 +2323,7 @@
               <span class="sample-label">Try Demo:</span>
               <button type="button" class="btn-sample" onclick="loadSample('universal', 'TEST12345678')">Auto-Detect</button>
               <button type="button" class="btn-sample" onclick="loadSample('cbe', 'TESTCBE1234', '1234')">CBE Demo</button>
+              <button type="button" class="btn-sample" onclick="loadSample('telebirr', 'TESTTB12345678')">Telebirr Demo</button>
               <button type="button" class="btn-sample" onclick="loadSample('dashen', 'TESTDASHEN1234')">Dashen Demo</button>
               <button type="button" class="btn-sample" onclick="loadSample('abyssinia', 'TESTBOA1234', '12345')">BoA Demo</button>
               <button type="button" class="btn-sample" onclick="loadSample('mpesa', 'TESTMPESA1234')">M-Pesa Demo</button>
@@ -2689,81 +2919,220 @@
       return null;
     }
 
-    function promptPasteTelebirrHtml(ref) {
-      const existing = document.getElementById('telebirrBounceModal');
-      if (existing) existing.remove();
+    // ─────────────────────────────────────────────────────────────────────────
+    // Verification Route Mode Controller (UK Server vs Local Phone Direct)
+    // ─────────────────────────────────────────────────────────────────────────
+    let currentLocalReceiptRef = '';
+    let currentLocalReceiptUrl = '';
 
-      const modal = document.createElement('div');
-      modal.id = 'telebirrBounceModal';
-      modal.className = 'scanner-modal';
-      modal.style.display = 'flex';
-      modal.innerHTML = `
-        <div class="scanner-card" style="max-width: 540px; text-align: left;">
-          <div class="scanner-header" style="justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
-              <span>⚡ Client Bounce: Verify Telebirr Locally</span>
-            </div>
-            <button type="button" class="ocr-cancel-btn" onclick="document.getElementById('telebirrBounceModal').remove()">✕ Close</button>
-          </div>
-          <div style="padding: 18px 20px;">
-            <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-bottom: 12px; line-height: 1.5;">
-              Because Ethio Telecom's receipt server blocks foreign cloud hosting IPs, you can bounce the receipt through your Ethiopian device in seconds:
-            </p>
-            <ol style="font-size: 0.8rem; color: #CBD5E1; padding-left: 20px; margin-bottom: 14px; line-height: 1.6;">
-              <li>Open the <a href="https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(ref)}" target="_blank" rel="noopener noreferrer" style="color: #60A5FA; text-decoration: underline; font-weight: 600;">Official Ethio Telecom Receipt</a> on your phone or PC.</li>
-              <li>Select all text or view source, copy it, and paste it into the box below.</li>
-              <li>Click <strong>Audit & Verify</strong> to parse and validate locally.</li>
-            </ol>
-            <textarea id="telebirrBounceInput" rows="5" placeholder="Paste Telebirr HTML or receipt text here..." style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; padding: 10px; font-family: var(--font-mono); font-size: 0.78rem; resize: vertical;"></textarea>
-            <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: flex-end;">
-              <button type="button" class="tool-btn" onclick="document.getElementById('telebirrBounceModal').remove()" style="background: rgba(255,255,255,0.08); color: #fff; padding: 8px 14px;">Cancel</button>
-              <button type="button" class="tool-btn tool-btn-sanitize" onclick="submitTelebirrBounce('${encodeURIComponent(ref)}')" style="padding: 8px 16px; font-weight: 700;">Audit & Verify</button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
+    function isUkServerModeActive() {
+      const toggle = document.getElementById('ukServerToggle');
+      return toggle ? toggle.checked : true;
     }
 
-    function submitTelebirrBounce(ref) {
-      const textarea = document.getElementById('telebirrBounceInput');
-      const val = textarea?.value?.trim() || '';
-      if (!val) {
-        showToast('⚠️ Please paste the receipt HTML or text first.');
+    function setRoutingMode(isUk) {
+      const badge = document.getElementById('routingModeBadge');
+      const badgeText = document.getElementById('routingModeBadgeText');
+      const desc = document.getElementById('routingModeDesc');
+      const stateText = document.getElementById('toggleStateText');
+      const btnText = document.getElementById('btnText');
+      const toggle = document.getElementById('ukServerToggle');
+
+      if (toggle && toggle.checked !== isUk) {
+        toggle.checked = isUk;
+      }
+
+      if (isUk) {
+        localStorage.setItem('verifier_route_mode', 'uk');
+        if (badge) badge.className = 'routing-mode-pill mode-uk';
+        if (badgeText) badgeText.textContent = '🌐 UK Cloud Server (Default)';
+        if (desc) desc.textContent = 'Queries bank API via high-speed UK cloud server. Turn toggle OFF for Ethiopian local device routing (bypasses Telebirr geoblocks).';
+        if (stateText) stateText.textContent = 'UK Server ON';
+        if (btnText && !btnText.textContent.includes('Verifying')) {
+          btnText.textContent = 'Verify Settlement (UK Cloud)';
+        }
+        showToast('🌐 UK Cloud Server Route Active');
+      } else {
+        localStorage.setItem('verifier_route_mode', 'local');
+        if (badge) badge.className = 'routing-mode-pill mode-local';
+        if (badgeText) badgeText.textContent = '🇪🇹 Local Phone / Ethiopia Direct';
+        if (desc) desc.textContent = 'Bypasses UK server geofence! Opens official receipt directly on your phone/browser, captures slip locally, and populates the verified card.';
+        if (stateText) stateText.textContent = 'Local Direct';
+        if (btnText && !btnText.textContent.includes('Verifying')) {
+          btnText.textContent = 'Verify Settlement (Local Direct)';
+        }
+        showToast('🇪🇹 Local Device Mode Active (Ethiopia Direct)');
+      }
+    }
+
+    function initRoutingMode() {
+      const saved = localStorage.getItem('verifier_route_mode');
+      if (saved === 'local') {
+        setRoutingMode(false);
+      } else {
+        setRoutingMode(true);
+      }
+    }
+
+    function openLocalCaptureModal(ref, url) {
+      currentLocalReceiptRef = ref;
+      currentLocalReceiptUrl = url || `https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(ref)}`;
+
+      const modal = document.getElementById('localCaptureModal');
+      if (modal) modal.style.display = 'flex';
+
+      const area = document.getElementById('localCaptureText');
+      if (area) area.value = '';
+
+      const reopenBtn = document.getElementById('btnReopenReceipt');
+      if (reopenBtn) {
+        reopenBtn.title = currentLocalReceiptUrl;
+      }
+
+      // Pulse the paste button for immediate human clarity
+      const pasteBtn = document.getElementById('btnLocalCapturePaste');
+      if (pasteBtn) {
+        pasteBtn.style.animation = 'pulse-glow 1.8s infinite';
+      }
+
+      // Responsive human touch: When user switches back to this tab, check clipboard
+      const handleTabFocus = async () => {
+        window.removeEventListener('focus', handleTabFocus);
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const clip = await navigator.clipboard.readText();
+            if (clip && (clip.includes('Settled Amount') || clip.includes('የተከፈለው') || clip.includes('receipttable') || clip.includes(ref))) {
+              if (area && !area.value) {
+                area.value = clip;
+                showToast('📋 Copied receipt detected from phone! Tap Paste to verify.');
+              }
+            }
+          }
+        } catch (e) {}
+      };
+      window.addEventListener('focus', handleTabFocus);
+    }
+
+    function closeLocalCaptureModal() {
+      const modal = document.getElementById('localCaptureModal');
+      if (modal) modal.style.display = 'none';
+      const pasteBtn = document.getElementById('btnLocalCapturePaste');
+      if (pasteBtn) pasteBtn.style.animation = '';
+    }
+
+    function reopenReceiptTab() {
+      if (currentLocalReceiptUrl) {
+        window.open(currentLocalReceiptUrl, '_blank');
+      }
+    }
+
+    async function pasteAndVerifyLocalCapture() {
+      let text = '';
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          text = await navigator.clipboard.readText();
+        }
+      } catch (err) {
+        console.warn('Clipboard read error:', err);
+      }
+
+      if (!text) {
+        const area = document.getElementById('localCaptureText');
+        text = area?.value?.trim() || '';
+      }
+
+      if (!text) {
+        showToast('⚠️ Clipboard is empty. Please copy the receipt from the opened tab or paste text in the box.');
         return;
       }
-      const parsed = parseTelebirrClientSide(val);
+
+      const parsed = parseTelebirrClientSide(text);
       if (parsed) {
-        document.getElementById('telebirrBounceModal')?.remove();
+        closeLocalCaptureModal();
         lastVerifiedData = parsed;
+        selectBank('telebirr');
         showSuccess(parsed);
-        showToast('✓ Telebirr receipt parsed & verified locally!');
+        showToast('⚡ Telebirr receipt parsed & verified locally on your device!');
+
+        const container = document.getElementById('resultContainer');
+        if (container) container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Sync to backend for audit & telemetry
         fetch('/api/public-verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reference: parsed.receipt.reference || ref, bank: 'telebirr', html: val })
+          body: JSON.stringify({ reference: parsed.receipt.reference || currentLocalReceiptRef, bank: 'telebirr', html: text })
         }).catch(() => {});
       } else {
-        showToast('⚠️ Could not extract Telebirr receipt details. Make sure you copied the full page text or HTML.');
+        showToast('⚠️ Could not extract Telebirr receipt. Please make sure you copied the full page text or table.');
       }
+    }
+
+    function onLocalCaptureTextInput(val) {
+      if (!val) return;
+      if (val.includes('Settled Amount') || val.includes('የተከፈለው መጠን') || val.includes('receipttableTd')) {
+        submitLocalCaptureManual();
+      }
+    }
+
+    function submitLocalCaptureManual() {
+      const area = document.getElementById('localCaptureText');
+      const text = area?.value?.trim() || '';
+      if (!text) {
+        showToast('⚠️ Please paste the receipt slip text or HTML first.');
+        return;
+      }
+      const parsed = parseTelebirrClientSide(text);
+      if (parsed) {
+        closeLocalCaptureModal();
+        lastVerifiedData = parsed;
+        selectBank('telebirr');
+        showSuccess(parsed);
+        showToast('✓ Telebirr receipt parsed & verified locally!');
+
+        const container = document.getElementById('resultContainer');
+        if (container) container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        fetch('/api/public-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: parsed.receipt.reference || currentLocalReceiptRef, bank: 'telebirr', html: text })
+        }).catch(() => {});
+      } else {
+        showToast('⚠️ Could not extract valid Telebirr settlement details from text.');
+      }
+    }
+
+    function switchToLocalAndVerify(ref) {
+      setRoutingMode(false);
+      handleLocalVerify(ref, '', '');
+    }
+
+    function promptPasteTelebirrHtml(ref) {
+      openLocalCaptureModal(ref);
+    }
+
+    function submitTelebirrBounce(ref) {
+      submitLocalCaptureManual();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Verification Submission
     // ─────────────────────────────────────────────────────────────────────────
     async function handleVerify(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const reference = document.getElementById('refInput').value.trim();
       const suffix = document.getElementById('suffixInput')?.value.trim() || '';
       const phoneNumber = document.getElementById('phoneInput')?.value.trim() || '';
 
       if (!reference) return;
 
-      // If user pasted raw Telebirr HTML or structured receipt text directly into the box
+      // Fast Path: If user pasted raw Telebirr HTML or structured receipt text directly into the box
       if (reference.includes('Settled Amount') || reference.includes('የተከፈለው መጠን') || reference.includes('receipttableTd') || reference.includes('transactioninfo.ethiotelecom.et')) {
         const clientParsed = parseTelebirrClientSide(reference);
         if (clientParsed) {
           lastVerifiedData = clientParsed;
+          selectBank('telebirr');
           showSuccess(clientParsed);
           showToast('⚡ Telebirr receipt parsed & verified locally in browser!');
           fetch('/api/public-verify', {
@@ -2775,6 +3144,46 @@
         }
       }
 
+      // Check Routing Mode: UK Cloud Server vs Local Phone Direct
+      if (!isUkServerModeActive()) {
+        handleLocalVerify(reference, suffix, phoneNumber);
+        return;
+      }
+
+      handleUkVerify(reference, suffix, phoneNumber);
+    }
+
+    function handleLocalVerify(rawRef, suffix, phoneNumber) {
+      let cleanRef = rawRef;
+      const urlMatch = rawRef.match(/receipt\/([A-Za-z0-9_-]+)/);
+      if (urlMatch) {
+        cleanRef = urlMatch[1];
+      } else {
+        const tbMatch = rawRef.match(/\b(TB[A-Za-z0-9]+|\d{10,18})\b/i);
+        if (tbMatch && (currentBank === 'telebirr' || currentBank === 'universal')) {
+          cleanRef = tbMatch[1];
+        }
+      }
+
+      const isTelebirr = currentBank === 'telebirr' || (currentBank === 'universal' && (/^TB/i.test(cleanRef) || /^\d{10,18}$/.test(cleanRef) || rawRef.toLowerCase().includes('telebirr')));
+
+      if (isTelebirr) {
+        selectBank('telebirr');
+        const receiptUrl = `https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(cleanRef)}`;
+        try {
+          window.open(receiptUrl, '_blank');
+        } catch (err) {
+          console.warn('Popup blocked by browser:', err);
+        }
+        openLocalCaptureModal(cleanRef, receiptUrl);
+        return;
+      }
+
+      // For CBE, Dashen, BoA, CBE Birr, M-Pesa in local mode, execute direct verification via gateway
+      handleUkVerify(rawRef, suffix, phoneNumber);
+    }
+
+    async function handleUkVerify(reference, suffix, phoneNumber) {
       const submitBtn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
       const resultContainer = document.getElementById('resultContainer');
@@ -2786,7 +3195,7 @@
         <div style="text-align: center; padding: 40px 16px;">
           <div class="pulse-dot" style="margin: 0 auto 16px; width: 12px; height: 12px;"></div>
           <p style="font-family: var(--font-display); font-size: 1.05rem; color: #fff; font-weight: 700; margin-bottom: 4px;">
-            Auditing with ${currentBank.toUpperCase()} Banking Ledger...
+            Auditing with ${currentBank.toUpperCase()} Banking Ledger via UK Cloud Gateway...
           </p>
           <p style="color: var(--color-ink-soft); font-size: 0.85rem;">Zero storage. Real-time verification response.</p>
         </div>
@@ -2813,7 +3222,7 @@
         showError('Network connectivity error reaching verification gateway: ' + err.message, reference);
       } finally {
         submitBtn.disabled = false;
-        btnText.textContent = 'Verify Settlement';
+        btnText.textContent = isUkServerModeActive() ? 'Verify Settlement (UK Cloud)' : 'Verify Settlement (Local Direct)';
       }
     }
 
@@ -2823,12 +3232,23 @@
       const dateStr = r.paymentDate ? new Date(r.paymentDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Verified Live';
       const providerKey = (data.provider || currentBank).toLowerCase();
 
+      // Automatically select and highlight the verified bank tab
+      if (data.provider) {
+        selectBank(data.provider.toLowerCase());
+      }
+
+      const isLocalRoute = !isUkServerModeActive() || data.details?.source === 'client_bounce' || data.details?.source === 'local_device';
+      const routeBadge = isLocalRoute 
+        ? '<span class="route-source-pill" style="color: #34D399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.12);">🇪🇹 Local Direct</span>'
+        : '<span class="route-source-pill" style="color: #90B0FF; border-color: rgba(59, 130, 246, 0.4); background: rgba(37, 99, 235, 0.12);">🌐 UK Cloud Gateway</span>';
+
       container.innerHTML = `
         <div class="receipt-card bank-${providerKey}">
           <div class="receipt-header">
             <div class="provider-tag">
               <span class="bank-dot"></span>
               <span>${data.provider || currentBank}</span>
+              ${routeBadge}
             </div>
             <div class="verified-badge">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
@@ -2914,11 +3334,14 @@
                   ⚡ Bounce Call Through Ethiopian Device (Client Verification)
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button type="button" class="tool-btn tool-btn-scan" onclick="switchToLocalAndVerify('${encodeURIComponent(cleanRef)}')" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #34D399; padding: 6px 12px; font-size: 0.78rem; font-weight: 700;">
+                    🇪🇹 Switch to Local Mode & Verify
+                  </button>
                   <a href="https://transactioninfo.ethiotelecom.et/receipt/${encodeURIComponent(cleanRef)}" target="_blank" rel="noopener noreferrer" class="tool-btn tool-btn-scan" style="text-decoration: none; padding: 6px 12px; font-size: 0.78rem;">
                     🔗 Open Official Receipt
                   </a>
-                  <button type="button" class="tool-btn tool-btn-sanitize" onclick="promptPasteTelebirrHtml('${encodeURIComponent(cleanRef)}')" style="padding: 6px 12px; font-size: 0.78rem;">
-                    📋 Paste Receipt HTML / Text
+                  <button type="button" class="tool-btn tool-btn-sanitize" onclick="openLocalCaptureModal('${encodeURIComponent(cleanRef)}')" style="padding: 6px 12px; font-size: 0.78rem;">
+                    📋 1-Tap Paste & Verify
                   </button>
                   <button type="button" class="tool-btn tool-btn-gallery" onclick="document.getElementById('galleryFileInput').click()" style="padding: 6px 12px; font-size: 0.78rem;">
                     🖼️ OCR Receipt Screenshot
@@ -3851,6 +4274,7 @@
     });
 
     checkHealth();
+    initRoutingMode();
   </script>
 
   <!-- Live Camera & QR Viewfinder Modal -->
@@ -4070,6 +4494,55 @@
               <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
               <span>Open Camera Scanner</span>
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Local Device Verification & Capture Modal -->
+  <div id="localCaptureModal" class="scanner-modal" onclick="if(event.target===this) closeLocalCaptureModal()">
+    <div class="scanner-card" style="max-width: 540px; text-align: left;">
+      <div class="scanner-header" style="justify-content: space-between; align-items: center;">
+        <div style="font-weight: 700; font-size: 0.98rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.15rem;">🇪🇹</span>
+          <div>
+            <div>Local Device Verification</div>
+            <div style="font-size: 0.72rem; color: #34D399; font-weight: 600;">Ethio Telecom Geoblock Bypassed via Your Phone</div>
+          </div>
+        </div>
+        <button type="button" class="ocr-cancel-btn" onclick="closeLocalCaptureModal()">✕ Close</button>
+      </div>
+
+      <div style="padding: 20px;">
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #34D399; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span class="routing-pulse-dot" style="background: #10B981;"></span>
+            Official Receipt Opened in Your Phone Tab / Popup
+          </div>
+          <p style="font-size: 0.78rem; color: #CBD5E1; margin: 0; line-height: 1.5;">
+            Copy the text from the Ethio Telecom receipt tab, then tap the button below. Your device parses and validates the settlement instantly!
+          </p>
+        </div>
+
+        <button type="button" class="btn-paste-large" id="btnLocalCapturePaste" onclick="pasteAndVerifyLocalCapture()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #059669, #10B981); color: #fff; border: none; padding: 14px; border-radius: var(--radius-md); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); transition: all 0.2s ease; margin-bottom: 14px;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <span>📋 1-Tap Paste from Clipboard & Verify</span>
+        </button>
+
+        <div style="position: relative; margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.74rem; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+            Or paste receipt text / HTML directly:
+          </label>
+          <textarea id="localCaptureText" rows="4" placeholder="Paste Telebirr slip details, SMS, or page HTML here..." style="width: 100%; box-sizing: border-box; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 8px; color: #fff; padding: 10px; font-family: var(--font-mono); font-size: 0.78rem; resize: vertical;" oninput="onLocalCaptureTextInput(this.value)"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="tool-btn" id="btnReopenReceipt" onclick="reopenReceiptTab()" style="background: rgba(255, 255, 255, 0.06); color: #90B0FF; border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; font-size: 0.78rem;">
+            🔗 Re-open Receipt Tab
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="tool-btn" onclick="closeLocalCaptureModal()" style="background: rgba(255, 255, 255, 0.08); color: #CBD5E1; padding: 8px 14px; font-size: 0.8rem;">Cancel</button>
+            <button type="button" class="btn-verify" onclick="submitLocalCaptureManual()" style="padding: 8px 18px; font-size: 0.82rem; min-height: unset;">Audit & Verify</button>
           </div>
         </div>
       </div>
