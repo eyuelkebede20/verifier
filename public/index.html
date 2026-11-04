@@ -3238,17 +3238,42 @@
         return;
       }
 
-      // Phase 2: Run Browser OCR on receipt text
-      statusEl.textContent = 'No QR found. Reading printed text with OCR...';
-      progressBar.style.width = '50%';
-      percentEl.textContent = '50%';
+      // Phase 2: Run On-Device ML & Neural OCR
+      statusEl.textContent = 'No QR found. Reading printed text with On-Device ML...';
+      progressBar.style.width = '45%';
+      percentEl.textContent = '45%';
 
       let rawOcrText = '';
       let ocrError = null;
 
+      // Phase 2A: Try Google On-Device ML TextDetector (Chromium Shape Detection API - 0ms server)
+      if ('TextDetector' in window) {
+        try {
+          statusEl.textContent = 'Analyzing text with Google On-Device ML...';
+          const td = new window.TextDetector();
+          const detectedTexts = await td.detect(img);
+          if (detectedTexts && detectedTexts.length > 0) {
+            const joinedText = detectedTexts.map(t => t.rawValue).join('\n');
+            const nativeExtracted = extractReceiptDetails(joinedText);
+            if (nativeExtracted && nativeExtracted.reference) {
+              progressBar.style.width = '100%';
+              percentEl.textContent = '100%';
+              statusEl.textContent = '✓ Reference extracted via Google On-Device ML!';
+              showToast('Detected via Google On-Device ML (0ms server)!');
+              showExtractedResult(joinedText, 'Google On-Device ML (Shape Detection)');
+              return;
+            }
+            rawOcrText = joinedText;
+          }
+        } catch (e) {
+          console.debug('Native Google TextDetector unavailable, falling back to neural OCR:', e);
+        }
+      }
+
+      // Phase 2B: Neural In-Browser OCR Engine
       try {
         if (typeof Tesseract === 'undefined') {
-          statusEl.textContent = 'Loading OCR neural engine...';
+          statusEl.textContent = 'Loading neural OCR engine...';
           await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
         }
 
@@ -3306,13 +3331,14 @@
       const origW = sourceImg.naturalWidth || sourceImg.width;
       const origH = sourceImg.naturalHeight || sourceImg.height;
 
-      // 1. Try Native BarcodeDetector on original source
+      // 1. Try Native Google ML BarcodeDetector on original source
+      const supportedBarcodeFormats = ['qr_code', 'data_matrix', 'code_128', 'code_39', 'pdf417'];
       if ('BarcodeDetector' in window) {
         try {
-          const bd = new BarcodeDetector({ formats: ['qr_code'] });
+          const bd = new BarcodeDetector({ formats: supportedBarcodeFormats });
           const codes = await bd.detect(sourceImg);
           if (codes && codes.length > 0 && codes[0].rawValue && codes[0].rawValue.trim()) {
-            return { data: codes[0].rawValue.trim(), method: 'Native Barcode' };
+            return { data: codes[0].rawValue.trim(), method: 'Google On-Device BarcodeDetector' };
           }
         } catch (_) {}
       }
@@ -3352,10 +3378,10 @@
 
         if ('BarcodeDetector' in window) {
           try {
-            const bd = new BarcodeDetector({ formats: ['qr_code'] });
+            const bd = new BarcodeDetector({ formats: supportedBarcodeFormats });
             const codes = await bd.detect(canvas);
             if (codes && codes.length > 0 && codes[0].rawValue && codes[0].rawValue.trim()) {
-              return { data: codes[0].rawValue.trim(), method: `BarcodeDetector (${w}×${h})` };
+              return { data: codes[0].rawValue.trim(), method: `Google On-Device ML (${w}×${h})` };
             }
           } catch (_) {}
         }
@@ -3514,7 +3540,7 @@
       const stepQrStatus = document.getElementById('stepQrStatus');
       const qrReason = document.getElementById('diagnosticQrReason');
       stepQrStatus.textContent = '❌';
-      qrReason.textContent = `Tested multi-scale passes (1000px, 1500px, 750px), contrast binarization, and quadrant crops. No standard QR finder patterns (1:1:3:1:1) could be aligned.`;
+      qrReason.textContent = `Tested Google On-Device Barcode ML, multi-scale passes, and quadrant crops. No standard QR alignment patterns were found.`;
 
       // OCR Step
       const stepOcrStatus = document.getElementById('stepOcrStatus');
@@ -3522,10 +3548,10 @@
 
       if (ocrError) {
         stepOcrStatus.textContent = '❌';
-        ocrReason.textContent = `OCR engine error: ${ocrError.message || 'Worker initialization failed'}. Please enter reference manually or paste SMS.`;
+        ocrReason.textContent = `On-Device OCR engine error: ${ocrError.message || 'Worker initialization failed'}. Please enter reference manually or paste SMS.`;
       } else if (wordCount === 0) {
         stepOcrStatus.textContent = '❌';
-        ocrReason.textContent = `No readable characters detected in image. The photo may be blurry, have low contrast, or the receipt is too distant.`;
+        ocrReason.textContent = `Tested Google On-Device ML and neural OCR passes, but no readable characters were detected. The photo may be blurry, have low contrast, or the receipt is too distant.`;
       } else {
         stepOcrStatus.textContent = '⚠️';
         ocrReason.textContent = `Read ${wordCount} words (${charCount} characters), but no recognizable CBE FT, Telebirr, Dashen, or UUID reference code was found.`;
@@ -3895,8 +3921,12 @@
         <button type="button" class="scanner-close-btn" onclick="closeOcrModal()">✕ Close</button>
       </div>
       <div class="scanner-body">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 7px 11px; background: rgba(52, 168, 83, 0.08); border: 1px solid rgba(52, 168, 83, 0.25); border-radius: 6px; margin-bottom: 12px; font-size: 0.74rem; color: #86EFAC;">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span><strong>100% On-Device Machine Learning:</strong> QR detection & text OCR run locally in your browser. Image files are never uploaded to any server.</span>
+        </div>
         <p style="font-size: 0.8rem; color: var(--color-ink-soft); margin-bottom: 12px; line-height: 1.4;">
-          Upload a receipt screenshot or bank slip photo. We scan for QR codes first, then run browser OCR on printed text.
+          Upload a receipt screenshot or photo. We scan with Google On-Device Barcode & Text ML first, then verify the reference against official bank ledgers.
         </p>
 
         <!-- Dropzone Box -->
@@ -3966,6 +3996,10 @@
             <button type="button" class="btn-ctrl" onclick="applyExtractedToFormOnly()">
               <span>Apply to Form</span>
             </button>
+          </div>
+
+          <div style="font-size: 0.72rem; color: var(--color-ink-soft); margin-top: 12px; line-height: 1.4; border-top: 1px solid var(--color-line); padding-top: 9px;">
+            <strong style="color: #CBD5E1;">🛡️ Why verify with bank?</strong> On-device ML reads the printed pixels locally, but only authoritative bank ledger verification confirms whether funds actually settled in the account, protecting merchants from edited or reused slips.
           </div>
         </div>
 

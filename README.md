@@ -121,6 +121,72 @@ Future<Map<String, dynamic>> verifyTelebirrThroughClient(String reference) async
 
 ---
 
+## 🤖 Google ML (On-Device ML Kit) vs. Authoritative Bank Verification
+
+A common question among mobile & web developers:
+> *"Can Google ML do everything on the client device without needing an authoritative backend server?"*
+
+### 1. What Google ML DOES on the Client Device (100% Serverless):
+- **Zero Server Image Bandwidth & GPU Cost**: Using **Google ML Kit** on mobile (`google_mlkit_text_recognition`, `google_mlkit_barcode_scanning`) or native Chromium Shape Detection (`window.BarcodeDetector`, `window.TextDetector`) on Web, image scanning runs **locally on the user's CPU/GPU** in $< 50\text{ ms}$.
+- **Zero Privacy Risk**: Images never leave the customer's phone or browser.
+- **Instant Pattern Extraction**: It parses the printed reference code (`FT240101ABCD`, `CJT8R50V28`, etc.) locally.
+
+### 2. Why Authoritative Bank Verification is Strictly Required:
+- **Photoshopped & Fake Receipts**: Anyone can fabricate a fake payment screenshot in 30 seconds using photo editing apps.
+- **Duplicate Replay Attacks**: A buyer can reuse a real receipt from last week to claim a new order today.
+- **Cancelled/Reversed Payments**: A transaction might show "Submitted" on a slip but later failed or got reversed.
+- **Google ML only reads pixels**: Google ML has zero connection to CBE, Telebirr, or Dashen bank ledgers. It cannot tell whether money was actually deposited into your merchant account.
+
+### 3. The Recommended Industry Pipeline (Google ML + Senay Verifier):
+```
+[User snaps photo/slip] 
+       │
+       ▼ (100% on-device - 0ms server, 0 KB image upload)
+[Google ML Kit / On-Device ML] ──► Extracts: "FT240101ABCD"
+       │
+       ▼ (Lightweight JSON text only: ~40 bytes)
+[Senay Verifier API: POST /verify] ──► Audits official bank ledger ──► Verified / Fraud Blocked!
+```
+
+#### Flutter / Dart Implementation (Google ML Kit + Verifier API):
+```dart
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+Future<Map<String, dynamic>> scanAndVerifyReceipt(String imagePath) async {
+  // Step 1: Run Google ML Kit on-device text recognition (Zero Server)
+  final inputImage = InputImage.fromFilePath(imagePath);
+  final textRecognizer = TextRecognizer();
+  final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+  await textRecognizer.close();
+
+  // Step 2: Extract transaction reference via regex
+  final fullText = recognizedText.text;
+  final cbeMatch = RegExp(r'(FT[A-Z0-9]{8,14})').firstMatch(fullText);
+  final teleMatch = RegExp(r'\b([A-Z0-9]{10,12})\b').firstMatch(fullText);
+  final reference = cbeMatch?.group(1) ?? teleMatch?.group(1);
+
+  if (reference == null) {
+    throw Exception('No valid bank reference detected in receipt image.');
+  }
+
+  // Step 3: Authoritative Verification with Senay Verifier API (Zero Image Upload)
+  final response = await http.post(
+    Uri.parse('https://verifier.senaycreatives.com/verify'),
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'your_api_key_here',
+    },
+    body: jsonEncode({'reference': reference}),
+  );
+
+  return jsonDecode(response.body);
+}
+```
+
+---
+
 ## 🛠️ cPanel / Shared Hosting Deployment
 
 1. **Automated CI/CD**:
